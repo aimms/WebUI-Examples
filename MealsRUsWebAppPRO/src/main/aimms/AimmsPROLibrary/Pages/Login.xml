@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2014-04-11 13:13:49">
+	<Location top="267" left="484" bottom="426" right="816" />
+	<PageEditSize Type="Inherited" />
+	<ProjectUUID>542E2CC1-3709-407D-A3B4-8BDD7229C67D</ProjectUUID>
+	<Title>pro::LocalizedText( '1', pro::CurrentLanguage )</Title>
+	<IsDialogPage>true</IsDialogPage>
+	<Positioning>Save Last Position</Positioning>
+	<TemplatesTabOrderPosition>2</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="Text">
+		<Location top="54" left="24" bottom="72" right="90" />
+		<SourceType>StringParameter</SourceType>
+		<StringParameter>pro::LocalizedText( '2', pro::CurrentLanguage )</StringParameter>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="6" left="144" bottom="30" right="222" />
+		<TabOrder>3</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>pro::LocalizedText( '3', pro::CurrentLanguage )</Title>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<ActionSequence>
+			<Action Type="Assignment">
+				<Identifier>pro::PROCancelLogin</Identifier>
+				<AssignedValue>1</AssignedValue>
+			</Action>
+			<Action Type="ClosePage" />
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="48" left="120" bottom="78" right="306" />
+		<TabOrder>4</TabOrder>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>SingleLineEditField</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>pro::PROEnvironment</Identifier>
+			<NumberFormat Width="15" Decimals="0" Alignment="Left" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="6" left="228" bottom="30" right="306" />
+		<TabOrder>2</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>pro::LocalizedText( '4', pro::CurrentLanguage )</Title>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<ActionSequence>
+			<Action Type="ClosePage" />
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="90" left="24" bottom="108" right="90" />
+		<SourceType>StringParameter</SourceType>
+		<StringParameter>pro::LocalizedText( '5', pro::CurrentLanguage )</StringParameter>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="84" left="120" bottom="114" right="306" />
+		<TabOrder>1</TabOrder>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>SingleLineEditField</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>pro::PROUserName</Identifier>
+			<NumberFormat Width="15" Decimals="0" Alignment="Left" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Selection Object">
+		<SelectionType>CheckBoxes</SelectionType>
+		<Location top="126" left="18" bottom="150" right="312" />
+		<TabOrder>7</TabOrder>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<TextShown>IdentifierText</TextShown>
+		<Border Style="None" Width="2" />
+		<BackgroundColor>
+			<UserColor GUID="4C29CF98-3E51-4BAA-8563-90FCE3E3DF3B">default background</UserColor>
+		</BackgroundColor>
+		<ExplicitIdentifier>
+			<Identifier>pro::DebugServerSession</Identifier>
+			<Description>"I want to manually start up a server-side debug session"</Description>
+		</ExplicitIdentifier>
+	</PageObject>
+	<UsedReferences>
+		<Model>
+			<Symbol>pro::PROUserName</Symbol>
+			<Symbol>pro::CurrentLanguage</Symbol>
+			<Symbol>pro::DebugServerSession</Symbol>
+			<Symbol>pro::LocalizedText</Symbol>
+			<Symbol>pro::PROCancelLogin</Symbol>
+			<Symbol>pro::PROEnvironment</Symbol>
+		</Model>
+	</UsedReferences>
+</Page>

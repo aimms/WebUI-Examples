@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<PageManager>
+	<Page Name="Scenarios" PageGUID="040A46E7-B3FB-4230-B59B-83079A2438EC">
+		<Page Name="Scenario a)" PageGUID="C62CDA03-FBEB-44C1-8A97-0DA602B90CB2" />
+		<Page Name="Scenario b)" PageGUID="DD7B08FD-5AEB-4D7A-A78D-565B62DCB947" />
+		<Page Name="Scenario d) - Multiple Identifiers" PageGUID="DC42D2D0-D32E-42E4-BA72-8632A1947208" />
+		<Page Name="Scenario d) - Aggregators" PageGUID="06505F25-D50C-4928-88BC-34D0F65D9B98" />
+	</Page>
+	<Page Name="All Data Pages" PageGUID="8EB43E9F-1181-4E5C-8389-88398FC99336" />
+</PageManager>

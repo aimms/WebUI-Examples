@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2013-05-16 13:01:22" NeedsCompiledModel="false">
+	<PageEditSize Type="Inherited" />
+	<ProjectUUID>22371509-AC47-467F-BC44-2F6232790B5E</ProjectUUID>
+	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="Button">
+		<Location top="6" left="6" bottom="36" right="108" />
+		<TabOrder>4</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Back"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<ActionSequence>
+			<Action Type="GotoPage">
+				<Destination>Parent</Destination>
+				<IfDestinationNonExisting>Nowhere</IfDestinationNonExisting>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="6" left="120" bottom="36" right="720" />
+		<StaticText>Ready-To-Eat Meal Production Planning</StaticText>
+		<Font GUID="A4439617-D833-4F87-BF20-7D78C1277F1C" Name="Header" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="6" left="732" bottom="36" right="834" />
+		<TabOrder>2</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Previous"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<ActionSequence>
+			<Action Type="GotoPage" />
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="6" left="840" bottom="36" right="942" />
+		<TabOrder>3</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Next"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<ActionSequence>
+			<Action Type="GotoPage">
+				<Destination>Next</Destination>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<UsedReferences>
+		<Model />
+	</UsedReferences>
+</Page>

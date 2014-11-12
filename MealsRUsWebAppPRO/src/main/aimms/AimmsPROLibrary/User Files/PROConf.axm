@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AimmsXMLSchemaMapping xmlns="http://www.aimms.com/XMLSchema/AimmsXMLMappingSchema" MappedNameSpace="http://tempuri.org/AIMMS/generated-namespace-12787">
+	<ElementMapping name="PROCParameters">
+		<ElementMapping name="LogConfigFile" maps-to="pro::PROLogConfigFile"/>
+		<ElementMapping name="TempFolder" maps-to="pro::PROTempFolder"/>
+		<ElementMapping name="EndPoint" maps-to="pro::PROEndPoint"/>
+		<ElementMapping name="UserData">
+			<ElementMapping name="Environment" maps-to="pro::PROEnvironment"/>
+			<ElementMapping name="UserName" maps-to="pro::PROUserName"/>
+		</ElementMapping>
+		<ElementMapping name="Language" maps-to="pro::_PROLanguageCode"/>
+	</ElementMapping>
+</AimmsXMLSchemaMapping>

@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2013-05-16 13:01:22">
+	<PageEditSize Type="Inherited" />
+	<ProjectUUID>22371509-AC47-467F-BC44-2F6232790B5E</ProjectUUID>
+	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="Pivot Table">
+		<Location top="126" left="36" bottom="546" right="984" />
+		<TabOrder>2</TabOrder>
+		<ObjectUUID>569C08E7-4A9F-41ED-AFE8-5D106146925E</ObjectUUID>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<Contents>
+			<Explicit_Identifier>
+				<Identifier ID="4110">MealsProduced( m, d )</Identifier>
+				<Format>
+					<Decimal_Places ID="4312">2</Decimal_Places>
+				</Format>
+			</Explicit_Identifier>
+			<Defaults>
+				<Format>
+					<Decimal_Places ID="4212">2</Decimal_Places>
+				</Format>
+			</Defaults>
+		</Contents>
+		<Indices>
+			<Explicit_Index>
+				<Index ID="6510">m</Index>
+				<Element_Text ID="6520">MealDescription( m )</Element_Text>
+				<Header_Title ID="6530">"Meal"</Header_Title>
+				<Artificial_Index>
+					<Index ID="6571">pl</Index>
+					<Element_Parameter ID="6573">MealToProductionLineMapping( m )</Element_Parameter>
+				</Artificial_Index>
+			</Explicit_Index>
+			<Explicit_Index>
+				<Index ID="6510">d</Index>
+				<Header_Title ID="6530">"Day"</Header_Title>
+				<Artificial_Index>
+					<Index ID="6571">w</Index>
+					<Element_Parameter ID="6573">DayToWeekMapping( d )</Element_Parameter>
+				</Artificial_Index>
+			</Explicit_Index>
+			<Explicit_Index>
+				<Index ID="6510">pl</Index>
+				<Header_Title ID="6530">"Line"</Header_Title>
+			</Explicit_Index>
+			<Explicit_Index>
+				<Index ID="6510">w</Index>
+				<Header_Title ID="6530">"Week"</Header_Title>
+			</Explicit_Index>
+			<Identifier_Index>
+				<Hide_if_Single_Identifier ID="6270">"No"</Hide_if_Single_Identifier>
+			</Identifier_Index>
+		</Indices>
+		<General>
+			<Dense_Aggregation_restricts_to_Domain ID="1022">"Yes"</Dense_Aggregation_restricts_to_Domain>
+			<Save_Layout_State>
+				<Store_Entire_Tree_Layout ID="1110">1</Store_Entire_Tree_Layout>
+			</Save_Layout_State>
+		</General>
+		<Row_Area>
+			<Background_Color ID="2010">RGB&lt;255,255,200&gt;</Background_Color>
+			<Text_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2020">"default selection"</Text_Color>
+			<Headers>
+				<Background_Color ExtraInfo="D4F48705-BFDF-4DF8-8E1F-D38EFF981024" ID="2120">"default selection"</Background_Color>
+				<Text_Color ID="2130">RGB&lt;255,255,255&gt;</Text_Color>
+				<Show_Sub_Headers ID="2150">"No"</Show_Sub_Headers>
+			</Headers>
+			<Grid_Focus_Indicator>
+				<Background_Color ID="2270">RGB&lt;0,0,168&gt;</Background_Color>
+				<Text_Color ID="2280">RGB&lt;255,255,200&gt;</Text_Color>
+			</Grid_Focus_Indicator>
+		</Row_Area>
+		<Grid_Area>
+			<Background_Color ID="5010">RGB&lt;255,255,255&gt;</Background_Color>
+			<Alternating_Background_Color ID="5011">RGB&lt;225,225,225&gt;</Alternating_Background_Color>
+			<Aggregators>
+				<Background_Color ID="5220">RGB&lt;255,128,128&gt;</Background_Color>
+			</Aggregators>
+			<Sub_Header_Row_or_Column>
+				<Background_Color ID="5320">RGB&lt;255,255,200&gt;</Background_Color>
+			</Sub_Header_Row_or_Column>
+		</Grid_Area>
+	</PageObject>
+	<UsedReferences>
+		<Model>
+			<Symbol>MealToProductionLineMapping</Symbol>
+			<Symbol>d</Symbol>
+			<Symbol>m</Symbol>
+			<Symbol>w</Symbol>
+			<Symbol>pl</Symbol>
+			<Symbol>MealsProduced</Symbol>
+			<Symbol>DayToWeekMapping</Symbol>
+			<Symbol>MealDescription</Symbol>
+		</Model>
+	</UsedReferences>
+</Page>

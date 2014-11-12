@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2014-04-11 13:13:50">
+	<Location top="29" left="8" bottom="658" right="447" />
+	<PageEditSize Type="Inherited">
+		<Size Width="522" Height="504" />
+	</PageEditSize>
+	<ProjectUUID>CEE75F90-6086-4AD0-890B-C051C7F4AF0D</ProjectUUID>
+	<Title>guipro::LocalizedText( '47', guipro::CurrentLanguage )</Title>
+	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
+	<ResizeData>
+		<MainArea Line="FixedFromLeft" Value="11">
+			<RightArea Line="FixedFromTop" Value="371">
+				<TopArea Line="FixedFromLeft" Value="502" />
+			</RightArea>
+		</MainArea>
+	</ResizeData>
+	<Background Inherited="true" />
+	<Action>
+		<ExitProcedure>guipro::progress::UpdateProgressWindowPause</ExitProcedure>
+	</Action>
+	<PageObject Type="Button">
+		<Location top="318" left="408" bottom="342" right="510" />
+		<TabOrder>1</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>guipro::LocalizedText( '9', guipro::CurrentLanguage )</Title>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<ActionSequence>
+			<Action Type="ClosePage" />
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Composite Table">
+		<Location top="24" left="12" bottom="342" right="402" />
+		<ReadOnly>"Yes"</ReadOnly>
+		<TabOrder>2</TabOrder>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<HeaderBar>false</HeaderBar>
+		<HorizontalLines>false</HorizontalLines>
+		<VerticalLines>false</VerticalLines>
+		<HeaderRearrange>false</HeaderRearrange>
+		<ColumnSort>false</ColumnSort>
+		<CellSelection>false</CellSelection>
+		<RowSelection>false</RowSelection>
+		<Domain>
+			<Identifier>guipro::progress::item</Identifier>
+			<Index Name="guipro::progress::item">
+				<Color>guipro::progress::LineColor( guipro::progress::item )</Color>
+			</Index>
+		</Domain>
+		<ExplicitIdentifier>
+			<Identifier>guipro::progress::Value( guipro::progress::TimeElement, guipro::progress::item )</Identifier>
+			<NumberFormat Width="15" Decimals="0" Alignment="Left" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Curve">
+		<Location top="372" left="12" bottom="486" right="510" />
+		<ReadOnly>"Yes"</ReadOnly>
+		<TabOrder>7</TabOrder>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor>
+			<Symbol>guipro::progress::PauseResumeColor</Symbol>
+		</BackgroundColor>
+		<ColorScheme Number="0" />
+		<Legend>true</Legend>
+		<Y-Labels>true</Y-Labels>
+		<X-Labels>true</X-Labels>
+		<HorizontalGridLines>true</HorizontalGridLines>
+		<VerticalGridLines>true</VerticalGridLines>
+		<DescriptionAsTooltip>false</DescriptionAsTooltip>
+		<ValueInTooltip>false</ValueInTooltip>
+		<ExplicitIdentifier>
+			<Identifier>guipro::progress::GAP( guipro::progress::tm )</Identifier>
+			<NumberFormat Width="5" Decimals="1" />
+			<TitleText>guipro::LocalizedText( '10', guipro::CurrentLanguage )</TitleText>
+		</ExplicitIdentifier>
+		<DrawLines>true</DrawLines>
+		<FillArea>true</FillArea>
+		<LineWidth>2</LineWidth>
+		<XRange>
+			<MaxVisibleLabels>100</MaxVisibleLabels>
+		</XRange>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="6" left="12" bottom="24" right="108" />
+		<SourceType>StringParameter</SourceType>
+		<StringParameter>guipro::LocalizedText( '11', guipro::CurrentLanguage )</StringParameter>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="192" left="408" bottom="216" right="510" />
+		<ReadOnly>guipro::progress::PausedSessionNotRunning</ReadOnly>
+		<TabOrder>9</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>guipro::progress::PauseResumeLabel</Title>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<ActionSequence>
+			<Action Type="Run">
+				<RunWhat>SpecificProcecure</RunWhat>
+				<Procedure>guipro::progress::UpdateProgressWindowPauseResume</Procedure>
+				<AbortOnError>true</AbortOnError>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="84" left="408" bottom="108" right="510" />
+		<ReadOnly>guipro::progress::WatchedSessionNotRunning</ReadOnly>
+		<TabOrder>5</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>guipro::LocalizedText( '1', guipro::CurrentLanguage )</Title>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<ActionSequence>
+			<Action Type="Run">
+				<RunWhat>SpecificProcecure</RunWhat>
+				<Procedure>guipro::progress::TerminateSession</Procedure>
+				<AbortOnError>true</AbortOnError>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="54" left="408" bottom="78" right="510" />
+		<ReadOnly>guipro::progress::WatchedSessionNotRunning</ReadOnly>
+		<TabOrder>4</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>guipro::LocalizedText( '3', guipro::CurrentLanguage )</Title>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<ActionSequence>
+			<Action Type="Run">
+				<RunWhat>SpecificProcecure</RunWhat>
+				<Procedure>guipro::progress::ProcedureInterruptSession</Procedure>
+				<AbortOnError>true</AbortOnError>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="24" left="408" bottom="48" right="510" />
+		<ReadOnly>guipro::progress::WatchedSessionNotRunning</ReadOnly>
+		<TabOrder>3</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>guipro::LocalizedText( '5', guipro::CurrentLanguage )</Title>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<ActionSequence>
+			<Action Type="Run">
+				<RunWhat>SpecificProcecure</RunWhat>
+				<Procedure>guipro::progress::SolveInterruptSession</Procedure>
+				<AbortOnError>true</AbortOnError>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Selection Object">
+		<SelectionType>DropDownList</SelectionType>
+		<Location top="162" left="408" bottom="186" right="510" />
+		<ReadOnly>guipro::progress::PausedSessionNotRunning</ReadOnly>
+		<TabOrder>8</TabOrder>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<TextShown>ElementName</TextShown>
+		<Border Style="None" />
+		<BackgroundColor RGB="#ffffff" />
+		<ProcedureUponChange>guipro::progress::UpdateProgressWindowFreq</ProcedureUponChange>
+		<ExplicitIdentifier>
+			<Identifier>guipro::progress::FreqElement</Identifier>
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="144" left="408" bottom="162" right="450" />
+		<SourceType>StringParameter</SourceType>
+		<StringParameter>guipro::LocalizedText( '12', guipro::CurrentLanguage )</StringParameter>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="353" left="12" bottom="366" right="186" />
+		<ReadOnly>"Yes"</ReadOnly>
+		<TabOrder>6</TabOrder>
+		<TabStop>false</TabStop>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="None" />
+		<BackgroundColor Transparent="true" />
+		<Layout>Value</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>guipro::progress::ChartLabel</Identifier>
+			<NumberFormat Width="15" Decimals="0" Alignment="Left" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="240" left="408" bottom="258" right="510" />
+		<SourceType>StringParameter</SourceType>
+		<StringParameter>guipro::LocalizedText( '56', guipro::CurrentLanguage )</StringParameter>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="258" left="408" bottom="276" right="510" />
+		<SourceType>StringParameter</SourceType>
+		<StringParameter>pro::session::LastKnownActiveSessionStatus</StringParameter>
+		<Font GUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" Name="Arial 8" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<UsedReferences>
+		<Model>
+			<Symbol>guipro::CurrentLanguage</Symbol>
+			<Symbol>guipro::LocalizedText</Symbol>
+			<Symbol>guipro::progress::TimeElement</Symbol>
+			<Symbol>guipro::progress::PauseResumeLabel</Symbol>
+			<Symbol>guipro::progress::GAP</Symbol>
+			<Symbol>guipro::progress::WatchedSessionNotRunning</Symbol>
+			<Symbol>guipro::progress::UpdateProgressWindowPauseResume</Symbol>
+			<Symbol>guipro::progress::Value</Symbol>
+			<Symbol>guipro::progress::TerminateSession</Symbol>
+			<Symbol>guipro::progress::tm</Symbol>
+			<Symbol>guipro::progress::SolveInterruptSession</Symbol>
+			<Symbol>guipro::progress::PauseResumeColor</Symbol>
+			<Symbol>guipro::progress::UpdateProgressWindowPause</Symbol>
+			<Symbol>guipro::progress::LineColor</Symbol>
+			<Symbol>guipro::progress::ChartLabel</Symbol>
+			<Symbol>guipro::progress::PausedSessionNotRunning</Symbol>
+			<Symbol>guipro::progress::item</Symbol>
+			<Symbol>guipro::progress::UpdateProgressWindowFreq</Symbol>
+			<Symbol>guipro::progress::ProcedureInterruptSession</Symbol>
+			<Symbol>guipro::progress::Frequency</Symbol>
+			<Symbol>guipro::progress::FreqElement</Symbol>
+			<Symbol>pro::session::LastKnownActiveSessionStatus</Symbol>
+		</Model>
+	</UsedReferences>
+</Page>

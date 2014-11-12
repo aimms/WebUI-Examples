@@ -1,0 +1,57 @@
+INTRO
+- still in beta
+- develop setup differs from actual setup through portal
+
+STARTUP
+- open project
+- start webUI
+- connect browser
+
+DESCRIBE HOME PAGE
+- switch style
+- automatic resizing
+- navigation
+
+CREATE NEW PAGE
+- create table widget with ingredient prices
+  - contents
+  - title
+  - pivoting to
+    ROWS : s i
+    COLUMNS : ym dn
+    TOTALS : <IDENTIFIERS>
+  - switch type to 'linechart' to 'scalar' to 'table' again
+  - add sum over i
+- option changes are automatically saved/synced
+- create scenario legend widget
+- create ingredient multiselect widget
+- rearrange widgets
+- refresh
+- use scenario legend widget as a filter for the table
+- use ingredient multiselect widget as a filter for the table
+- create linechart with profit
+- pivot linechart
+- create barchart 
+- undo
+- all pages are stored in text format
+- create button
+- add scenario
+- adapt prices for new scenario
+- press optimize button
+
+MODEL INTERFACE
+- AllPublicIdentifiers
+
+DATA MANAGEMENT
+- save / load case
+
+STYLING
+- css
+- model related
+- show theme-switch-addon
+
+LANGUAGE
+- language property files
+
+OPEN FRAMWORK
+- open framework that allows you the create/add your own widgets

@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2014-06-18 08:30:56">
+	<PageEditSize Type="Inherited" />
+	<ProjectUUID>22371509-AC47-467F-BC44-2F6232790B5E</ProjectUUID>
+	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="Button">
+		<Location top="18" left="18" bottom="102" right="324" />
+		<TabOrder>2</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Solve"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<ActionSequence>
+			<Action Type="Run">
+				<RunWhat>SpecificProcecure</RunWhat>
+				<Procedure>CalculateScenarioProfit</Procedure>
+				<AbortOnError>true</AbortOnError>
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Button">
+		<Location top="18" left="336" bottom="102" right="642" />
+		<TabOrder>1</TabOrder>
+		<LeaveOnEnter>false</LeaveOnEnter>
+		<ButtonType>Text</ButtonType>
+		<Title>"Open PRO Request Manager"</Title>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<ActionSequence>
+			<Action Type="LinkedPage">
+				<Page ProjectGUID="CEE75F90-6086-4AD0-890B-C051C7F4AF0D" PageGUID="4371A622-2E3C-4D57-BE0C-DB31F10C6A72" Name="Managed Requests" />
+			</Action>
+		</ActionSequence>
+	</PageObject>
+	<PageObject Type="Bar Chart">
+		<Location top="114" left="18" bottom="312" right="642" />
+		<TabOrder>3</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<ColorScheme Number="0" />
+		<Title>true</Title>
+		<Legend>true</Legend>
+		<Y-Labels>true</Y-Labels>
+		<X-Labels>true</X-Labels>
+		<HorizontalGridLines>true</HorizontalGridLines>
+		<StatusLine>true</StatusLine>
+		<ExplicitIdentifier>
+			<Identifier>MaximumProfitUI( s )</Identifier>
+		</ExplicitIdentifier>
+		<FillWithColor>true</FillWithColor>
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="324" left="18" bottom="378" right="642" />
+		<TabOrder>4</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>Text-Value</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>StartupMode</Identifier>
+			<NumberFormat Width="70" Decimals="0" Alignment="Center" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<UsedReferences>
+		<Model>
+			<Symbol>MaximumProfitUI</Symbol>
+			<Symbol>StartupMode</Symbol>
+			<Symbol>CalculateScenarioProfit</Symbol>
+			<Symbol>s</Symbol>
+		</Model>
+	</UsedReferences>
+</Page>

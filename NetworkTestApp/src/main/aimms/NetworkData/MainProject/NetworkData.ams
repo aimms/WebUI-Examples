@@ -1,0 +1,147 @@
+## ams_version=1.0
+
+Model Main_NetworkData {
+    DeclarationSection Network_Data_Declaration {
+        Set Cities {
+            Index: c, c_from, c_to;
+        }
+        Parameter XCoordinate {
+            IndexDomain: c;
+        }
+        Parameter YCoordinate {
+            IndexDomain: c;
+        }
+        Parameter Demand {
+            IndexDomain: c;
+        }
+        Parameter Supply {
+            IndexDomain: c;
+        }
+        Parameter NumberOfInhabitants {
+            IndexDomain: c;
+        }
+        Parameter TransportCost {
+            IndexDomain: (c_from,c_to);
+            Definition: Round(1000 * Sqrt(Sqr(XCoordinate(c_from)-XCoordinate(c_to)) + Sqr(YCoordinate(c_from)-YCoordinate(c_to))) )/1000;
+        }
+        Parameter IsSupplier {
+            IndexDomain: c;
+        }
+        Parameter Throughput {
+            IndexDomain: c;
+            Definition: sum[ c_from, Transport(c_from,c) ] + sum[ c_to, Transport(c,c_to) ];
+        }
+    }
+    DeclarationSection Model_Declaration {
+        Variable Transport {
+            IndexDomain: (c_from,c_to) | TransportCost(c_from,c_to) and IsSupplier(c_from) and (1-IsSupplier(c_to));
+            Range: nonnegative;
+        }
+        Parameter PTransport {
+            IndexDomain: (c_from,c_to);
+            Definition: Transport(c_from, c_to);
+        }
+        Constraint SupplyRestriction {
+            IndexDomain: c | IsSupplier(c);
+            Definition: sum[ c_to, Transport(c,c_to) ] <= Supply(c);
+        }
+        Constraint MeetDemand {
+            IndexDomain: c | ( 1 - IsSupplier(c) );
+            Definition: sum[ c_from, Transport(c_from,c) ] >= Demand(c);
+        }
+        Variable TotalTransportCost {
+            Range: free;
+            Definition: sum[ (c_from,c_to), TransportCost(c_from,c_to) * Transport(c_from,c_to) ];
+        }
+        MathematicalProgram NetworkModel {
+            Objective: TotalTransportCost;
+            Direction: minimize;
+            Constraints: AllConstraints;
+            Variables: AllVariables;
+            Type: Automatic;
+        }
+    }
+    DeclarationSection WebUI_Declarations {
+        Set AllPublicIdentifiers {
+            SubsetOf: AllIdentifiers;
+            Definition: {
+                data
+                    { Cities             , c                  , c_from             , c_to               , Demand             , Supply             ,
+                      NumberOfInhabitants, TransportCost      , Transport          , TotalTransportCost , LonLat             , iLonLat            ,
+                      WebUICoordinates   , Throughput, PTransport   }
+            }
+        }
+        Set LonLat {
+            Index: iLonLat;
+            Definition: data { 'Lon', 'Lat' };
+        }
+        Parameter WebUICoordinates {
+            IndexDomain: (c,iLonLat);
+            Definition: if ( iLonLat = 'Lon' ) then XCoordinate(c) else YCoordinate(c) endif;
+        }
+    }
+    Procedure InitializeNodes {
+        Body: {
+            COMPOSITE TABLE:
+              c             XCoordinate     YCoordinate
+            !------------------------------------------
+            Amersfoort      5.377           52.158
+            Amsterdam       4.88            52.376
+            Apeldoorn       5.953           52.213
+            Arnhem          5.917           51.982
+            Assen           6.561           53.011
+            Breda           4.778           51.588
+            'Den Bosch'     5.308           51.701
+            'Den Haag'      4.303           52.079
+            'Den Helder'    4.754           52.958
+            Deventer        6.158           52.263
+            Dordrecht       4.679           51.794
+            Eindhoven       5.461           51.432
+            Emmen           6.885           52.788
+            Enschede        6.89            52.22
+            Groningen       6.574           53.226
+            Haarlem         4.618           52.382
+            Leeuwarden      5.782           53.212
+            Maastricht      5.696           50.857
+            Nijmegen        5.845           51.84
+            Rotterdam       4.482           51.929
+            Tilburg         5.071           51.568
+            Utrecht         5.118           52.107
+            Venlo           6.158           51.374
+            Vlissingen      3.571           51.458
+            Zwolle          6.09            52.522     ;
+            
+            NumberOfInhabitants(c)
+            :=
+            data
+            { Amersfoort   : 149662,  Amsterdam    : 799278,  Breda        : 178140,  'Den Bosch'  : 142817,  Haarlem      : 153093,
+              Eindhoven    : 218433,  Apeldoorn    : 157315,  Arnhem       : 149827,  Assen        :  67204,  'Den Haag'   : 505856,
+              'Den Helder' :  56947,  Deventer     :  98581,  Dordrecht    : 118466,  Emmen        : 108392,  Enschede     : 158627,
+              Groningen    : 195418,  Leeuwarden   : 106987,  Maastricht   : 121819,  Nijmegen     : 166382,  Rotterdam    : 616294,
+              Tilburg      : 208527,  Utrecht      : 321916,  Venlo        : 100159,  Vlissingen   :  44451,  Zwolle       : 122562 };
+            
+            option seed := 12345;
+            
+            IsSupplier(c) := Round(Uniform(0,0.75));
+            Supply(c) := Round(100* IsSupplier(c) * Uniform(20,30))/ 100;
+            Demand(c) := Round(100 * (1-IsSupplier(c)) * Uniform(10,25))/100;
+        }
+    }
+    Procedure MainInitialization;
+    Procedure SolveModel {
+        Body: {
+            InitializeNodes;
+            solve NetworkModel;
+        }
+    }
+    Procedure MainExecution {
+        Body: {
+            display PTransport;
+        }
+    }
+    Procedure MainTermination {
+        Body: {
+            return DataManagementExit();
+        }
+    }
+}

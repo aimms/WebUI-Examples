@@ -1,0 +1,683 @@
+## ams_version=1.0
+
+Model Main_Ready_To_Eat_Meal_Production {
+    Section Model_Declarations {
+        DeclarationSection Time_Related_Declarations {
+            Quantity SI_Time_Duration {
+                BaseUnit: day;
+                Conversions: month -> day : # -> # * 30.41666667;
+            }
+            StringParameter BeginDate {
+                Definition: "2013-04-01";
+            }
+            StringParameter EndDate {
+                Definition: "2013-04-28";
+            }
+            Calendar Days {
+                Index: d;
+                Parameter: firstDay, selectedDay;
+                Unit: day;
+                BeginDate: BeginDate;
+                EndDate: EndDate;
+                TimeslotFormat: "%d/%m/%y";
+            }
+            Calendar Weeks {
+                Index: w;
+                Unit: 7 * day;
+                BeginDate: BeginDate;
+                EndDate: EndDate;
+                TimeslotFormat: "week %W";
+            }
+            Calendar YearMonths {
+                Index: ym;
+                Unit: month;
+                BeginDate: BeginDate;
+                EndDate: EndDate;
+                TimeslotFormat: "%sAm|AllMonths| %c%y";
+            }
+            Set DayNumbers {
+                Index: dn;
+                Definition: data { 1 .. 31 };
+            }
+            Set WeekNumbers {
+                Index: wn;
+                Parameter: WeekNumber;
+            }
+            ElementParameter WeekNumberToWeek {
+                IndexDomain: (wn);
+                Range: Weeks;
+                Definition: first( w | Ord(w) = Ord(wn) );
+            }
+            ElementParameter DayToWeekMapping {
+                IndexDomain: (d);
+                Range: Weeks;
+                Definition: first( w | TimeslotCharacteristic(w,'week') = TimeslotCharacteristic(d,'week'));
+            }
+            Parameter DayToYearMonthMapping {
+                IndexDomain: (d,ym);
+                Definition: 1 onlyif (TimeslotCharacteristic(d,'month') = TimeslotCharacteristic(ym,'month'));
+            }
+            ElementParameter DayToYearMonth {
+                IndexDomain: (d);
+                Range: YearMonths;
+                Definition: first( ym | DayToYearMonthMapping(d,ym) );
+            }
+            Parameter DayToDayNumberMapping {
+                IndexDomain: (d,dn);
+                Definition: 1 onlyif (TimeslotCharacteristic(d,'monthday') = Ord(dn));
+            }
+            ElementParameter DayToDayNumber {
+                IndexDomain: (d);
+                Range: DayNumbers;
+                Definition: first( dn | DayToDayNumberMapping(d,dn) );
+            }
+            Parameter DayToYearMonthDayNumberMapping {
+                IndexDomain: (d,ym,dn);
+                Definition: 1 onlyif ( DayToYearMonthMapping(d,ym) and DayToDayNumberMapping(d,dn) );
+            }
+            ElementParameter YearMonthDayNumberToDay {
+                IndexDomain: (ym,dn);
+                Range: Days;
+                Definition: first( d | DayToYearMonthDayNumberMapping(d,ym,dn) );
+            }
+        }
+        DeclarationSection Model_Data_Declarations {
+            Quantity SI_Mass {
+                BaseUnit: kg;
+                Conversions: g -> kg : # -> # / 1000;
+                Comment: "Expresses the value for the amount of matter.";
+            }
+            Quantity Currency {
+                BaseUnit: $;
+                Conversions: k$ -> $ : # -> # * 1000;
+            }
+            Quantity SI_Unitless {
+                BaseUnit: -;
+                Conversions: meal -> - : # -> #;
+                Comment: "Expresses a dimensionless value.";
+            }
+            Set Ingredients {
+                Index: i;
+            }
+            Set Meals {
+                Index: m;
+            }
+            Set IngredientCategories {
+                Index: ic;
+            }
+            Set ProductionLines {
+                SubsetOf: Ingredients;
+                Index: pl;
+            }
+            Parameter Composition {
+                IndexDomain: (m,i);
+                Unit: g/meal;
+            }
+            ElementParameter MealToProductionLineMapping {
+                IndexDomain: (m);
+                Range: ProductionLines;
+                Definition: first( i | Composition(m,i) );
+            }
+            ElementParameter IngredientToIngredientCategoryMapping {
+                IndexDomain: (i);
+                Range: IngredientCategories;
+            }
+            Parameter IngredientPrice {
+                IndexDomain: (i,d);
+                Unit: $/kg;
+            }
+            Parameter Demand {
+                IndexDomain: (m,d);
+                Unit: meal;
+            }
+            Parameter IngredientSupply {
+                IndexDomain: (i,d);
+                Unit: kg;
+                Definition: Round( 0.98 * MaxIngredientRequirement(i) / 10 ) * 10;
+            }
+            Parameter MealPrice {
+                IndexDomain: (m);
+                Unit: $/meal;
+            }
+            Parameter MinimalRequiredDemandServiceLevel {
+                Range: [0, 1];
+                Default: 1;
+            }
+            Parameter InitialStock {
+                IndexDomain: (m);
+                Unit: meal;
+            }
+        }
+        DeclarationSection Optimization_Model_Declarations {
+            Variable MealsProduced {
+                IndexDomain: (m,d);
+                Range: nonnegative;
+                Unit: meal;
+            }
+            Variable MealsDelivered {
+                IndexDomain: (m,d);
+                Range: [0, Demand(m, d)];
+                Unit: meal;
+            }
+            Variable Stock {
+                IndexDomain: (m,d);
+                Range: nonnegative;
+                Unit: meal;
+            }
+            Constraint IngredientSupplyRestriction {
+                IndexDomain: (i,d);
+                Unit: kg;
+                Definition: sum[ m, MealsProduced(m,d)*Composition(m,i) ] <= IngredientSupply(i,d);
+            }
+            Constraint MeetDemand {
+                IndexDomain: (m,d);
+                Unit: meal;
+                Definition: MealsDelivered(m,d) >= MinimalRequiredDemandServiceLevel * Demand(m,d);
+            }
+            Constraint StockBalance {
+                IndexDomain: (m,d);
+                Unit: meal;
+                Definition: InitialStock(m) $ (Ord(d)=1) + MealsProduced(m,d) + Stock(m,d-1) = MealsDelivered(m,d) + Stock(m,d);
+            }
+            Variable TotalRevenue {
+                Range: free;
+                Unit: k$;
+                Definition: sum[ (m,d), MealPrice(m) * MealsDelivered(m,d) ];
+            }
+            Variable TotalStockCost {
+                Range: free;
+                Unit: $;
+                Definition: sum[ (m,d), StockCost * Stock(m,d) ];
+            }
+            Variable TotalProductionCost {
+                Range: free;
+                Unit: k$;
+                Definition: sum[ (m,i,d), IngredientPrice(i,d) * Composition(m,i) * MealsProduced(m,d) ];
+            }
+            Variable TotalProfit {
+                Range: free;
+                Unit: k$;
+                Definition: TotalRevenue - TotalProductionCost - TotalStockCost;
+            }
+            MathematicalProgram ProductionPlanning {
+                Objective: TotalProfit;
+                Direction: maximize;
+                Constraints: AllConstraints;
+                Variables: AllVariables;
+                Type: Automatic;
+            }
+        }
+        Procedure DetermineProductionPlanning {
+            Body: {
+                InitializeSets;
+                InitializeData;
+                solve ProductionPlanning;
+            }
+        }
+    }
+    Section Data_Initialization {
+        DeclarationSection Data_Generation_Declarations {
+            Parameter BaseIngredientPrice {
+                IndexDomain: (i);
+                Unit: $/kg;
+            }
+            Set Patterns {
+                Index: pat;
+                Parameter: thePattern;
+            }
+            Parameter PatternFactor {
+                IndexDomain: (pat,d);
+            }
+            Parameter MealPopularityFactor {
+                IndexDomain: (m);
+                Default: 1;
+            }
+            Parameter MaxIngredientRequirement {
+                IndexDomain: (i);
+                Unit: kg;
+                Definition: max[ d, sum[ m, Demand(m,d)*Composition(m,i) ] ];
+            }
+            Parameter CostPerMeal {
+                IndexDomain: (m,d);
+                Unit: $/meal;
+                Definition: sum[ i, Composition(m,i)*IngredientPrice(i,d) ];
+            }
+            Parameter AverageCostperMeal {
+                IndexDomain: (m);
+                Unit: $/meal;
+                Definition: mean[ d, CostPerMeal(m,d) ];
+            }
+            Parameter StockCost {
+                Unit: $/meal;
+            }
+        }
+        Procedure InitializeSets {
+            Body: {
+                Ingredients := data {
+                        beef, chicken, salmon,
+                        potatoes, rice, pasta,
+                        beans, salad, brocolli, spinach
+                };
+                
+                ProductionLines := data { beef, chicken, salmon };
+                
+                IngredientCategories := data { proteins, carbohydrates, vegetables };
+                
+                Meals := data { meal-01 .. meal-20 };
+                
+                for (w) do
+                	SetElementAdd( WeekNumbers, WeekNumber, FormatString("%e",w) )
+                endfor;
+            }
+        }
+        Procedure InitializeData {
+            Body: {
+                IngredientToIngredientCategoryMapping(i) := data
+                { beef     : proteins     ,  chicken  : proteins     ,  salmon   : proteins     ,  potatoes : carbohydrates,
+                  rice     : carbohydrates,  pasta    : carbohydrates,  beans    : vegetables   ,  salad    : vegetables   ,
+                  brocolli : vegetables   ,  spinach  : vegetables    };
+                
+                  Composition(m,i) := data
+                { ( meal-01, beef     ) : 200,  ( meal-01, potatoes ) : 150,  ( meal-01, beans    ) : 100,  ( meal-02, beef     ) : 200,
+                  ( meal-02, rice     ) : 150,  ( meal-02, brocolli ) : 100,  ( meal-03, beef     ) : 175,  ( meal-03, potatoes ) : 125,
+                  ( meal-03, salad    ) :  75,  ( meal-04, beef     ) : 175,  ( meal-04, rice     ) : 125,  ( meal-04, spinach  ) : 100,
+                  ( meal-05, beef     ) : 175,  ( meal-05, pasta    ) : 125,  ( meal-05, salad    ) :  75,  ( meal-06, beef     ) : 150,
+                  ( meal-06, potatoes ) : 125,  ( meal-06, spinach  ) : 100,  ( meal-07, beef     ) : 150,  ( meal-07, rice     ) : 125,
+                  ( meal-07, beans    ) : 100,  ( meal-08, beef     ) : 150,  ( meal-08, pasta    ) : 125,  ( meal-08, brocolli ) : 100,
+                  ( meal-09, chicken  ) : 175,  ( meal-09, potatoes ) : 150,  ( meal-09, brocolli ) : 100,  ( meal-10, chicken  ) : 175,
+                  ( meal-10, rice     ) : 150,  ( meal-10, beans    ) : 100,  ( meal-11, chicken  ) : 175,  ( meal-11, rice     ) : 150,
+                  ( meal-11, brocolli ) : 100,  ( meal-12, chicken  ) : 175,  ( meal-12, rice     ) : 150,  ( meal-12, salad    ) :  75,
+                  ( meal-13, chicken  ) : 150,  ( meal-13, pasta    ) : 125,  ( meal-13, salad    ) :  75,  ( meal-14, chicken  ) : 150,
+                  ( meal-14, pasta    ) : 125,  ( meal-14, beans    ) : 100,  ( meal-15, chicken  ) : 150,  ( meal-15, pasta    ) : 125,
+                  ( meal-15, spinach  ) : 100,  ( meal-16, salmon   ) : 125,  ( meal-16, potatoes ) : 125,  ( meal-16, salad    ) :  75,
+                  ( meal-17, salmon   ) : 125,  ( meal-17, rice     ) : 125,  ( meal-17, beans    ) : 100,  ( meal-18, salmon   ) : 125,
+                  ( meal-18, pasta    ) : 125,  ( meal-18, salad    ) :  75,  ( meal-19, salmon   ) : 125,  ( meal-19, rice     ) : 125,
+                  ( meal-19, spinach  ) : 100,  ( meal-20, salmon   ) : 125,  ( meal-20, pasta    ) : 125,  ( meal-20, brocolli ) : 100 };
+                
+                StockCost := 0.05;
+                
+                option seed  := 1234567;
+                
+                BaseIngredientPrice(i) := data { beef : 15,  chicken : 10,  salmon : 20,  potatoes : 2,  rice : 2,  pasta : 1,  beans : 2,  salad : 4,  brocolli : 3,  spinach : 3 };
+                
+                Patterns := data { LLL, LLH, LHL, LHH, HLL, HLH, HHL, HHH };
+                
+                for (pat,d) do
+                        PatternString := FormatString("%e",pat);
+                        if ( Ord(d) <= 8 ) then
+                                PatternIndex := 1;
+                        elseif ( Ord(d) <= 20 ) then
+                                PatternIndex := 2;
+                        else
+                                PatternIndex := 3;
+                        endif;
+                        if ( Substring(PatternString,PatternIndex,1) = "L" ) then
+                                Lo := 0.9;
+                                Up := 1.0;
+                        elseif ( Substring(PatternString,PatternIndex,1) = "H" ) then
+                                Lo := 1.0;
+                                Up := 1.1;
+                        endif;
+                        PatternFactor(pat,d) := Round(Uniform(Lo,Up)*10)/10;
+                endfor;
+                
+                for (i) do
+                        thePattern := Element(Patterns,Round(Uniform(0.51,Card(Patterns)+0.49)));
+                        for (d) do
+                                IngredientPrice(i,d) := Round(PatternFactor(thePattern,d)*BaseIngredientPrice(i)*100)/100;
+                        endfor;
+                endfor;
+                
+                InitialSalmonPrice(d) := IngredientPrice('salmon',d);
+                
+                MealPopularityFactor(m) :=
+                    ! Non-displayed entries represent the default value of 1.
+                data
+                { meal-01 :  1.5,  meal-02 :  1.5,  meal-03 :  1.2,  meal-04 :  1.2,  meal-08 :  0.9,  meal-09 :  1.1,  meal-10 :  1.1,
+                  meal-11 :  1.1,  meal-15 :  0.9,  meal-16 :  1.2,  meal-17 :  1.2,  meal-20 :  0.9 };
+                
+                for (m) do
+                        thePattern := Element(Patterns,Round(Uniform(0.51,Card(Patterns)+0.49)));
+                        for (d) do
+                                Demand(m,d) := Round(0.5*MealPopularityFactor(m)*Uniform(PatternFactor(thePattern,d)*95,PatternFactor(thePattern,d)*105))*10;
+                        endfor;
+                endfor;
+                
+                MealPrice(m) := Round( Uniform(1.4,1.6) * AverageCostperMeal(m) * 10 ) / 10;
+                InitialMealPrice(m) := MealPrice(m);
+                
+                firstDay := first(Days);
+                selectedDay := firstDay;
+                InitialStock(m) := Round( Uniform(0.1,0.2) * Demand(m,firstDay) );
+                
+                ProductionLineColor(pl) := data { beef : beef, chicken : chicken,  salmon : salmon };
+                
+                for (m) do
+                        empty Description;
+                        for (i | Composition(m,i)) do
+                                if ( StringLength(Description) > 0 ) then
+                                        Description += ", ";
+                                endif;
+                                Description += FormatString("%e",i);
+                        endfor;
+                        if ( Composition(m,'beef') >= 200 [g/meal] ) then
+                                Description += " XL";
+                        endif;
+                        MealDescription(m) := Description;
+                endfor;
+            }
+            StringParameter PatternString;
+            Parameter PatternIndex;
+            Parameter Lo;
+            Parameter Up;
+            StringParameter Description;
+        }
+    }
+    Section Auxiliary_UI_Declarations {
+        StringParameter MealDescription {
+            IndexDomain: (m);
+        }
+        Set SelectedMeals {
+            SubsetOf: Meals;
+            Index: sm;
+        }
+        Parameter MealsProducedPerProductionLine {
+            IndexDomain: (pl,d);
+            Unit: meal;
+            Definition: sum[ m | MealToProductionLineMapping(m) = pl, MealsProduced(m,d) ];
+        }
+        Parameter MealsNotDelivered {
+            IndexDomain: (m,d);
+            Unit: meal;
+            Definition: Demand(m,d)-MealsDelivered(m,d);
+        }
+        Parameter ProfitPerProductionLine {
+            IndexDomain: (pl,d);
+            Unit: k$;
+            Definition: {
+                sum[ m | MealToProductionLineMapping(m) = pl, MealPrice(m) * MealsDelivered(m,d) ] -
+                sum[ (m,i) | MealToProductionLineMapping(m) = pl, IngredientPrice(i,d) * Composition(m,i) * MealsProduced(m,d) ] -
+                sum[ m | MealToProductionLineMapping(m) = pl, StockCost * Stock(m,d) ]
+            }
+        }
+        ElementParameter ProductionLineColor {
+            IndexDomain: (pl);
+            Range: AllColors;
+        }
+        Parameter InitialSalmonPrice {
+            IndexDomain: (d);
+            Unit: $/kg;
+        }
+        Parameter SalmonPriceFactor {
+            Range: [0, 10];
+            InitialData: 1;
+        }
+        Parameter InitialMealPrice {
+            IndexDomain: (m);
+            Unit: $/meal;
+        }
+        Parameter TempSalmonPrice {
+            IndexDomain: (d);
+            Unit: $/kg;
+        }
+        Parameter MaxTotalProfit {
+            Unit: k$;
+        }
+        Parameter MinTotalProfit {
+            Unit: k$;
+        }
+        Set PivotTableIdentifiers {
+            SubsetOf: AllIdentifiers;
+        }
+        Parameter MealsProducedExt {
+            IndexDomain: (pl,m,w,d);
+            Unit: meal;
+            Definition: MealsProduced(m,d) onlyif ( ( MealToProductionLineMapping(m) = pl ) and ( DayToWeekMapping(d) = w ) );
+        }
+        Parameter StockExt {
+            IndexDomain: (pl,m,w,d);
+            Unit: meal;
+            Definition: Stock(m,d) onlyif ( ( MealToProductionLineMapping(m) = pl ) and ( DayToWeekMapping(d) = w ) );
+        }
+        Procedure ChangeSalmonPrice {
+            Body: {
+                IngredientPrice('salmon',d) := SalmonPriceFactor * InitialSalmonPrice(d);
+            }
+        }
+        Procedure ChangeMinimalRequiredDemandServiceLevelForInitialSalmonPrice {
+            Body: {
+                TempSalmonPrice(d) := IngredientPrice('salmon',d);
+                IngredientPrice('salmon',d) := InitialSalmonPrice(d);
+                MealPrice(m) := MinimalRequiredDemandServiceLevel * InitialMealPrice(m);
+                solve ProductionPlanning;
+                UpdateTotalProfitRange;
+                IngredientPrice('salmon',d) := TempSalmonPrice(d);
+            }
+        }
+        Procedure ChangeMinimalRequiredDemandServiceLevelForUpdatedSalmonPrice {
+            Body: {
+                MealPrice(m) := MinimalRequiredDemandServiceLevel * InitialMealPrice(m);
+                UpdateTotalProfitRange;
+                solve ProductionPlanning;
+            }
+        }
+        Procedure UpdateTotalProfitRange {
+            Body: {
+                if ( TotalProfit < MinTotalProfit ) then
+                        MinTotalProfit := ( Floor( Round(TotalProfit/100) ) - 1 [k$] ) * 100;
+                endif;
+                if ( TotalProfit > MaxTotalProfit ) then
+                        MaxTotalProfit := ( Ceil( Round(TotalProfit/100) ) + 1 [k$] ) * 100;
+                endif;
+            }
+        }
+        Procedure PivotTableOnlyShowStock {
+            Body: PivotTableIdentifiers := data { Stock };
+        }
+        Procedure PivotTableOnlyShowProduction {
+            Body: PivotTableIdentifiers := data { MealsProduced };
+        }
+        Procedure PivotTableShowStockAndProduction {
+            Body: PivotTableIdentifiers := data { MealsProduced, Stock };
+        }
+    }
+    Section WebUI_Teaser_Declarations {
+        DeclarationSection Declarations {
+            Set Scenarios {
+                Index: s;
+                Parameter: BaseScenario, AScenario;
+            }
+            Set ServiceLevels {
+                Index: sl;
+                Definition: ElementRange( 0, 100, incr: 10, postfix : "%", fill: 0 );
+            }
+            Parameter ServiceLevelValues {
+                IndexDomain: (sl);
+                Definition: (Ord(sl)-1)*10;
+            }
+            Parameter IngredientPriceUI {
+                IndexDomain: (i,ym,dn,s);
+                Unit: $/kg;
+            }
+            Parameter MaximumProfitUI {
+                IndexDomain: (s);
+                Unit: k$;
+            }
+            Parameter ProfitUI {
+                IndexDomain: (sl,s);
+                Unit: k$;
+            }
+            Parameter OptimalProductionUI {
+                IndexDomain: (pl,m,wn,d);
+                Unit: meal;
+                Definition: MealsProducedExt(pl, m, WeekNumberToWeek(wn), d);
+            }
+            Parameter OptimalStockUI {
+                IndexDomain: (pl,m,wn,d);
+                Unit: meal;
+                Definition: StockExt(pl, m, WeekNumberToWeek(wn), d);
+            }
+            Parameter IsNewScenario {
+                IndexDomain: (s);
+            }
+            Set AllPublicIdentifiers {
+                SubsetOf: AllIdentifiers;
+                Index: api;
+                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode };
+            }
+            Set AllPublicProcedures {
+                SubsetOf: AllIdentifiers;
+                Index: app;
+                Definition: data { CalculateScenarioProfit };
+            }
+            StringParameter StartupMode {
+                Property: NoSave;
+            }
+        }
+        DeclarationSection Declarations_for_Scenario_A {
+            Parameter DailyMealsProduced_Base {
+                IndexDomain: (pl,d);
+            }
+            Parameter DailyProfit_Base {
+                IndexDomain: (pl,d);
+                Unit: k$;
+            }
+            Parameter DailyTotalProfit_Base {
+                IndexDomain: (d);
+                Unit: k$;
+                Definition: sum[ pl, DailyProfit_Base(pl,d) ];
+            }
+            Parameter TotalProfit_Base {
+                Unit: k$;
+                Definition: sum[ d, DailyTotalProfit_Base(d)];
+            }
+        }
+        Procedure InitializeEmptyScenarios {
+            Body: {
+                if ( sum[ (i,ym,dn), IngredientPriceUI(i,ym,dn,BaseScenario) ] = 0 [$/kg] ) then
+                        IngredientPriceUI(i,ym,dn,BaseScenario) := IngredientPrice(i,YearMonthDayNumberToDay(ym,dn));
+                endif;
+                
+                for ( s | s<>BaseScenario ) do
+                        if ( sum[ (i,ym,dn), IngredientPriceUI(i,ym,dn,s) ] = 0 [$/kg] ) then
+                                IngredientPriceUI(i,ym,dn,s) := IngredientPriceUI(i,ym,dn,BaseScenario);
+                        endif;
+                endfor;
+            }
+        }
+        Procedure uponAddElement_Scenarios {
+            Arguments: (newScenario);
+            Body: {
+                IngredientPriceUI(i,ym,dn,newScenario) := IngredientPriceUI(i,ym,dn,BaseScenario);
+            }
+            ElementParameter newScenario {
+                Range: Scenarios;
+                Property: Input;
+            }
+        }
+        Procedure CalculateScenarioProfit {
+            Body: {
+                if ( pro::management::IsInitialized ) then
+                	display "pro::management::IsInitialized is true";
+                	if ( pro::DelegateToServer( completionCallback: 'pro::session::LoadResultsCallBack' )  ) then
+                		display "pro::DelegateToServer is true";
+                		StartupMode := "This is the PRO client app";
+                		return 1;
+                	else
+                		display "pro::DelegateToServer is false";
+                		StartupMode := "This is the PRO server app";
+                	endif;
+                else
+                	display "pro::management::IsInitialized is false";
+                	StartupMode := "This is a stand-alone AIMMS app (started manually outside of PRO)";
+                endif;
+                
+                display StartupMode;
+                StatusMessage(StartupMode);
+                CalculateScenarioProfitLocal;
+            }
+        }
+        Procedure CalculateScenarioProfitLocal {
+            Body: {
+                display "Running CalculateScenarioProfitLocal";
+                
+                !empty MaximumProfitUI(s);
+                
+                InitializeEmptyScenarios;
+                
+                for (s) do
+                	AScenario := Element( Scenarios, Card(s) - Ord(s) + 1 );
+                	display AScenario;
+                        !if ( MaximumProfitUI(s) = 0 [k$] ) then
+                                IngredientPrice(i,d) := IngredientPriceUI(i,DayToYearMonth(d),DayToDayNumber(d),AScenario);
+                                for ( sl ) do
+                                        MinimalRequiredDemandServiceLevel := ServiceLevelValues(sl)/100;
+                                        MealPrice(m) := MinimalRequiredDemandServiceLevel * InitialMealPrice(m);
+                                        solve ProductionPlanning;
+                                        ProfitUI(sl,AScenario) := TotalProfit;
+                                        if ( ProfitUI(sl,AScenario) = 0 [$] ) then
+                                                ProfitUI(sl,AScenario) := 0.0000001;
+                                        endif;
+                                endfor;
+                                MaximumProfitUI(AScenario) := TotalProfit;
+                                display TotalProfit;
+                                if (AScenario = BaseScenario) then
+                                        DailyMealsProduced_Base(pl,d) := sum[ m | MealToProductionLineMapping(m) = pl, MealsProduced(m,d) ];
+                                        DailyProfit_Base(pl,d) :=
+                                                sum[ m | MealToProductionLineMapping(m) = pl, MealPrice(m) * MealsDelivered(m,d) ] -
+                                                sum[ (m,i) | MealToProductionLineMapping(m) = pl, IngredientPrice(i,d) * Composition(m,i) * MealsProduced(m,d) ] -
+                                                sum[ m | MealToProductionLineMapping(m) = pl, StockCost * Stock(m,d) ];
+                
+                                endif;
+                        !endif;
+                endfor
+            }
+        }
+        Procedure AddOtherScenarios {
+            Body: {
+                SetElementAdd(Scenarios,aScenario,"Salmon (x3)");
+                
+                IngredientPriceUI(i,ym,dn,aScenario) := IngredientPriceUI(i,ym,dn,BaseScenario);
+                IngredientPriceUI('Salmon',ym,dn,aScenario) *= 3;
+                
+                SetElementAdd(Scenarios,aScenario,"Salmon & Rice");
+                
+                IngredientPriceUI(i,ym,dn,aScenario) := IngredientPriceUI(i,ym,dn,BaseScenario);
+                IngredientPriceUI('Rice',ym,dn,aScenario) *= 0.8;
+                IngredientPriceUI('Salmon',ym,dn,aScenario) *= 3;
+                IngredientPriceUI('Salmon',ym,dn,aScenario)|(Ord(dn)>=13 and Ord(dn)<=18) := 30;
+            }
+            ElementParameter aScenario {
+                Range: Scenarios;
+            }
+        }
+    }
+    Procedure MainInitialization {
+        Body: {
+            AddUserColors;
+            InitializeSets;
+            InitializeData;
+            MinTotalProfit := 0;
+            MaxTotalProfit := 0;
+            PivotTableIdentifiers := data { Stock };
+            Scenarios := data { Base };
+            BaseScenario := 'Base';
+            
+            InitializeEmptyScenarios;
+            AddOtherScenarios;
+        }
+    }
+    Procedure AddUserColors {
+        Body: {
+            UserColorAdd( "beef", 160, 82, 45 );
+            UserColorAdd( "salmon", 250, 128, 114 );
+            UserColorAdd( "chicken", 250, 250, 210 );
+        }
+    }
+    Procedure MainExecution;
+    Procedure MainTermination {
+        Body: {
+            return DataManagementExit();
+        }
+    }
+}

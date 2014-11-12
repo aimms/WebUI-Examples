@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2013-05-16 13:01:22">
+	<PageEditSize Type="Inherited" />
+	<ProjectUUID>22371509-AC47-467F-BC44-2F6232790B5E</ProjectUUID>
+	<TemplatesTabOrderPosition>2</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="2D Chart">
+		<Location top="144" left="12" bottom="396" right="336" />
+		<TabOrder>1</TabOrder>
+		<Border Style="InShadow" Width="2" />
+		<X_Axis>
+			<Domain ID="1004">pl</Domain>
+		</X_Axis>
+		<Y_Axis>
+			<Chart_type ID="2001">"Pie"</Chart_type>
+			<Identifier>
+				<Value ID="2007">MealsProducedPerProductionLine( pl, selectedDay )</Value>
+				<Appearance>
+					<Fill>
+						<Foreground_color ID="2013">ProductionLineColor( pl )</Foreground_color>
+					</Fill>
+				</Appearance>
+			</Identifier>
+			<Title>
+				<Text ID="2003">"Daily production per production line"</Text>
+			</Title>
+		</Y_Axis>
+		<Legend>
+			<Show ID="53">"Show"</Show>
+		</Legend>
+		<Style>
+			<Pie_chart>
+				<Minimum_number_of_slices ID="4008">0</Minimum_number_of_slices>
+				<Show_percentages>
+					<Percentages ID="4034">1</Percentages>
+				</Show_percentages>
+			</Pie_chart>
+		</Style>
+	</PageObject>
+	<PageObject Type="Selection Object">
+		<SelectionType>DropDownList</SelectionType>
+		<Location top="402" left="12" bottom="426" right="336" />
+		<TabOrder>3</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<TextShown>ElementName</TextShown>
+		<Border Style="None" />
+		<BackgroundColor RGB="#ffffff" />
+		<ExplicitIdentifier>
+			<Identifier>selectedDay</Identifier>
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Bar Chart">
+		<Location top="144" left="438" bottom="402" right="738" />
+		<TabOrder>4</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<ColorScheme Number="0" />
+		<Title>true</Title>
+		<Legend>true</Legend>
+		<Y-Labels>true</Y-Labels>
+		<X-Labels>true</X-Labels>
+		<HorizontalGridLines>true</HorizontalGridLines>
+		<StatusLine>true</StatusLine>
+		<YRange Automatic="false">
+			<Lower>0</Lower>
+			<Upper>6000</Upper>
+		</YRange>
+		<ExplicitIdentifier>
+			<Identifier>MealsProducedPerProductionLine( pl, selectedDay )</Identifier>
+			<Unit Display="InTitle" />
+			<Color>ProductionLineColor( pl )</Color>
+		</ExplicitIdentifier>
+		<FillWithColor>true</FillWithColor>
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="246" left="354" bottom="336" right="444" />
+		<StaticText>== swipe ==&gt;</StaticText>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="48" left="6" bottom="78" right="342" />
+		<StaticText>Production Line Overview</StaticText>
+		<Font GUID="A4439617-D833-4F87-BF20-7D78C1277F1C" Name="Header" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Scalar">
+		<Location top="84" left="6" bottom="132" right="342" />
+		<TabOrder>7</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>Text-Value</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>TotalProfit</Identifier>
+			<Unit Display="PerValue" />
+			<NumberFormat Width="4" Decimals="0" Scientific="IfTooSmallorLarge" Alignment="Center" ShowDefaults="true" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Bar Chart">
+		<Location top="432" left="12" bottom="672" right="336" />
+		<TabOrder>8</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<ColorScheme Number="0" />
+		<Title>true</Title>
+		<Legend>true</Legend>
+		<Y-Labels>true</Y-Labels>
+		<X-Labels>true</X-Labels>
+		<HorizontalGridLines>true</HorizontalGridLines>
+		<StatusLine>true</StatusLine>
+		<YRange Automatic="false">
+			<Lower>0</Lower>
+			<Upper>10</Upper>
+		</YRange>
+		<ExplicitIdentifier>
+			<Identifier>ProfitPerProductionLine( pl, selectedDay )</Identifier>
+			<Unit Display="InTitle" />
+			<TitleText>"Daily profit per production line"</TitleText>
+			<Color>ProductionLineColor( pl )</Color>
+		</ExplicitIdentifier>
+		<FillWithColor>true</FillWithColor>
+	</PageObject>
+	<PageObject Type="Rectangle">
+		<Location top="138" left="6" bottom="678" right="342" />
+		<Shape>Open</Shape>
+		<FillColor RGB="#ffffff" />
+		<LineColor RGB="#000000" />
+	</PageObject>
+	<UsedReferences>
+		<Model>
+			<Symbol>Days</Symbol>
+			<Symbol>ProfitPerProductionLine</Symbol>
+			<Symbol>selectedDay</Symbol>
+			<Symbol>ProductionLineColor</Symbol>
+			<Symbol>pl</Symbol>
+			<Symbol>MealsProducedPerProductionLine</Symbol>
+			<Symbol>TotalProfit</Symbol>
+		</Model>
+	</UsedReferences>
+</Page>

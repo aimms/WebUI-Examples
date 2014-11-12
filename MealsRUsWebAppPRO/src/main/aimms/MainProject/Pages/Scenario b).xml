@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<Page Version="4000" TimeStamp="2013-05-16 13:01:22">
+	<PageEditSize Type="Inherited" />
+	<ProjectUUID>22371509-AC47-467F-BC44-2F6232790B5E</ProjectUUID>
+	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
+	<Background Inherited="true" />
+	<PageObject Type="Scalar">
+		<Location top="186" left="450" bottom="228" right="648" />
+		<TabOrder>2</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<Layout>Text-Value</Layout>
+		<SeparatorSign>=</SeparatorSign>
+		<ExplicitIdentifier>
+			<Identifier>SalmonPriceFactor</Identifier>
+			<NumberFormat Width="7" Decimals="1" Scientific="IfTooSmallorLarge" Alignment="Center" ShowDefaults="true" />
+			<ProcedureUponChange>ChangeSalmonPrice</ProcedureUponChange>
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Table">
+		<Location top="234" left="450" bottom="690" right="648" />
+		<TabOrder>3</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<RowIndentation>3</RowIndentation>
+		<ExplicitIdentifier>
+			<Identifier>IngredientPrice( 'salmon', d )</Identifier>
+			<Permutation>[1,0]</Permutation>
+			<FirstColumn>2</FirstColumn>
+			<NumberFormat Width="5" Decimals="1" />
+		</ExplicitIdentifier>
+	</PageObject>
+	<PageObject Type="Parametric Curve">
+		<Location top="186" left="12" bottom="690" right="438" />
+		<TabOrder>4</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<ColorScheme Number="0" />
+		<SwappedAxes>true</SwappedAxes>
+		<Title>true</Title>
+		<Legend>true</Legend>
+		<Y-Labels>true</Y-Labels>
+		<X-Labels>true</X-Labels>
+		<StatusLine>true</StatusLine>
+		<YRange Automatic="false">
+			<Lower>MinTotalProfit</Lower>
+			<Upper>MaxTotalProfit</Upper>
+		</YRange>
+		<HorizontalLine>
+			<Identifier>0</Identifier>
+		</HorizontalLine>
+		<ExplicitIdentifier>
+			<Identifier>TotalProfit</Identifier>
+			<Unit Display="InTitle" />
+		</ExplicitIdentifier>
+		<DrawLines>true</DrawLines>
+		<MarkPoints>true</MarkPoints>
+		<XAxisIdentifier>
+			<Identifier>MinimalRequiredDemandServiceLevel</Identifier>
+		</XAxisIdentifier>
+		<ParametricSetup>
+			<Procedure>ChangeMinimalRequiredDemandServiceLevelForInitialSalmonPrice</Procedure>
+			<Steps>21</Steps>
+			<Start>0</Start>
+			<Stop>1</Stop>
+		</ParametricSetup>
+	</PageObject>
+	<PageObject Type="Parametric Curve">
+		<Location top="186" left="654" bottom="690" right="1080" />
+		<TabOrder>5</TabOrder>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
+		<BackgroundColor RGB="#ffffff" />
+		<ColorScheme Number="0" />
+		<SwappedAxes>true</SwappedAxes>
+		<Title>true</Title>
+		<Legend>true</Legend>
+		<Y-Labels>true</Y-Labels>
+		<X-Labels>true</X-Labels>
+		<StatusLine>true</StatusLine>
+		<YRange Automatic="false">
+			<Lower>MinTotalProfit</Lower>
+			<Upper>MaxTotalProfit</Upper>
+		</YRange>
+		<HorizontalLine>
+			<Identifier>0</Identifier>
+		</HorizontalLine>
+		<ExplicitIdentifier>
+			<Identifier>TotalProfit</Identifier>
+			<Unit Display="InTitle" />
+		</ExplicitIdentifier>
+		<DrawLines>true</DrawLines>
+		<MarkPoints>true</MarkPoints>
+		<XAxisIdentifier>
+			<Identifier>MinimalRequiredDemandServiceLevel</Identifier>
+		</XAxisIdentifier>
+		<ParametricSetup>
+			<Procedure>ChangeMinimalRequiredDemandServiceLevelForUpdatedSalmonPrice</Procedure>
+			<Steps>21</Steps>
+			<Start>0</Start>
+			<Stop>1</Stop>
+		</ParametricSetup>
+	</PageObject>
+	<PageObject Type="Rectangle">
+		<Location top="180" left="444" bottom="696" right="1086" />
+		<Shape>Open</Shape>
+		<FillColor RGB="#ffffff" />
+		<LineColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="120" left="444" bottom="174" right="1086" />
+		<StaticText>Just adapt the price of salmon (either by changing the factor, or by changing some individual prices) and press &lt;Start&gt; again
+
+@Ruud : Try to vary the factor in the range [1,4]</StaticText>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<PageObject Type="Text">
+		<Location top="66" left="18" bottom="132" right="438" />
+		<StaticText>These graphs show the optimal prifit as a function of the 'minimal required demand service level'. Please note, that the service level has an effect on the meal price as well as on the minimal percentage of the demand that has to be satisfied.</StaticText>
+		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
+		<TextColor RGB="#000000" />
+	</PageObject>
+	<UsedReferences>
+		<Model>
+			<Symbol>d</Symbol>
+			<Symbol>ChangeSalmonPrice</Symbol>
+			<Symbol>MinimalRequiredDemandServiceLevel</Symbol>
+			<Symbol>MaxTotalProfit</Symbol>
+			<Symbol>ChangeMinimalRequiredDemandServiceLevelForInitialSalmonPrice</Symbol>
+			<Symbol>MinTotalProfit</Symbol>
+			<Symbol>SalmonPriceFactor</Symbol>
+			<Symbol>IngredientPrice</Symbol>
+			<Symbol>ChangeMinimalRequiredDemandServiceLevelForUpdatedSalmonPrice</Symbol>
+			<Symbol>TotalProfit</Symbol>
+		</Model>
+	</UsedReferences>
+</Page>

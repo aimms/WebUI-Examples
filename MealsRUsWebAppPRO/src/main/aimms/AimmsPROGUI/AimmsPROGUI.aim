@@ -1,0 +1,2329 @@
+
+LIBRARYMODULE AimmsProGUI
+  prefix    :  guipro
+  interface :  data { OpenRequestManagement, 'progress::UpdateCallBack', EditAuthorization }
+
+  PROCEDURE
+    identifier :  OpenRequestManagement
+
+    DECLARATION SECTION 
+
+      PARAMETER:
+         identifier :  ret ;
+
+    ENDSECTION  ;
+
+    body       :  
+      if SessionHasVisibleGUI then
+              LocalizationInitialize;
+              if (not session::DateToList) then
+                      session::DateToList := CurrentToStringDelta(-24*60*60);        ! Requests for the last 24h
+              endif;
+              PageOpen("Managed Requests");
+      endif;
+      return 1;
+
+  ENDPROCEDURE  ;
+
+  SECTION Private_Tools
+
+
+    DECLARATION SECTION 
+
+      QUANTITY:
+         identifier :  TimeDuration
+         base unit  :  s
+         comment    :  "Expresses the value for the duration of periods." ;
+
+    ENDSECTION  ;
+
+    FUNCTION
+      identifier :  CurrentToStringDelta
+      arguments  :  (deltaSeconds)
+      range      :  string
+
+      DECLARATION SECTION 
+
+        PARAMETER:
+           identifier :  deltaSeconds
+           property   :  Input ;
+
+        PARAMETER:
+           identifier :  tmpHour
+           range      :  integer ;
+
+        PARAMETER:
+           identifier :  tmpMin
+           range      :  integer ;
+
+        PARAMETER:
+           identifier :  tmpSec
+           range      :  integer
+           unit       :  s ;
+
+      ENDSECTION  ;
+
+      body       :  
+        tmpSec := CurrentToMoment([s], "2011-01-01 00:00:00") ;
+        tmpSec += (deltaSeconds) [s];
+        CurrentToStringDelta := MomentToString( "%c%y-%m-%d %H:%M:%S", [s], "2011-01-01 00:00:00", tmpSec );
+
+    ENDFUNCTION  ;
+
+    PROCEDURE
+      identifier :  SaveAndOpenVersionInTemp
+      arguments  :  (versionID)
+
+      DECLARATION SECTION 
+
+        STRING PARAMETER:
+           identifier   :  versionID
+           property     :  Input ;
+
+        STRING PARAMETER:
+           identifier   :  getFileName
+           initial data :  "" ;
+
+        PARAMETER:
+           identifier   :  ret ;
+
+      ENDSECTION  ;
+
+      body       :  
+        ret := pro::GetObjectVersion(versionID,pro::PROTempFolder,getFileName);
+        if not (ret) then return 0; endif;
+        
+        guipro::session::sessionLogFile := pro::PROTempFolder + "\\" +  getFileName;
+        PageOpen("Log File Viewer");
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+  ENDSECTION Private_Tools ;
+
+  SECTION Localization
+
+
+    DECLARATION SECTION 
+
+      SET:
+         identifier   :  AllLanguages
+         index        :  language
+         parameter    :  CurrentLanguage
+         property     :  NoSave
+         order by     :  User
+         definition   :  Data { English }
+         comment      :  "This set should contain all languages for which you want to
+                          localize your AIMMS end-user application. You can add new
+                          languages at any time. However, you should always make sure
+                          that your development language remains the first language
+                          in the set. AIMMS will use this language to create new
+                          localization entries during the automated localization
+                          procedure as well as in the localization wizards." ;
+
+      SET:
+         identifier   :  LocalizedTextIndexSet
+         subset of    :  Integers
+         index        :  lti
+         property     :  NoSave
+         definition   :  Data { 1 .. 67 }
+         comment      :  "This set is used to number all localized strings in your
+                          end-user interface. The localization wizards automatically
+                          update the definition of this set whenever new localization
+                          strings are added. Therefore, you should not edit the
+                          definition of this set by hand, unless you are sure
+                          what you are doing." ;
+
+      STRING PARAMETER:
+         identifier   :  LocalizedText
+         index domain :  (lti,language)
+         property     :  NoSave
+         comment      :  "This string parameter contains the actual localized strings
+                          that are visible in the end-user interface. You can edit its
+                          contents in the `Localized Text` window, which is accessible
+                          through the `Tools-Localization` menu. The `Localized Text`
+                          window is also opened when you invoke the `Data ...` menu
+                          for any of the localization identifiers." ;
+
+      STRING PARAMETER:
+         identifier   :  LocalizedTextDescription
+         index domain :  (lti)
+         property     :  NoSave
+         comment      :  "This string parameter contains an (optional) description for
+                          each localization string. You can edit its contents in the
+                          `Localized Text` window, which is accessible through the
+                          `Tools-Localization` menu. The `Localized Text` window is
+                          also opened when you invoke the `Data ...` menu for any of
+                          the localization identifiers." ;
+
+    ENDSECTION  ;
+
+    PROCEDURE
+      identifier :  LocalizationReadLanguage
+      arguments  :  ThisLanguage
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier :  ThisLanguage
+           range      :  AllLanguages
+           property   :  Input ;
+
+        STRING PARAMETER:
+           identifier :  LanguageFileName ;
+
+      ENDSECTION  ;
+
+      comment    :  "This procedure reads the localization data for a single language."
+      body       :  
+        LanguageFileName := FormatString("<lib:guipro>:Localization\\%e.txt", ThisLanguage );
+        
+        if FileExists( LanguageFileName ) then
+            Read From File LanguageFileName;
+        endif;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  LocalizationWriteLanguage
+      arguments  :  ThisLanguage
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier :  ThisLanguage
+           range      :  AllLanguages
+           property   :  Input ;
+
+        STRING PARAMETER:
+           identifier :  LanguageFileName ;
+
+        FILE:
+           identifier :  f
+           name       :  LanguageFileName
+           device     :  disk
+           mode       :  replace ;
+
+      ENDSECTION  ;
+
+      comment    :  "This procedure writes the localization data for a single language.
+                     AIMMS will only write data, if data for the language is actually
+                     present. This will prevent loss of localization data which is
+                     written without being read before."
+      body       :  
+        if ( ProjectDeveloperMode and
+             Count( lti | LocalizedText(lti,ThisLanguage) ) ) then
+        
+            LanguageFileName := FormatString("<lib:guipro>:Localization\\%e.txt", ThisLanguage );
+            put f;
+            display LocalizedText(lti,ThisLanguage);
+            putclose;
+        
+        endif;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  LocalizationReadAll
+      comment    :  "Execute this procedure if you intend to edit the localization
+                     parameters by hand (i.e. without using the localization wizards).
+                     In that case, do not forget to call LocalizationWriteAll before
+                     the end of your AIMMS session."
+      body       :  
+        for ( language ) do
+            LocalizationReadLanguage( language );
+        endfor;
+        
+        if ( ProjectDeveloperMode and
+             FileExists("<lib:guipro>:Localization\\Descriptions.txt") ) then
+            read from file "<lib:guipro>:Localization\\Descriptions.txt";
+        endif;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  LocalizationWriteAll
+      comment    :  "You should execute this procedure if you have edited the
+                     localization parameters by hand. Before editing, you can
+                     call LocalizationReadAll to obtain all currently present
+                     localization data."
+      body       :  
+        for ( language ) do
+            LocalizationWriteLanguage( language );
+        endfor;
+        
+        if ( ProjectDeveloperMode and
+             Count( lti | LocalizedTextDescription(lti) ) ) then
+        
+            write LocalizedTextDescription to file "<lib:guipro>:Localization\\Descriptions.txt";
+        
+        endif;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  LocalizationInitialize
+      comment    :  "This procedure initializes localization support for your application.
+                     It is automatically added to the end of MainInitialization during the
+                     localization setup. If the element parameter CurrentLanguage already
+                     has been assigned a value at that time, AIMMS will read the localization
+                     strings for that language. In all other cases, the localization data
+                     for the development language is read."
+      body       :  
+        if not CurrentLanguage then
+            CurrentLanguage := first(AllLanguages);
+        endif;
+        
+        LocalizationReadLanguage(CurrentLanguage);
+
+    ENDPROCEDURE  ;
+
+  ENDSECTION Localization ;
+
+  MODULE Progress_Window
+      prefix     :  progress
+
+
+    DECLARATION SECTION 
+
+      ELEMENT PARAMETER:
+         identifier   :  WatchedSession
+         range        :  session::SessionList
+         property     :  NoSave
+         initial data :  '' ;
+
+      PARAMETER:
+         identifier   :  UpdateDelay
+         range        :  integer
+         property     :  NoSave
+         initial data :  5000 ;
+
+      ELEMENT PARAMETER:
+         identifier   :  UpdateSession
+         range        :  session::SessionList ;
+
+      PARAMETER:
+         identifier   :  UpdateRequested
+         range        :  binary
+         property     :  NoSave
+         initial data :  0 ;
+
+      SET:
+         identifier   :  TimeSlots
+         index        :  tm
+         parameter    :  TimeElement
+         property     :  NoSave
+         order by     :  tm ;
+
+      SET:
+         identifier   :  Items
+         index        :  item
+         parameter    :  ItemElement
+         property     :  NoSave
+         order by     :  ItemOrder(item) ;
+
+      PARAMETER:
+         identifier   :  ItemOrder
+         index domain :  item
+         range        :  integer
+         default      :  0
+         property     :  NoSave
+         initial data :  0 ;
+
+      STRING PARAMETER:
+         identifier   :  Value
+         index domain :  (tm,item)
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  WorkerValue
+         index domain :  (item)
+         property     :  NoSave
+         definition   :  Value('worker',item) ;
+
+      PARAMETER:
+         identifier   :  GAP
+         index domain :  (tm)
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  BeginTime
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  EndTime
+         property     :  NoSave ;
+
+      PARAMETER:
+         identifier   :  WatchedSessionNotRunning
+         range        :  binary
+         property     :  NoSave
+         definition   :  if (WatchedSession and pro::session::ActiveSessionRunning) then 0 else 1 endif ;
+
+      PARAMETER:
+         identifier   :  PausedSessionNotRunning
+         range        :  binary
+         property     :  NoSave
+         definition   :  if ((WatchedSession or PausedSession) and pro::session::ActiveSessionRunning) then 0 else 1 endif ;
+
+    ENDSECTION  ;
+
+    PROCEDURE
+      identifier :  UpdateCallBack
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier :  MpType
+           range      :  AllMatrixManipulationProgrammingTypes ;
+
+        ELEMENT PARAMETER:
+           identifier :  CurrentMathematicalProgram
+           range      :  AllMathematicalPrograms ;
+
+        STRING PARAMETER:
+           identifier :  tmpStr ;
+
+      ENDSECTION  ;
+
+      comment    :  "Collect execution information and send to be shown in Progress Window client-side"
+      body       :  
+        ! If requested, collect and send data
+        if UpdateRequested then
+                empty Items, Value;
+                TimeSlots := {'worker'};
+        
+                ! Session basic data
+                SetElementAdd(Items,ItemElement,"Username");
+                Value('worker',ItemElement) := pro::GetPROUserName + "@" + pro::GetPROEnvironment;
+        
+                ! Mathematical program data
+                if (CurrentGeneratedMathematicalProgram <> '') then
+                        MpType := GMP::Instance::GetMathematicalProgrammingType(CurrentGeneratedMathematicalProgram);
+                        CurrentMathematicalProgram := GMP::Instance::GetSymbolicMathematicalProgram(CurrentGeneratedMathematicalProgram);
+        
+                        if (MpType='LP' or MpType='NLP') then
+                                SetElementAdd(Items,ItemElement,"Objective");
+                                Value('worker',ItemElement) := GMP::Instance::GetObjective(CurrentGeneratedMathematicalProgram);
+        
+                        elseif (MpType='MIP' or MpType='MIQP' or MpType='MIQCP') then
+                                SetElementAdd(Items,ItemElement,"LinearObjective");
+                                Value('worker',ItemElement) := FormatString("%4.2f",GMP::Instance::GetLinearObjective(CurrentGeneratedMathematicalProgram));
+        
+                                SetElementAdd(Items,ItemElement,"Incumbent");
+                                Value('worker',ItemElement) := FormatString("%4.2f",GMP::Solution::GetObjective(CurrentGeneratedMathematicalProgram,1));
+        
+                                SetElementAdd(Items,ItemElement,"GAP");
+                                Value('worker',ItemElement) := FormatString("%3.1f",100*Abs((GMP::Solution::GetObjective(CurrentGeneratedMathematicalProgram,1) -
+                                                        GMP::Instance::GetLinearObjective(CurrentGeneratedMathematicalProgram))
+                                                        /$
+                                                        GMP::Solution::GetObjective(CurrentGeneratedMathematicalProgram,1)));
+        
+                                SetElementAdd(Items,ItemElement,"NumberOfIntegerVariables");
+                                if pro::management::GetScalarSuffixValue(CurrentMathematicalProgram,"NumberOfIntegerVariables",tmpStr) then Value('worker',ItemElement) := FormatString("%i",Val(tmpStr)); endif;
+        
+                                SetElementAdd(Items,ItemElement,"Nodes");
+                                if pro::management::GetScalarSuffixValue(CurrentMathematicalProgram,"Nodes",tmpStr) then Value('worker',ItemElement) := FormatString("%i",Val(tmpStr)); endif;
+                        endif;
+        
+                        SetElementAdd(Items,ItemElement,"Solver");
+                        Value('worker',ItemElement) := GMP::Instance::GetSolver(CurrentGeneratedMathematicalProgram);
+        
+                        SetElementAdd(Items,ItemElement,"MemoryUsed");
+                        Value('worker',ItemElement) := FormatString("%3.2f Mb",GMP::Instance::GetMemoryUsed(CurrentGeneratedMathematicalProgram));
+        
+                        SetElementAdd(Items,ItemElement,"ProgramStatus");
+                        if pro::management::GetScalarSuffixValue(CurrentMathematicalProgram,"ProgramStatus",tmpStr) then
+                                if pro::management::SetElementToName(AllSolutionStates,Val(tmpStr),tmpStr) then Value('worker',ItemElement) := tmpStr; endif;
+                        endif;
+        
+                        SetElementAdd(Items,ItemElement,"Iterations");
+                        if pro::management::GetScalarSuffixValue(CurrentMathematicalProgram,"Iterations",tmpStr) then Value('worker',ItemElement) := FormatString("%i",Val(tmpStr)); endif;
+        
+                        SetElementAdd(Items,ItemElement,"NumberOfConstraints");
+                        if pro::management::GetScalarSuffixValue(CurrentMathematicalProgram,"NumberOfConstraints",tmpStr) then Value('worker',ItemElement) := FormatString("%i",Val(tmpStr)); endif;
+        
+                        SetElementAdd(Items,ItemElement,"NumberOfVariables");
+                        if pro::management::GetScalarSuffixValue(CurrentMathematicalProgram,"NumberOfVariables",tmpStr) then Value('worker',ItemElement) := FormatString("%i",Val(tmpStr)); endif;
+        
+                        SetElementAdd(Items,ItemElement,"SolutionTime");
+                        Value('worker',ItemElement) := FormatString("%4.2f",GMP::Solution::GetCPUSecondsUsed(CurrentGeneratedMathematicalProgram,1)/100);
+                endif;
+        
+                UpdateRequested := 0;
+                progress::UpdateWindowAction(UpdateSession,CurrentToString("%H:%M:%S"),Items,WorkerValue);
+        endif;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  Activate
+      arguments  :  (sessionElement)
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier :  sessionElement
+           range      :  session::SessionList
+           property   :  Input ;
+
+      ENDSECTION  ;
+
+      body       :  
+        if sessionElement = '' then
+                ! Deactivate updates
+                WatchedSession := '';
+                pro::session::SetActiveSession(WatchedSession);
+        
+        elseif sessionElement <> WatchedSession then
+                empty TimeSlots, Items, Value;
+        
+                if WatchedSession = '' then
+                        ! Activate updates
+                        WatchedSession := sessionElement;
+                        pro::session::SetActiveSession(WatchedSession);
+        
+                        NextCheck := CurrentToString("%c%y-%m-%d %H:%M:%S");
+                        Items := {'Connecting to session...'};
+                        progress::RepeatUpdate;
+                else
+                        ! Redefines session to be updated
+                        WatchedSession := sessionElement;
+                        pro::session::SetActiveSession(WatchedSession);
+                endif;
+        
+                PageOpen("Progress Window");
+        else
+                ! Deactivate updates
+                WatchedSession := '';
+                pro::session::SetActiveSession(WatchedSession);
+        endif;
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  RepeatUpdate
+      body       :  
+        if WatchedSessionNotRunning then return 0;
+        
+        ! Run update and schedule nex check
+        elseif progress::UpdateWindow(WatchedSession) then
+                if pro::GetPROLastErrorMessage = "" then
+                        NextCheck := CurrentToStringDelta(UpdateDelay/1000);
+                        if not ScheduleAt(NextCheck, 'guipro::progress::RepeatUpdate') then
+                                raise error "Error scheduling updateprogress procedure: " + CurrentErrorMessage code 'PRO-Error-scheduling-progress-procedure' ;
+                        endif;
+                else
+                        WatchedSession := '';
+                        pro::session::SetActiveSession(WatchedSession);
+                endif;
+        endif;
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  UpdateWindow
+      arguments  :  (sessionToUpdate,UpdateDelay)
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier :  sessionToUpdate
+           range      :  session::SessionList
+           property   :  Input ;
+
+        PARAMETER:
+           identifier :  UpdateDelay
+           range      :  integer
+           default    :  5000
+           property   :  Optional ;
+
+      ENDSECTION  ;
+
+      comment    :  "Collect execution information and send to be shown in Progress Window client-side"
+      body       :  
+        ! Basic validation
+        if sessionToUpdate = '' then
+                raise error "Invalid request reference" code 'PRO-Invalid-request-reference-update-progress' ;
+                return 0;
+        elseif UpdateDelay < 1000 then
+                raise error "The update frequency must be greater than 1 second" code 'PRO-invalid-update-frequency' ;
+                return 0;
+        endif;
+        
+        ! If the PRO library has not been finalized do not call the server.
+        if (not pro::management::IsInitialized()) then return 0; endif;
+        
+        ! Delegate the remainder of the execution to the server side
+        return UpdateWindowServer(sessionToUpdate, UpdateDelay);
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  UpdateWindowServer
+      arguments  :  (sessionToUpdate,UpdateDelay)
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier :  sessionToUpdate
+           range      :  session::SessionList
+           property   :  Input ;
+
+        PARAMETER:
+           identifier :  UpdateDelay
+           range      :  integer
+           default    :  5000
+           property   :  Optional ;
+
+      ENDSECTION  ;
+
+      comment    :  "Collect execution information and send to be shown in Progress Window client-side"
+      body       :  
+        ! Execution at the server side
+        if pro::DelegateToServer(
+                RequestQueue : session::WorkerQueue(sessionToUpdate),
+                flags : pro::PROMFLAG_PRIORITY + pro::PROMFLAG_LIVE
+        ) then return 1; endif;
+        
+        ! Request data to be collect during next callback
+        UpdateSession   := sessionToUpdate;
+        UpdateRequested := 1;
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  UpdateWindowAction
+      arguments  :  (sessionToUpdate,argTime,argItems,argValue)
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier   :  sessionToUpdate
+           range        :  session::SessionList
+           property     :  Input ;
+
+        STRING PARAMETER:
+           identifier   :  argTime
+           property     :  Input ;
+
+        SET:
+           identifier   :  argItems
+           index        :  argItem
+           property     :  Input ;
+
+        STRING PARAMETER:
+           identifier   :  argValue
+           index domain :  argItem
+           property     :  Input ;
+
+      ENDSECTION  ;
+
+      comment    :  "Receives a vector of elements to be displayed in Progress Window"
+      body       :  
+        ! Execution at the client side
+        if pro::DelegateToClient(
+                ProcedureName : 'guipro::progress::UpdateWindowAction',
+                flags : pro::PROMFLAG_LIVE
+        ) then return 1; endif;
+        
+        ! Only update the progress window if the update message coming in is actually for the session
+        ! we're watching. This situation may occur if the same user has multiple PRO clients opened
+        ! simultaneously.
+        if (sessionToUpdate <> WatchedSession) then
+                return;
+        endif;
+        
+        if StringToElement(Items,"connecting to session...") then
+                Items -= 'connecting to session...';
+        endif;
+        
+        ! Add the new values and update current PW_Time_Element
+        TimeElement := StringToElement(TimeSlots,argTime,1);
+        
+        SetElementAdd(Items,ItemElement,"LastUpdate");
+        Value(TimeElement,ItemElement) := argTime;
+        SetElementAdd(Items,ItemElement,"Request");
+        Value(TimeElement,ItemElement) := session::RequestDescription(guipro::session::selectedSession);
+        
+        for argItem do
+                SetElementAdd(Items,ItemElement,argItem);
+                Value(TimeElement,ItemElement) := argValue(argItem);
+        endfor;
+        
+        ! GAP or objective value for graphics
+        if StringToElement(argItems,"GAP") <> '' then
+                GAP(TimeElement) := Val(Value(TimeElement,'GAP'));
+                ChartLabel := LocalizedText( '51', CurrentLanguage ) ! "GAP Evolution:"
+        else
+                GAP(TimeElement) := Val(Value(TimeElement,'Objective'));
+                ChartLabel := LocalizedText( '52', CurrentLanguage ) ! "Linear Objective:"
+        endif;
+        
+        ! Limit number of points
+        While Card(TimeSlots) > 100 do TimeSlots -= First(TimeSlots); endwhile;
+        
+        ! GUI: Correct ordenation
+        UpdateProgressWindowOrdenation;
+        PageRefreshAll;
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    SECTION Progress_Windows_GUI
+
+
+      DECLARATION SECTION 
+
+        STRING PARAMETER:
+           identifier   :  NextCheck
+           default      :  ""
+           property     :  NoSave ;
+
+        ELEMENT PARAMETER:
+           identifier   :  PausedSession
+           range        :  session::SessionList
+           property     :  NoSave
+           initial data :  '' ;
+
+        STRING PARAMETER:
+           identifier   :  Label
+           property     :  NoSave
+           definition   :  if WatchedSession = "" or session::selectedSession <> WatchedSession then
+                                   LocalizedText( '47', CurrentLanguage ) !"Progress Window"
+                           else
+                                   LocalizedText( '48', CurrentLanguage ) !"Stop Progress Window"
+                           endif ;
+
+        STRING PARAMETER:
+           identifier   :  ChartLabel
+           property     :  NoSave ;
+
+        STRING PARAMETER:
+           identifier   :  PauseResumeLabel
+           property     :  NoSave
+           definition   :  if WatchedSession = "" then
+                                   LocalizedText( '49', CurrentLanguage ) !"Resume Updates"
+                           else
+                                   LocalizedText( '50', CurrentLanguage ) !"Pause Updates"
+                           endif ;
+
+        ELEMENT PARAMETER:
+           identifier   :  PauseResumeColor
+           range        :  AllColors
+           property     :  NoSave
+           definition   :  if WatchedSession = "" then
+                                   'light grey'
+                           else
+                                   'white'
+                           endif ;
+
+        ELEMENT PARAMETER:
+           identifier   :  LineColor
+           index domain :  item
+           range        :  AllColors
+           property     :  NoSave
+           definition   :  if ItemOrder(item) > 0 and Mod(ItemOrder(item),100) = 0 then 'blue'
+                           else 'black' endif ;
+
+        SET:
+           identifier   :  Frequency
+           index        :  freq
+           parameter    :  FreqElement
+           property     :  NoSave
+           definition   :  data { '5 seconds', '15 seconds', '1 minute', '5 minutes' } ;
+
+        PARAMETER:
+           identifier   :  FreqValue
+           index domain :  (freq)
+           range        :  integer
+           property     :  NoSave
+           definition   :  data { '5 seconds' : 5000,  '15 seconds' : 15000,  '1 minute' : 60000,  '5 minutes' : 300000 } ;
+
+        PARAMETER:
+           identifier   :  ShowDetails
+           range        :  binary
+           property     :  NoSave
+           initial data :  0 ;
+
+        PARAMETER:
+           identifier   :  Resume
+           index domain :  item
+           range        :  binary
+           property     :  NoSave
+           definition   :  if      item = "PRO SESSION" or
+                                   item = "Request" or
+                                   item = "LastUpdate" or
+                                   item = "SOLVER SESSION" or
+                                   item = "LinearObjective" or
+                                   item = "Incumbent" or
+                                   item = "GAP" or
+                                   item = "Solver" or
+                                   item = "SolutionTime" or
+                                   item = "Connecting to session..." then 1
+                           else 0
+                           endif ;
+
+        SET:
+           identifier   :  GUIItems
+           subset of    :  Items
+           index        :  guiItem
+           property     :  NoSave
+           order by     :  ItemOrder(guiItem)
+           definition   :  if ShowDetails then
+                                   {item}
+                           else
+                                   {item | Resume(item)}
+                           endif ;
+
+        PARAMETER:
+           identifier   :  NoTerminationConfirmation
+           initial data :  1 ;
+
+      ENDSECTION  ;
+
+      PROCEDURE
+        identifier :  UpdateProgressWindow
+        body       :  
+          ! Default update frequency
+          if FreqElement = '' then
+                  FreqElement := '5 seconds';
+          endif;
+          
+          ! Clear data from old updates
+          empty TimeSlots, Items, ItemOrder;
+          cleandependents TimeSlots, Items;
+          
+          return Activate(guipro::session::selectedSession);
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  UpdateProgressWindowFreq
+        body       :  
+          ! Default update frequency
+          if FreqElement = '' then
+                  FreqElement := '5 seconds';
+          endif;
+          UpdateDelay := FreqValue(FreqElement);
+          
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  UpdateProgressWindowPause
+        body       :  
+          PausedSession := WatchedSession;
+          WatchedSession := '';
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  UpdateProgressWindowPauseResume
+        body       :  
+          if WatchedSessionNotRunning then
+                  WatchedSession := PausedSession;
+                  RepeatUpdate;
+          else
+                  PausedSession := WatchedSession;
+                  WatchedSession := '';
+          endif;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  UpdateProgressWindowOrdenation
+        body       :  
+          SetElementAdd(Items,ItemElement,"PRO SESSION");
+          SetElementAdd(Items,ItemElement,"SOLVER SESSION");
+          
+          ! Line ordenation
+          if Exists(item | ItemOrder(item)=0) then for item do
+                  ! PRO Session
+                  if item='PRO SESSION' then ItemOrder(item):=100;
+                  elseif item='Request' then ItemOrder(item):=101;
+                  elseif item='ServerURL' then ItemOrder(item):=102;
+                  elseif item='Username' then ItemOrder(item):=103;
+                  elseif item='LastUpdate' then ItemOrder(item):=104;
+          
+                  ! PRO Session
+                  elseif item='SOLVER SESSION' then ItemOrder(item):=200;
+                  elseif item='EndPoint' then ItemOrder(item):=201;
+                  elseif item='Objective' then ItemOrder(item):=202;
+                  elseif item='LinearObjective' then ItemOrder(item):=203;
+                  elseif item='Incumbent' then ItemOrder(item):=204;
+                  elseif item='GAP' then ItemOrder(item):=205;
+                  elseif item='Solver' then ItemOrder(item):=206;
+                  elseif item='MemoryUsed' then ItemOrder(item):=207;
+                  elseif item='ProgramStatus' then ItemOrder(item):=208;
+                  elseif item='Iterations' then ItemOrder(item):=210;
+                  elseif item='Nodes' then ItemOrder(item):=211;
+                  elseif item='SolutionTime' then ItemOrder(item):=212;
+                  elseif item='NumberOfConstraints' then ItemOrder(item):=213;
+                  elseif item='NumberOfVariables' then ItemOrder(item):=214;
+                  elseif item='NumberOfIntegerVariables' then ItemOrder(item):=215;
+          
+                  else ItemOrder(item):=1001; endif;
+          endfor; endif;
+          
+          update LineColor;
+          
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  SolveInterruptSession
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  ret ;
+
+        ENDSECTION  ;
+
+        body       :  
+          if (NoTerminationConfirmation) then
+                  ret := 1;
+          else
+                  ret := DialogAsk("Do you want to interrupt the current solve? The execution will continue in the next statement.","Yes","No",title:"PRO Framework");
+          endif;
+          
+          if (ret = 1) then
+                  return pro::client::StopExecution(session::WorkerQueue(guipro::session::selectedSession),pro::AIMMSAPI_INTERRUPT_SOLVE);
+          endif;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  ProcedureInterruptSession
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  ret ;
+
+        ENDSECTION  ;
+
+        body       :  
+          if (NoTerminationConfirmation) then
+                  ret := 1;
+          else
+                  ret := DialogAsk("Do you want to interrupt the current procedure? The request will be finished.","Yes","No",title:"PRO Framework");
+          endif;
+          if (ret = 1) then
+                  return pro::client::StopExecution(session::WorkerQueue(guipro::session::selectedSession),pro::AIMMSAPI_INTERRUPT_EXECUTE);
+          endif;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  TerminateSession
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  ret ;
+
+        ENDSECTION  ;
+
+        body       :  
+          if (NoTerminationConfirmation) then
+                  ret := 1;
+          else
+                  ret := DialogAsk("Do you want to terminate the request? No data will be retrieved.","Yes","No",title:"PRO Framework");
+          endif;
+          
+          if (ret = 1) then
+                  ! Finish progress window, if activated
+                  if(WatchedSession = guipro::session::selectedSession) then
+                          WatchedSession := '';
+                  endif;
+                  return pro::sessionmanager::TerminateSession(guipro::session::selectedSession);
+          endif;
+
+      ENDPROCEDURE  ;
+
+    ENDSECTION Progress_Windows_GUI ;
+
+  ENDMODULE Progress_Window ;
+
+  MODULE User_Sessions
+      prefix     :  session
+
+
+    DECLARATION SECTION 
+
+      SET:
+         identifier   :  SessionList
+         index        :  sess
+         parameter    :  selectedSession
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  ClientQueue
+         index domain :  (sess)
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  WorkerQueue
+         index domain :  (sess)
+         property     :  NoSave
+         initial data :  "" ;
+
+      PARAMETER:
+         identifier   :  CurrentStatus
+         index domain :  (sess)
+         property     :  NoSave
+         initial data :  0 ;
+
+      STRING PARAMETER:
+         identifier   :  CreateTime
+         index domain :  (sess)
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  UserEnv
+         index domain :  (sess)
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  UserName
+         index domain :  (sess)
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  Application
+         index domain :  (sess)
+         property     :  NoSave
+         initial data :  "" ;
+
+      PARAMETER:
+         identifier   :  IsManaged
+         index domain :  sess
+         range        :  binary
+         property     :  NoSave
+         initial data :  0 ;
+
+      STRING PARAMETER:
+         identifier   :  RequestDescription
+         index domain :  sess
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  RequestProcedure
+         index domain :  sess
+         property     :  NoSave
+         initial data :  "" ;
+
+      PARAMETER:
+         identifier   :  RunTimeOut
+         index domain :  sess
+         property     :  NoSave
+         initial data :  0 ;
+
+      STRING PARAMETER:
+         identifier   :  VersionID
+         index domain :  sess
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  ResponseVersionID
+         index domain :  sess
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  MessageLogVersionID
+         index domain :  sess
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  ErrorMessage
+         index domain :  sess
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  RequestTime
+         index domain :  sess
+         property     :  NoSave
+         initial data :  "" ;
+
+      STRING PARAMETER:
+         identifier   :  OriginalCasePath
+         index domain :  sess
+         property     :  NoSave
+         initial data :  "" ;
+
+      PARAMETER:
+         identifier   :  ActiveStatus
+         index domain :  sess
+         property     :  NoSave
+         initial data :  0 ;
+
+      PARAMETER:
+         identifier   :  ErrorCode
+         index domain :  sess
+         property     :  NoSave
+         initial data :  0 ;
+
+    ENDSECTION  ;
+
+    PROCEDURE
+      identifier :  LoadSessionList
+      arguments  :  (SinceDate,AllUsers)
+
+      DECLARATION SECTION 
+
+        PARAMETER:
+           identifier   :  ret ;
+
+        STRING PARAMETER:
+           identifier   :  contList ;
+
+        SET:
+           identifier   :  Containers
+           index        :  CONT
+           parameter    :  Container ;
+
+        SET:
+           identifier   :  Items
+           index        :  Item
+           parameter    :  PeItem ;
+
+        STRING PARAMETER:
+           identifier   :  Value
+           index domain :  (CONT,ITEM) ;
+
+        ELEMENT PARAMETER:
+           identifier   :  Ref
+           index domain :  (CONT,ITEM)
+           range        :  Containers ;
+
+        STRING PARAMETER:
+           identifier   :  SinceDate
+           property     :  Input ;
+
+        PARAMETER:
+           identifier   :  AllUsers
+           default      :  0
+           property     :  Optional ;
+
+        STRING PARAMETER:
+           identifier   :  SessionModelID ;
+
+        STRING PARAMETER:
+           identifier   :  SessionModelVersion ;
+
+      ENDSECTION  ;
+
+      body       :  
+        ! Initialize PRO Framework (if not initialized yet)
+        ret := pro::Initialize();
+        if not (ret) then return 0; endif;
+        
+        if (AllUsers) then
+                SessionModelId := "";
+                SessionModelVersion := "";
+        else
+                SessionModelId := pro::ModelName;
+                ! Retrieve sessions for all versions of the model
+                SessionModelVersion := ""; ! don't restrict to a specific ModelVersion
+        endif;
+        
+        empty SessionList;
+        
+        if (not SinceDate) then
+                SinceDate := CurrentToStringDelta(-24*60*60);        ! Requests for the last 24h
+        endif;
+        
+        ! Load raw session list from PROT
+        ret := pro::sessionmanager::ListSessionSinceDate(SinceDate,SessionList,ClientQueue,WorkerQueue,CurrentStatus,
+                                              CreateTime,UserEnv,UserName,Application,
+                                              OriginalCasePath, RequestDescription, RequestProcedure, RunTimeOut,
+                                              VersionID, ResponseVersionID, MessageLogVersionID,
+                                              ErrorMessage, ActiveStatus, ErrorCode, AllUsers, SessionModelId, SessionModelVersion);
+        
+        if not pro::HandleError(ret) then return 0; endif;
+        if Card(SessionList) = 0 then return 1; endif;
+        
+        if not pro::HandleError(ret) then return 0; endif;
+        
+        ! Update session list data with managed session info, if available
+        IsManaged(sess) := 1;
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  PurgeSessionList
+      arguments  :  (sList)
+
+      DECLARATION SECTION 
+
+        SET:
+           identifier :  sList
+           index      :  sessList
+           property   :  Input ;
+
+        PARAMETER:
+           identifier :  ret ;
+
+        STRING PARAMETER:
+           identifier :  warnStr ;
+
+        STRING PARAMETER:
+           identifier :  contList ;
+
+        SET:
+           identifier :  queueList
+           index      :  sessQueueList
+           parameter  :  sessionListElement ;
+
+      ENDSECTION  ;
+
+      body       :  
+        if Card(sList) = 0 then return 0; endif;
+        
+        ! prevent incoming messages for sessions that are to be deleted from being handled
+        for sessList do
+                pro::session::RemoveManagedSession(sessList);
+        endfor;
+        
+        ! Request to remove sessions in PROT, this includes clearing out the message database
+        warnStr := "";
+        ret := pro::sessionmanager::ClearSessionDatabase(sList,warnStr);
+        if not pro::HandleError(ret) then return 0; endif;
+        
+        if (warnStr <> "") then
+                DialogMessage(warnStr,"Warnings");
+        endif;
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  ExportSessionList
+      arguments  :  (sList)
+
+      DECLARATION SECTION 
+
+        SET:
+           identifier   :  sList
+           index        :  sessList
+           property     :  Input ;
+
+        ELEMENT PARAMETER:
+           identifier   :  sessionElement
+           range        :  SessionList ;
+
+        STRING PARAMETER:
+           identifier   :  PackFileName ;
+
+        STRING PARAMETER:
+           identifier   :  CaseFolder ;
+
+        PARAMETER:
+           identifier   :  ret ;
+
+        STRING PARAMETER:
+           identifier   :  CaseTree ;
+
+        FILE:
+           identifier   :  Content
+           name         :  CaseTree
+           device       :  Disk(ASCII)
+           mode         :  replace ;
+
+        STRING PARAMETER:
+           identifier   :  getFileName ;
+
+        PARAMETER:
+           identifier   :  fileCont
+           range        :  integer
+           initial data :  0 ;
+
+      ENDSECTION  ;
+
+      body       :  
+        if Card(sList) = 0 then return 0; endif;
+        
+        if (pro::IsNewDataManagementStyle) then
+                if not DirectorySelect(CaseFolder, title: "Select case folder") then return 0; endif;
+        else
+                PackFileName := "PRORequests.dat";
+                if not FileSelectNew(PackFileName, title : "Select file to pack") then return 0; endif;
+        
+            if not FileExists("StgConv.exe") then
+                    FileCopy("<lib:pro>:StgConv.exe","StgConv.exe");
+                endif;
+        
+                CaseFolder := pro::PROTempFolder + "\\Empty.dat";
+                ! Generate the empty case structure
+                if DirectoryExists(CaseFolder) then
+                        DirectoryDelete(CaseFolder);
+                endif;
+                FileCopy("<lib:pro>:Empty.dat",CaseFolder,0);
+                pro::management::UnpackIStorage(CaseFolder);
+        
+                ! Fill index
+                CaseTree := CaseFolder + "\\{CASETREE}";
+                PUT Content;
+        endif;
+        
+        fileCont := 0;
+        for sessList do
+                sessionElement := StringToElement(SessionList,sessList);
+                if IsManaged(sessionElement) and ResponseVersionID(sessionElement) <> "" then
+                        ret := pro::GetObjectVersion(ResponseVersionID(sessionElement),CaseFolder,getFileName);
+                        if not pro::HandleError(ret) then return 0; endif;
+        
+                        fileCont += 1;
+        
+                        if (pro::IsNewDataManagementStyle) then
+                                FileMove(CaseFolder + "\\" + getFileName,
+                                                 CaseFolder + "\\" +  FindReplaceStrings(FormatString("%s (%i).data",RequestDescription(sessionElement),fileCont), ":", "-"));
+                        else
+                                ! Version file
+                                FileMove(CaseFolder + "\\" + getFileName, CaseFolder + FormatString("\\%>08i",fileCont));
+        
+                                ! Index entry
+                                if fileCont = 1 then PUT "c"; else PUT "n"; endif;
+                                PUT FormatString(" %i 0 0 0 00022626 -1 1 5", fileCont), /;
+                                PUT "GE113CC98-C66F-4DDC-9830-D3C2ECBFF825", /;
+                                PUT FormatString("N%s (%i)",RequestDescription(sessionElement),fileCont), /;
+                        endif;
+                endif;
+        endfor;
+        
+        if (not pro::IsNewDataManagementStyle) then
+                PUT "p";
+                PUTCLOSE Content;
+        
+                ! Pack the content into a single file
+                pro::management::PackIStorage(pro::PROTempFolder + "//Empty.dat");
+                DirectoryDelete(pro::PROTempFolder + "//Empty.dat.old");
+                FileMove(pro::PROTempFolder + "//Empty.dat",PackFileName,0);
+                DialogMessage("Selected cases downloaded to file \"" + PackFileName + "\". You can now import all cases to your project through menu \"Edit\"/\"Import\" in the Data Manager page");
+        endif;
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  LoadResponse
+      arguments  :  (Request)
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier   :  Request
+           range        :  SessionList
+           property     :  Input ;
+
+        PARAMETER:
+           identifier   :  ret ;
+
+        STRING PARAMETER:
+           identifier   :  tmpFile
+           initial data :  "" ;
+
+        STRING PARAMETER:
+           identifier   :  tmpFileLog
+           initial data :  "" ;
+
+        STRING PARAMETER:
+           identifier   :  tmpStr
+           initial data :  "" ;
+
+        PARAMETER:
+           identifier   :  changedStatus
+           range        :  binary ;
+
+      ENDSECTION  ;
+
+      body       :  
+        ! Basic validation
+        if Request = '' then
+                raise error "Invalid request reference" code 'PRO-Invalid-request-reference' ;
+                return 0;
+        endif;
+        
+        changedStatus := pro::version::GetCaseStatus();
+        
+        ! Either error state or not available state
+        if (ResponseVersionID(Request) = "") then
+                ! Collect error information
+                if (ErrorCode(Request)) then
+                ret := 2;
+                if MessageLogVersionID(Request) <> "" then
+                            ret := DialogAsk("Execution finished with an error. Do you want to download and open the messages.log file?","Yes","No",title:"PRO Framework");
+        
+                        if (ret = 1) then
+                                ret := pro::GetObjectVersion(MessageLogVersionID(Request),"log",tmpFileLog);
+                                if not pro::HandleError(ret) then return 0; endif;
+                                ShowMessageWindow();
+                                return 0;
+                        endif;
+                endif;
+        
+                if ret = 2 AND ErrorMessage(Request) <> "" then
+                        DialogMessage("Execution finished with error message: " + ErrorMessage(Request),title:"PRO Framework");
+                        return 0;
+                endif;
+                endif;
+        
+                if (MessageLogVersionID(Request) = "") and (ErrorCode(Request) = 0) then
+                        DialogMessage("No output case was generated by the application",title:"PRO Framework");
+                        return 0;
+                endif;
+        
+                return 1;
+        else
+                ! Open options page
+                guipro::session::Request := Request;
+        
+                pro::version::FindCase(OriginalCasePath(Request),guipro::session::OriginalCase);
+        
+                if (changedStatus) then
+                        guipro::session::WarningNonSavedData := "Attention: the current case contains unsaved data; loading a new case will overwrite this!";
+                else
+                        empty guipro::session::WarningNonSavedData;
+                        pro::version::ResetCaseStatus();
+                endif;
+        
+                PageOpen("Load Response");
+        
+                return 1;
+        endif;
+
+    ENDPROCEDURE  ;
+
+    SECTION User_Session_List_GUI
+
+
+      DECLARATION SECTION 
+
+        STRING PARAMETER:
+           identifier   :  DateToList
+           property     :  NoSave ;
+
+        STRING PARAMETER:
+           identifier   :  PersistentSelectedFolder
+           property     :  NoSave
+           initial data :  "" ;
+
+        PARAMETER:
+           identifier   :  Mark
+           index domain :  sess
+           range        :  binary
+           property     :  NoSave
+           initial data :  0 ;
+
+        STRING PARAMETER:
+           identifier   :  SessionName
+           index domain :  sess
+           property     :  NoSave
+           definition   :  if IsManaged(sess) then
+                                   RequestDescription(sess)
+                           else
+                                   "<<not managed>>"
+                           endif ;
+
+        STRING PARAMETER:
+           identifier   :  CurrentStatusDescr
+           index domain :  sess
+           property     :  NoSave
+           definition   :  if(CurrentStatus(sess) = 0) then
+                           "Created"
+                           elseif(CurrentStatus(sess) = 1) then
+                           "Queued"
+                           elseif(CurrentStatus(sess) = 2) then
+                           "Starting server session"
+                           elseif(CurrentStatus(sess) = 3) then
+                           "Waiting for tasks"
+                           elseif(CurrentStatus(sess) = 4) then
+                           "Running"
+                           elseif(CurrentStatus(sess) = 5) then
+                           "Closing server session"
+                           elseif(CurrentStatus(sess) = 6) then
+                           "Finished"
+                           elseif(CurrentStatus(sess) = 7) then
+                           "Terminated"
+                           elseif(CurrentStatus(sess) = 8) then
+                           "Finished with errors"
+                           elseif(CurrentStatus(sess) = 9) then
+                           "Deleted"
+                           else
+                           "Unknown"
+                           endif ;
+
+        PARAMETER:
+           identifier   :  GotResults
+           index domain :  sess
+           range        :  binary
+           property     :  NoSave
+           definition   :  ResponseVersionID(sess) <> "" ;
+
+        SET:
+           identifier   :  sessionMarked
+           subset of    :  SessionList
+           index        :  sessMark
+           property     :  NoSave
+           definition   :  {sess | Mark(sess)} ;
+
+        PARAMETER:
+           identifier   :  noSessionsMarked
+           property     :  NoSave
+           definition   :  card(sessionMarked) = 0 ;
+
+        PARAMETER:
+           identifier   :  nonAdminUser
+           property     :  NoSave
+           initial data :  1 ;
+
+        PARAMETER:
+           identifier   :  allUsersRequests
+           property     :  NoSave
+           initial data :  0 ;
+
+        PARAMETER:
+           identifier   :  singleUserRequest
+           property     :  NoSave
+           definition   :  1 $ (not allUsersRequests) ;
+
+        PARAMETER:
+           identifier   :  markAllRequests
+           range        :  binary
+           property     :  NoSave ;
+
+        STRING PARAMETER:
+           identifier   :  sessionLogFile
+           property     :  NoSave ;
+
+        ELEMENT PARAMETER:
+           identifier   :  sessionColor
+           index domain :  session::sess
+           range        :  AllColors
+           property     :  NoSave
+           definition   :  if session::sess = session::selectedSession then 'blue' endif ;
+
+      ENDSECTION  ;
+
+      PROCEDURE
+        identifier :  MarkAll
+        body       :  
+          Mark(sess) := markAllRequests;
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  SeeActions
+        body       :  
+          PageOpen("Actions");
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  DownloadMarked
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  ret ;
+
+        ENDSECTION  ;
+
+        body       :  
+          if Card(sessionMarked) = 0 then return 0; endif;
+          
+          ret := ExportSessionList(sessionMarked);
+          if not (ret) then return 0; endif;
+          
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  TerminateMarked
+
+        DECLARATION SECTION 
+
+          SET:
+             identifier :  sessionsToTerminate
+             subset of  :  SessionList ;
+
+          SET:
+             identifier :  sessionTerminateList
+             subset of  :  SessionList ;
+
+          PARAMETER:
+             identifier :  ret ;
+
+          SET:
+             identifier :  VersionToRemove
+             parameter  :  PeVersionToRemove ;
+
+        ENDSECTION  ;
+
+        body       :  
+          if Card(sessionMarked) = 0 then return 0; endif;
+          
+          ! Remove in batches to prevent call timeouts
+          sessionsToTerminate := sessionMarked;
+          for sess in sessionsToTerminate | IsManaged(sess) do
+                  ret := pro::sessionmanager::TerminateSession(sess);
+          endfor;
+          
+          ! Update session list
+          ret := UpdateSessionList;
+          if not (ret) then return 0; endif;
+          
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  RemoveMarked
+
+        DECLARATION SECTION 
+
+          SET:
+             identifier :  sessionsToRemove
+             subset of  :  SessionList ;
+
+          SET:
+             identifier :  sessionRemoveList
+             subset of  :  SessionList ;
+
+          PARAMETER:
+             identifier :  ret ;
+
+          SET:
+             identifier :  VersionToRemove
+             parameter  :  PeVersionToRemove ;
+
+        ENDSECTION  ;
+
+        body       :  
+          if Card(sessionMarked) = 0 then return 0; endif;
+          
+          ! Remove in batches to prevent call timeouts
+          sessionsToRemove := sessionMarked;
+          while (card(sessionsToRemove) > 0) do
+                  sessionRemoveList := SubRange(sessionsToRemove, Element(sessionsToRemove,1),
+                                                                  Element(sessionsToRemove,Min(50,Card(sessionsToRemove))));
+                  sessionsToRemove -= sessionRemoveList;
+          
+                  ret := PurgeSessionList(sessionRemoveList);
+                  if not (ret) then return 0; endif;
+          
+                  ! Purge all object versions related to managed sessions
+                  empty VersionToRemove;
+                  for sess in sessionRemoveList | IsManaged(sess) do
+                          if(VersionID(sess) <> "") then SetElementAdd(VersionToRemove,PeVersionToRemove,VersionID(sess)); endif;
+                          if(ResponseVersionID(sess) <> "") then SetElementAdd(VersionToRemove,PeVersionToRemove,ResponseVersionID(sess)); endif;
+                          if(MessageLogVersionID(sess) <> "") then SetElementAdd(VersionToRemove,PeVersionToRemove,MessageLogVersionID(sess)); endif;
+                  endfor;
+                  ret := pro::storage::DeleteObjectVersionFromSet(VersionToRemove);
+                  if not pro::HandleError(ret) then return 0; endif;
+          endwhile;
+          
+          ! Update session list
+          ret := UpdateSessionList;
+          if not (ret) then return 0; endif;
+          
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  DownloadLog
+        body       :  
+          return pro::SaveVersionInFolder(MessageLogVersionID(selectedSession),PersistentSelectedFolder);
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  DownloadAndOpenLog
+        body       :  
+          return SaveAndOpenVersionInTemp(MessageLogVersionID(selectedSession));
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  UpdateSessionList
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  ret ;
+
+          STRING PARAMETER:
+             identifier :  storedSelectedSession ;
+
+        ENDSECTION  ;
+
+        body       :  
+          ! Initialize PRO Framework (if not initialized yet)
+          ret := pro::Initialize();
+          if not (ret) then return 0; endif;
+          
+          for pro::userGroup do
+                  if ( val(pro::userGroup) = pro::PROA_ADMIN_GROUP ) then
+                          session::nonAdminUser := 0;
+                  break;
+                  endif;
+          endfor;
+          
+          ret := pro::session::LoadManagedSessions;
+          if not (ret) then return 0; endif;
+          
+          StatusMessage("");
+          
+          ! Store the currently selected session.
+          storedSelectedSession := selectedSession;
+          
+          if LoadSessionList(DateToList,allUsersRequests) then
+                  ! Set selectedSession to the storedSelectedSession if it is still in the SessionList.
+                  selectedSession := StringToElement(SessionList, storedSelectedSession);
+                  return 1;
+          else
+                  return 0;
+          endif;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  LoadRequestResponse
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  ret ;
+
+        ENDSECTION  ;
+
+        body       :  
+          if selectedSession = '' then return 0; endif;
+          
+          pro::session::SetSessionData(selectedSession, RequestDescription(selectedSession),
+                                                   ClientQueue(selectedSession),
+                                                   WorkerQueue(selectedSession),
+                                                   RequestProcedure(selectedSession),
+                                                   RunTimeOut(selectedSession),
+                                                   VersionID(selectedSession),
+                                                   ResponseVersionID(selectedSession),
+                                                   MessageLogVersionID(selectedSession),
+                                                   ErrorMessage(selectedSession),
+                                                   RequestTime(selectedSession),
+                                                   OriginalCasePath(selectedSession));
+          
+          ret := LoadResponse(selectedSession);
+          if not (ret) then return 0; endif;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  CloseRequestManager
+        body       :  
+          return PageClose("Managed Requests");
+
+      ENDPROCEDURE  ;
+
+    ENDSECTION User_Session_List_GUI ;
+
+    SECTION Load_Response_GUI
+
+
+      PROCEDURE
+        identifier :  LoadResponseAction
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier   :  ret ;
+
+          STRING PARAMETER:
+             identifier   :  tmpFile
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpFileLog
+             initial data :  "" ;
+
+        ENDSECTION  ;
+
+        body       :  
+          ! Prepare case to load
+          if OriginalCase <> '' then
+                  pro::version::ResetCaseStatus();
+                  pro::version::LoadCaseAsCurrent(OriginalCase);
+          else
+                  pro::version::NewCase();
+          endif;
+          
+          ! Get the case file and the message log from the Storage Service
+          ret := pro::GetObjectVersion(ResponseVersionID(Request),pro::PROTempFolder,tmpFile);
+          if not pro::HandleError(ret) then return 0; endif;
+          if MessageLogVersionID(Request) <> "" then
+                  ret := pro::GetObjectVersion(MessageLogVersionID(Request),"log",tmpFileLog);
+                  if not pro::HandleError(ret) then return 0; endif;
+          endif;
+          
+          ! Load file
+          ret := pro::version::LoadCaseByFile(pro::PROTempFolder + "\\" + tmpFile);
+          
+          if not ret then
+                  DialogMessage("Error during load. File corrupted.", "PRO Framework - Load Solution");
+                  ! Maybe the case has problems because of some execution error; check messages.log if it exists
+                  if MessageLogVersionID(Request) <> "" then
+                           ShowMessageWindow();
+                  endif;
+                  return 0;
+          endif;
+          Apply(pro::session::PostLoadResultCaseHook);
+
+      ENDPROCEDURE  ;
+
+      DECLARATION SECTION 
+
+        SET:
+           identifier   :  LoadOptions
+           property     :  NoSave ;
+
+        ELEMENT PARAMETER:
+           identifier   :  Request
+           range        :  SessionList
+           property     :  NoSave ;
+
+        ELEMENT PARAMETER:
+           identifier   :  OriginalCase
+           range        :  AllCases
+           property     :  NoSave
+           initial data :  '' ;
+
+        STRING PARAMETER:
+           identifier   :  WarningNonSavedData
+           property     :  NoSave ;
+
+      ENDSECTION  ;
+
+    ENDSECTION Load_Response_GUI ;
+
+  ENDMODULE User_Sessions ;
+
+  SECTION Authorization_Editor
+
+
+    DECLARATION SECTION User_and_Group_Entities
+
+      SET:
+         identifier   :  PROEnv
+         index        :  PRO_ENV
+         parameters   :  Pe_Env, Pe_GUI_Env
+         property     :  NoSave
+         order by     :  PRO_ENV ;
+
+      SET:
+         identifier   :  PROEntity
+         indices      :  PRO_ENT, PRO_ENT_U, PRO_ENT_G
+         parameter    :  Pe_Entity
+         property     :  NoSave ;
+
+      SET:
+         identifier   :  PROUser
+         subset of    :  PROEntity
+         index        :  PRO_USER
+         parameter    :  Pe_User
+         property     :  NoSave
+         order by     :  PROUser_Name(PRO_USER) ;
+
+      SET:
+         identifier   :  PROEnvUser
+         index domain :  (PRO_ENV)
+         subset of    :  PROUser ;
+
+      SET:
+         identifier   :  PROGroup
+         subset of    :  PROEntity
+         index        :  PRO_GRP
+         parameter    :  Pe_Group
+         property     :  NoSave
+         order by     :  PROGroup_Name(PRO_GRP) ;
+
+      SET:
+         identifier   :  PROEnvGroup
+         index domain :  (PRO_ENV)
+         subset of    :  PROGroup ;
+
+      STRING PARAMETER:
+         identifier   :  PROEnv_Name
+         index domain :  (PRO_ENV)
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  PROEnv_Descr
+         index domain :  (PRO_ENV)
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  PROEnv_Auth
+         index domain :  (PRO_ENV)
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  PROUser_Name
+         index domain :  (PRO_ENT_U)
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  PROGroup_Name
+         index domain :  (PRO_ENT_G)
+         property     :  NoSave ;
+
+      PARAMETER:
+         identifier   :  PROUserGroup
+         index domain :  (PRO_ENT_U,PRO_ENT_G)
+         range        :  binary
+         property     :  NoSave ;
+
+      PARAMETER:
+         identifier   :  PROEntityIsGroup
+         index domain :  PRO_ENT
+         range        :  binary
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  PROEntityType
+         index domain :  PRO_ENT
+         property     :  NoSave
+         definition   :  if PROEntityIsGroup(PRO_ENT) then
+                                 "group"
+                         else
+                                 "user"
+                         endif ;
+
+      ELEMENT PARAMETER:
+         identifier   :  PROEntityEnvironment
+         index domain :  PRO_ENT
+         range        :  PROEnv
+         default      :  ''
+         property     :  NoSave ;
+
+      STRING PARAMETER:
+         identifier   :  PROEntityEnvironmentName
+         index domain :  PRO_ENT
+         property     :  NoSave
+         definition   :  if PROEntityEnvironment(PRO_ENT) = '' then
+                                 if (Val(PRO_ENT) = 16777215 OR Val(PRO_ENT) = 16777087) then
+                                         "<<all>>"
+                                 else
+                                         "?"
+                                 endif
+                         else
+                                 PROEnv_Name(PROEntityEnvironment(PRO_ENT))
+                         endif ;
+
+      STRING PARAMETER:
+         identifier   :  PROEntityName
+         index domain :  PRO_ENT
+         property     :  NoSave ;
+
+    ENDSECTION  ;
+
+    DECLARATION SECTION Entity_Properties_Current_Authorized_Object
+
+      SET:
+         identifier   :  CurrentEntity
+         subset of    :  PROEntity
+         index        :  CUR_ENT
+         parameter    :  Pe_CUR_Entity ;
+
+      PARAMETER:
+         identifier   :  CurrentObjectEntityDeny
+         index domain :  CUR_ENT
+         range        :  binary
+         property     :  NoSave ;
+
+      PARAMETER:
+         identifier   :  CurrentObjectEntityExec
+         index domain :  CUR_ENT
+         range        :  binary
+         property     :  NoSave ;
+
+      PARAMETER:
+         identifier   :  CurrentObjectEntityRead
+         index domain :  CUR_ENT
+         range        :  binary
+         property     :  NoSave ;
+
+      PARAMETER:
+         identifier   :  CurrentObjectEntityWrite
+         index domain :  CUR_ENT
+         range        :  binary
+         property     :  NoSave ;
+
+      SET:
+         identifier   :  CurrentUserSet
+         subset of    :  PROUser
+         parameter    :  Pe_GUI_User
+         definition   :  PROEnvUser(Pe_GUI_Env) ;
+
+      SET:
+         identifier   :  CurrentGroupSet
+         subset of    :  PROGroup
+         parameter    :  Pe_GUI_Group
+         definition   :  PROEnvGroup(Pe_GUI_Env) ;
+
+      PARAMETER:
+         identifier   :  PROCancelAuth
+         range        :  binary
+         property     :  NoSave ;
+
+    ENDSECTION  ;
+
+    PROCEDURE
+      identifier :  PopulateEntitySets
+      arguments  :  (addUniversalSets)
+
+      DECLARATION SECTION 
+
+        PARAMETER:
+           identifier :  ret ;
+
+        ELEMENT PARAMETER:
+           identifier :  err
+           range      :  errh::PendingErrors ;
+
+        SET:
+           identifier :  UserCurrentEnv
+           subset of  :  PROUser ;
+
+        SET:
+           identifier :  GroupCurrentEnv
+           subset of  :  PROGroup ;
+
+        STRING PARAMETER:
+           identifier :  tmpEnt ;
+
+        PARAMETER:
+           identifier :  addUniversalSets
+           default    :  0
+           property   :  Optional ;
+
+      ENDSECTION  ;
+
+      body       :  
+        ! Populate users and groups
+        ret := pro::authentication::GetEnvironmentList(PROEnv,PROEnv_Name,PROEnv_Descr,PROEnv_Auth);
+        for (PRO_ENV) do
+                block
+                        empty UserCurrentEnv, GroupCurrentEnv;
+        
+                        ret := pro::authentication::GetEnvironmentUsersAndGroups(PROEnv_Name(PRO_ENV),UserCurrentEnv,GroupCurrentEnv,PROUser_Name,PROGroup_Name);
+        
+                        if (addUniversalSets) then
+                                tmpEnt := FormatString("%i",16776960 + Val(PRO_ENV));   ! 0xFFFF00 = 0xFFFF | 0x0 (+ 7 bits to the environment id)
+                                SetElementAdd(PROUser,Pe_User,tmpEnt);
+                                PROUser_Name(Pe_User) := "<<all>>";
+                                UserCurrentEnv += Pe_User;
+                                tmpEnt := FormatString("%i",16777088 + Val(PRO_ENV));   ! 0xFFFF80 = 0xFFFF | 0x1 (+ 7 bits to the environment id)
+                                SetElementAdd(PROGroup,Pe_Group,tmpEnt);
+                                PROGroup_Name(Pe_Group) := "<<all>>";
+                                GroupCurrentEnv += Pe_Group;
+                        endif;
+        
+                        PROEnvUser(PRO_ENV) := UserCurrentEnv;
+                        PROEnvGroup(PRO_ENV) := GroupCurrentEnv;
+        
+                        PROEntityEnvironment(PRO_ENT in UserCurrentEnv) := PRO_ENV;
+                        PROEntityEnvironment(PRO_ENT in GroupCurrentEnv) := PRO_ENV;
+                onerror err do
+                        errh::MarkAsHandled(err);
+                endblock;
+        endfor;
+        
+        ! Retrieve user and group relationships
+        empty PROUserGroup;
+        for (PRO_ENV) do
+                block
+                        ret := pro::authentication::GetEntityList(PROEnv_Name(PRO_ENV),PROUser,PROGroup,PROUser_Name,PROGroup_Name,PROUserGroup);
+                onerror err do
+                        errh::MarkAsHandled(err);
+                endblock;
+        endfor;
+        
+        ! Add universal group
+        if (addUniversalSets) then
+                empty UserCurrentEnv,GroupCurrentEnv;
+        
+                tmpEnt := FormatString("%i", 127);
+                SetElementAdd(PROEnv,Pe_Env,tmpEnt);
+                PROEnv_Name(Pe_Env) := "<<all>>";
+        
+                tmpEnt := FormatString("%i",16776960 + Val(Pe_Env));    ! 0xFFFF00 = 0xFFFF | 0x0 (+ 7 bits to the environment id)
+                SetElementAdd(PROUser,Pe_User,tmpEnt);
+                PROUser_Name(Pe_User) := "<<all>>";
+                UserCurrentEnv += Pe_User;
+        
+                tmpEnt := FormatString("%i",16777088 + Val(Pe_Env));    ! 0xFFFF80 = 0xFFFF | 0x1 (+ 7 bits to the environment id)
+                SetElementAdd(PROGroup,Pe_Group,tmpEnt);
+                PROGroup_Name(Pe_Group) := "<<all>>";
+                GroupCurrentEnv += Pe_Group;
+        
+                PROEnvUser(Pe_Env) := UserCurrentEnv;
+                PROEnvGroup(Pe_Env) := GroupCurrentEnv;
+                PROEntityEnvironment(PRO_ENT in UserCurrentEnv) := Pe_Env;
+                PROEntityEnvironment(PRO_ENT in GroupCurrentEnv) := Pe_Env;
+        endif;
+        
+        empty PROEntityIsGroup;
+        PROEntityIsGroup(PRO_GRP) := 1;
+        PROEntityName(PRO_USER) := PROUser_Name(PRO_USER);
+        PROEntityName(PRO_GRP) := PROGroup_Name(PRO_GRP);
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  EditAuthorization
+      arguments  :  (AuthString)
+
+      DECLARATION SECTION 
+
+        STRING PARAMETER:
+           identifier :  AuthString
+           property   :  InOut ;
+
+        PARAMETER:
+           identifier :  ret ;
+
+        ELEMENT PARAMETER:
+           identifier :  err
+           range      :  errh::PendingErrors ;
+
+        PARAMETER:
+           identifier :  tmpLength ;
+
+        PARAMETER:
+           identifier :  tmpLast ;
+
+        PARAMETER:
+           identifier :  tmpNext ;
+
+        PARAMETER:
+           identifier :  tmpCont ;
+
+        STRING PARAMETER:
+           identifier :  tmpAuth ;
+
+        PARAMETER:
+           identifier :  tmpFlag
+           range      :  integer ;
+
+        PARAMETER:
+           identifier :  tmpDeny
+           range      :  binary ;
+
+        STRING PARAMETER:
+           identifier :  tmpEnt ;
+
+        STRING PARAMETER:
+           identifier :  tmpEnv ;
+
+        ELEMENT PARAMETER:
+           identifier :  tmpEntElem
+           range      :  PROEntity ;
+
+        INDEX:
+           identifier :  n
+           range      :  Integers ;
+
+      ENDSECTION  ;
+
+      body       :  
+        IF NOT SessionHasVisibleGUI THEN
+                return 0;
+        ENDIF;
+        
+        LocalizationInitialize;
+        
+        ! Initialize PRO Framework (if not initialized yet)
+        ret := pro::Initialize();
+        if not (ret) then return 0; endif;
+        
+        if not pro::handleError(ret) then return 0; endif;
+        PopulateEntitySets(1);
+        
+        tmpEnv := pro::GetPROEnvironment;
+        Pe_Env := First(PRO_ENV | PROEnv_Name(PRO_ENV) = tmpEnv);
+        
+        ! Fill the sets with the authorization string
+        Empty CurrentEntity,CurrentObjectEntityDeny, CurrentObjectEntityExec, CurrentObjectEntityRead, CurrentObjectEntityWrite;
+        if SubString(AuthString,1,1) = "#" then
+                tmpLength := StringLength(AuthString);
+                tmpLast := 2;
+                tmpCont := 2;
+                tmpNext := FindNthString(AuthString,"#",tmpCont);
+                while tmpLast < tmpLength do
+                        if (tmpNext = 0) then tmpNext := tmpLength + 1; endif;
+        
+                        tmpAuth := SubString(AuthString,tmpLast,tmpNext - 1);
+        
+                        tmpEnt := SubString(tmpAuth,3,1000);
+                        tmpFlag := Val(SubString(tmpAuth,1,1));
+                        if SubString(tmpAuth,2,2) = "-" then
+                                tmpDeny := 1;
+                        else
+                                tmpDeny := 0;
+                        endif;
+        
+                        Pe_Entity := StringToElement(PROEntity,tmpEnt);
+                        CurrentEntity += Pe_Entity;
+                        CurrentObjectEntityDeny(Pe_Entity) := tmpDeny;
+        
+                        if Mod(div(tmpFlag,2^0),2)=1 then CurrentObjectEntityExec(Pe_Entity) := 1; endif;
+                        if Mod(div(tmpFlag,2^1),2)=1 then CurrentObjectEntityWrite(Pe_Entity) := 1; endif;
+                        if Mod(div(tmpFlag,2^2),2)=1 then CurrentObjectEntityRead(Pe_Entity) := 1; endif;
+                        if Mod(div(Val(tmpEnt),2^7),2)=1 then PROEntityIsGroup(Pe_Entity) := 1; endif;
+        
+                        tmpLast := min(tmpNext + 1,tmpLength);
+                        tmpCont += 1;
+                        tmpNext := FindNthString(AuthString,"#",tmpCont);
+                endwhile;
+        
+        endif;
+        
+        ! Open the edit dialog
+        PROCancelAuth := 0;
+        PageOpen("Authorization Manager");
+        if not PROCancelAuth then
+                ! Encode the string back
+                AuthString := "";
+                for CUR_ENT do
+                        tmpFlag := 0;
+                        if CurrentObjectEntityExec(CUR_ENT) then tmpFlag += 2^0; endif;
+                        if CurrentObjectEntityWrite(CUR_ENT) then tmpFlag += 2^1; endif;
+                        if CurrentObjectEntityRead(CUR_ENT) then tmpFlag += 2^2; endif;
+                        if CurrentObjectEntityDeny(CUR_ENT) then tmpAuth := "-"; else tmpAuth := "+"; endif;
+                        AuthString += FormatString("#%i%s%e",tmpFlag,tmpAuth,CUR_ENT);
+                endfor;
+        else
+                return 0;
+        endif;
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  AddUserAuthorization
+      body       :  
+        ! Validation
+        if Pe_GUI_User = '' then
+                DialogError("Please select a valid user","Add User Authorization");
+                return 0;
+        endif;
+        
+        ! Add to the set
+        CurrentEntity += Pe_GUI_User;
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  AddGroupAuthorization
+      body       :  
+        ! Validation
+        if Pe_GUI_Group = '' then
+                DialogError("Please select a valid group","Add Group Authorization");
+                return 0;
+        endif;
+        
+        ! Add to the set
+        CurrentEntity += Pe_GUI_Group;
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  RemoveEntityAuthorization
+      body       :  
+        ! Validation
+        if Pe_CUR_Entity = '' then
+                DialogError("Please select a valid entity","Remove Authorization");
+                return 0;
+        endif;
+        
+        ! Add to the set
+        CurrentEntity -= Pe_CUR_Entity;
+        
+        return 1;
+
+    ENDPROCEDURE  ;
+
+  ENDSECTION Authorization_Editor ;
+
+  PROCEDURE
+    identifier :  LibraryInitialization
+
+    DECLARATION SECTION 
+
+      PARAMETER:
+         identifier :  ret ;
+
+    ENDSECTION  ;
+
+    body       :  
+      ! General settings
+      session::DateToList := CurrentToStringDelta(-24*60*60);        ! Requests for the last 24h
+      session::DateToList := Substring(session::DateToList,1,11) + "00:00:00";   ! rounding to days
+      session::selectedSession := '';
+      
+      for pro::userGroup do
+              if ( val(pro::userGroup) = pro::PROA_ADMIN_GROUP ) then
+                      session::nonAdminUser := 0;
+                      break;
+              endif;
+      endfor;
+      
+      ! Initialize internationalization module
+      LocalizationInitialize;
+      
+      IF StringToElement(AllLanguages,pro::ReadArguments('_pro-language')) <> '' THEN
+              CurrentLanguage := StringToElement(AllLanguages,pro::ReadArguments('_pro-language'));
+      ENDIF;
+      
+      RETURN 1;
+
+  ENDPROCEDURE  ;
+
+  PROCEDURE
+    identifier :  LibraryTermination
+    body       :  
+      return 1 ;
+
+  ENDPROCEDURE  ;
+
+ENDLIBRARYMODULE AimmsProGUI ;
