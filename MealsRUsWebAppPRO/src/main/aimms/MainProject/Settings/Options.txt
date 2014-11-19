@@ -12,20 +12,14 @@ external_string_character_encoding UTF-16LE
 minimum_column_fill_percentage_tabular_display 101
 rounding_compatibility Aimms_3_7
 seed 1234567
+warning_not_initialized off
 * AOA
-* BARON 12
-* CBC 2.8.0
+* BARON 14
+* CONOPT 3.14G
 * CONOPT 3.14V
 * CPLEX 12.6
-* CPOptimizer 12.6
 * GUROBI 5.6
 * IPOPT 3.11
-* KNITRO 8.1
-* KNITRO 9.0
-* MINOS
-* PATH 4.6
-* SNOPT 6.1
-* SNOPT 7.2
 * XA 15
 * NETSOL
 * Environment
