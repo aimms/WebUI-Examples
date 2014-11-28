@@ -1,0 +1,287 @@
+## ams_version=1.0
+
+LibraryModule AimmsWebUI {
+    Prefix: webui;
+    Section Data_Management {
+        Set AllCases {
+            Text: "All available WebUI cases (local cases as wel as cases stored on the PRO server)";
+            Index: IndexCases;
+        }
+        ElementParameter CurrentCase {
+            Text: "Reference to the latest touched (i.e. created, saved or loaded) WebUI case";
+            Range: AllCases;
+        }
+        StringParameter CasePath {
+            IndexDomain: IndexCases;
+        }
+        StringParameter CurrentCasePath;
+        Parameter CurrentCaseIsDirty;
+        Function GetCaseStorageServerPath {
+            Range: string;
+            Body: {
+                GetCaseStorageServerPath := FormatString("PRO:/UserData/%s/%s/Cases/%s",pro::PROEnvironment,pro::PROUserName,pro::ModelName);
+            }
+        }
+        Function GetBareCasename {
+            Arguments: (casename,protocol);
+            Range: string;
+            Body: {
+                empty BareCasename;
+                
+                casenameLen := StringLength(casename);
+                protocolLen := StringLength(protocol);
+                
+                if ( SubString(casename,1,protocolLen) = protocol and SubString(casename,casenameLen-4,casenameLen) = ".data" ) then
+                	numSlashes := StringOccurrences(casename,"/");
+                	pos := FindNthString(casename,"/",numSlashes);
+                	BareCasename := SubString(casename,pos+1,casenameLen-5);
+                endif;
+                
+                GetBareCasename := bareCasename;
+            }
+            StringParameter casename {
+                Property: Input;
+            }
+            Parameter casenameLen;
+            Parameter protocolLen;
+            Parameter numSlashes;
+            Parameter pos;
+            StringParameter bareCasename;
+            StringParameter protocol {
+                Property: Input;
+            }
+        }
+        Procedure RefreshCurrentCase {
+            Arguments: (casename);
+            Body: {
+                CurrentCase := First( IndexCases | CasePath(IndexCases) = casename );
+                if ( CurrentCase ) then
+                	CurrentCasePath := CasePath(CurrentCase);
+                else
+                	CurrentCasePath := "";
+                endif;
+            }
+            StringParameter casename {
+                Property: Input;
+            }
+        }
+        Procedure RefreshAllCases {
+            Body: {
+                empty AllCases, LocalFileNumbers, casecount;
+                
+                if ( DirectoryExists("Data") ) then
+                	DirectoryGetFiles("Data","*.data",LocalFileNames);
+                endif;
+                
+                for (fn) do
+                	casename := FormatString("local-case-%n",Ord(fn));
+                	SetElementAdd(AllCases,aCase,casename);
+                	CasePath(aCase) := FormatString("file:/%s",LocalFileNames(fn));
+                endfor;
+                
+                StoragePath := GetCaseStorageServerPath + "/";
+                ! strip "PRO:" from path
+                len := StringLength(StoragePath);
+                StoragePath := SubString(StoragePath,5,len-1);
+                
+                if ( pro::management::IsInitialized ) then
+                	pro::management::LocalLogInfo("List WebUI Cases on PRO server in path " + StoragePath);
+                	pro::storage::ListObjects(StoragePath,PROCases,PROCaseName,PROCaseType,PROCaseSize,PROCaseAuthorization);
+                	! filter out all actual cases files and store them in the public set ManagedSessionListedCases
+                	for (pc) do
+                		casename := FormatString("%e",pc);
+                		len := StringLength(casename);
+                		if ( SubString(casename,len-4,len) = ".data" ) then
+                			casename := FormatString("server-case-%n",casecount+1);
+                			SetElementAdd(AllCases,aCase,casename);
+                			CasePath(aCase) := FormatString("pro:/%e",pc);
+                			casecount += 1;
+                		endif;
+                	endfor;
+                endif;
+            }
+            Set LocalFileNumbers {
+                SubsetOf: Integers;
+                Index: fn;
+            }
+            StringParameter LocalFileNames {
+                IndexDomain: fn;
+            }
+            StringParameter StoragePath;
+            Parameter len;
+            ElementParameter aCase {
+                Range: AllCases;
+            }
+            Parameter casecount;
+            StringParameter casename;
+            Set PROCases {
+                Index: pc;
+            }
+            StringParameter PROCaseName {
+                IndexDomain: pc;
+            }
+            StringParameter PROCaseType {
+                IndexDomain: pc;
+            }
+            Parameter PROCaseSize {
+                IndexDomain: pc;
+            }
+            StringParameter PROCaseAuthorization {
+                IndexDomain: pc;
+            }
+        }
+        Procedure LoadCase {
+            Arguments: (casename);
+            Body: {
+                empty success;
+                
+                bareCasename := GetBareCasename(casename,"PRO:/");
+                if ( StringLength(bareCasename) > 0 ) then
+                	if ( pro::webui::LoadWebUICase(bareCasename) ) then
+                		success := 1;
+                	endif;
+                else
+                	bareCasename := GetBareCasename(casename,"file:/");
+                	if ( StringLength(bareCasename) > 0 ) then
+                		bareCaseName := FormatString("./Data/%s.data",bareCasename);
+                		if ( CaseFileLoad(bareCaseName) ) then
+                			success := 1;
+                		endif;
+                	endif;
+                endif;
+                
+                if ( success ) then
+                	RefreshAllCases;
+                	RefreshCurrentCase(casename);
+                endif;
+                
+                return success;
+            }
+            StringParameter casename {
+                Property: Input;
+            }
+            StringParameter bareCasename;
+            Parameter success;
+        }
+        Procedure SaveCase {
+            Arguments: (casename);
+            Body: {
+                empty success;
+                
+                bareCasename := GetBareCasename(casename,"PRO:/");
+                if ( StringLength(bareCasename) > 0 ) then
+                	if ( pro::webui::SaveWebUICase(bareCasename) ) then
+                		success := 1;
+                	endif;
+                else
+                	bareCasename := GetBareCasename(casename,"file:/");
+                	if ( StringLength(bareCasename) > 0 ) then
+                		bareCaseName := FormatString("Data/%s.data",bareCasename);
+                		StoredIdentifiers := AllIdentifiers;
+                		StoredIdentifiers -= 'webui::CurrentCaseIsDirty';
+                		StoredIdentifiers -= 'webui::CurrentCaseName';
+                		CaseFileSave(bareCaseName,StoredIdentifiers);
+                		success := 1;
+                	endif;
+                endif;
+                
+                if ( success ) then
+                	RefreshAllCases;
+                	RefreshCurrentCase(casename);
+                endif;
+                
+                return success;
+            }
+            StringParameter casename {
+                Property: Input;
+            }
+            StringParameter bareCasename;
+            Parameter success;
+            Set StoredIdentifiers {
+                SubsetOf: AllIdentifiers;
+            }
+        }
+        Procedure ExistsCase {
+            Arguments: (casename);
+            Body: {
+                empty success;
+                
+                bareCasename := GetBareCasename(casename,"PRO:/");
+                if ( StringLength(bareCasename) > 0 ) then
+                	return pro::webui::ExistsWebUICase(bareCasename);
+                else
+                	bareCasename := GetBareCasename(casename,"file:/");
+                	if ( StringLength(bareCasename) > 0 ) then
+                		bareCaseName := FormatString("Data/%s.data",bareCasename);
+                		return FileExists(bareCasename);
+                	endif;
+                endif;
+                
+                return 0;
+            }
+            StringParameter casename {
+                Property: Input;
+            }
+            StringParameter bareCasename;
+            Parameter success;
+        }
+        Procedure CreateCase {
+            Arguments: (casename);
+            Body: {
+                numberOfversions := ExistsCase(casename);
+                if ( numberOfversions > 0 ) then
+                	return 0;
+                else
+                	return SaveCase(casename);
+                endif;
+            }
+            StringParameter casename {
+                Property: Input;
+            }
+            Parameter numberOfVersions;
+        }
+        Procedure DeleteCase {
+            Arguments: (casename);
+            Body: {
+                empty success;
+                
+                if ( ExistsCase(casename) ) then
+                
+                	bareCasename := GetBareCasename(casename,"PRO:/");
+                	if ( StringLength(bareCasename) > 0 ) then
+                		if ( pro::webui::DeleteWebUICase(bareCasename) ) then
+                			success := 1;
+                		endif;
+                	else
+                		bareCasename := GetBareCasename(casename,"file:/");
+                		if ( StringLength(bareCasename) > 0 ) then
+                			bareCaseName := FormatString("Data/%s.data",bareCasename);
+                			if ( FileDelete(bareCaseName) ) then
+                				success := 1;
+                			endif;
+                		endif;
+                	endif;
+                
+                	if ( success ) then
+                		RefreshAllCases;
+                		RefreshCurrentCase("<empty>");
+                	endif;
+                
+                endif;
+                
+                return success;
+            }
+            StringParameter casename {
+                Property: Input;
+            }
+            StringParameter bareCasename;
+            Parameter success;
+        }
+    }
+    Procedure LibraryInitialization;
+    Procedure LibraryTermination {
+        Body: {
+            return 1 ;
+        }
+    }
+}

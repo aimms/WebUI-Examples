@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<References AIMMS_Version="4.1.0.265 (x86)">
+<References AIMMS_Version="4.2.10000.174 (x86)">
 	<MainProject Path="MainProject" />
 	<Library Path="AimmsPROLibrary" />
 	<Library Path="AimmsPROGUI" />
+	<Library Path=".\AimmsWebUI" />
 </References>
