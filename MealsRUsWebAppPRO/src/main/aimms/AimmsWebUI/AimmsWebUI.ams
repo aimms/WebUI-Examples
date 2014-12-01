@@ -179,7 +179,7 @@ LibraryModule AimmsWebUI {
                 		bareCaseName := FormatString("Data/%s.data",bareCasename);
                 		StoredIdentifiers := AllIdentifiers;
                 		StoredIdentifiers -= 'webui::CurrentCaseIsDirty';
-                		StoredIdentifiers -= 'webui::CurrentCaseName';
+                		StoredIdentifiers -= 'webui::CurrentCasePath';
                 		CaseFileSave(bareCaseName,StoredIdentifiers);
                 		success := 1;
                 	endif;
