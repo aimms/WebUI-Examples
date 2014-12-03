@@ -1,17 +1,14 @@
 .themeswitcher {
+	position:absolute;
 	width: 110px;
-	float: right;
 	margin-right: 10px;
-	margin-top: 5px;
+	top:5px;
+	right:180px;
 }
 	.themeswitcher select {
 		width: 100%;
 		margin: 0;
 		background: rgba(0, 0, 100, 0.05);
-	}
-
-header.tag-application > .awf-optiondialog.left {
-		right: 165px;
 	}
 
 @media only screen and (max-width:570px) {
