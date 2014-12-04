@@ -60,6 +60,7 @@ LibraryModule AimmsWebUI {
                 else
                 	CurrentCasePath := "";
                 endif;
+                CurrentCaseIsDirty := 0;
             }
             StringParameter casename {
                 Property: Input;
