@@ -285,4 +285,9 @@ LibraryModule AimmsWebUI {
             return 1 ;
         }
     }
+    Procedure PostLibraryInitialization {
+        Body: {
+            RefreshAllCases;
+        }
+    }
 }
