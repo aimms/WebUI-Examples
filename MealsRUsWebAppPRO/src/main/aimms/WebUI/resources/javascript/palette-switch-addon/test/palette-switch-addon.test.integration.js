@@ -54,7 +54,7 @@ Screw.Unit(function() {with(Screw.Specifications) {with(Screw.Matchers) {
 			});
 
 			it("should have set the correct class", function() {
-				assertThat($('html').hasClass('colorbrewer-qualitative-11'));
+				assertThat($('html').hasClass('palette-colorbrewer-qualitative-11'));
 			});
 
 			describe("after the default palette is selected", function() {
@@ -65,7 +65,7 @@ Screw.Unit(function() {with(Screw.Specifications) {with(Screw.Matchers) {
 				});
 
 				it("should have updated the palette css path", function() {
-					assertThat(!$('html').hasClass('colorbrewer-qualitative-11'));
+					assertThat(!$('html').hasClass('palette-colorbrewer-qualitative-11'));
 				});
 
 			});
@@ -75,3 +75,4 @@ Screw.Unit(function() {with(Screw.Specifications) {with(Screw.Matchers) {
 	});
 
 }}});
+
