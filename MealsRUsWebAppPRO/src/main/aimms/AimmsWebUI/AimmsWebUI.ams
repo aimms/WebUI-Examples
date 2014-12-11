@@ -177,6 +177,9 @@ LibraryModule AimmsWebUI {
                 else
                 	bareCasename := GetBareCasename(casename,"file:/");
                 	if ( StringLength(bareCasename) > 0 ) then
+                		if ( not DirectoryExists("Data") ) then
+                			DirectoryCreate("Data");
+                		endif;
                 		bareCaseName := FormatString("Data/%s.data",bareCasename);
                 		StoredIdentifiers := AllIdentifiers;
                 		StoredIdentifiers -= 'webui::CurrentCaseIsDirty';
