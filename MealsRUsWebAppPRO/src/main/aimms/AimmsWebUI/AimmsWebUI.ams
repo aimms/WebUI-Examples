@@ -30,8 +30,10 @@ LibraryModule AimmsWebUI {
                 
                 casenameLen := StringLength(casename);
                 protocolLen := StringLength(protocol);
+                casenameLowerCase := StringToLower(casename);
+                protocolLowerCase := StringToLower(protocol);
                 
-                if ( SubString(casename,1,protocolLen) = protocol and SubString(casename,casenameLen-4,casenameLen) = ".data" ) then
+                if ( SubString(casenameLowerCase,1,protocolLen) = protocolLowerCase and SubString(casenameLowerCase,casenameLen-4,casenameLen) = ".data" ) then
                 	numSlashes := StringOccurrences(casename,"/");
                 	pos := FindNthString(casename,"/",numSlashes);
                 	BareCasename := SubString(casename,pos+1,casenameLen-5);
@@ -44,6 +46,8 @@ LibraryModule AimmsWebUI {
             }
             Parameter casenameLen;
             Parameter protocolLen;
+            StringParameter casenameLowerCase;
+            StringParameter protocolLowerCase;
             Parameter numSlashes;
             Parameter pos;
             StringParameter bareCasename;
@@ -134,20 +138,25 @@ LibraryModule AimmsWebUI {
         Procedure LoadCase {
             Arguments: (casename);
             Body: {
-                empty success;
+                empty success, caseUrl;
                 
                 bareCasename := GetBareCasename(casename,"PRO:/");
                 if ( StringLength(bareCasename) > 0 ) then
-                	if ( pro::webui::LoadWebUICase(bareCasename) ) then
-                		success := 1;
-                	endif;
+                	! PRO Storage case
+                	storageServerPath := GetCaseStorageServerPath;
+                	caseUrl := FormatString("%s/%s.data",storageServerPath,bareCasename);
                 else
                 	bareCasename := GetBareCasename(casename,"file:/");
                 	if ( StringLength(bareCasename) > 0 ) then
-                		bareCaseName := FormatString("./Data/%s.data",bareCasename);
-                		if ( CaseFileLoad(bareCaseName) ) then
-                			success := 1;
-                		endif;
+                		! Case in project folder
+                		caseUrl := FormatString("./Data/%s.data",bareCasename);
+                	endif;
+                endif;
+                
+                if ( StringLength(caseUrl) > 0 ) then
+                	pro::management::LocalLogInfo("Loading WebUI case from : " + caseUrl);
+                	if ( CaseFileLoad(caseUrl) ) then
+                		success := 1;
                 	endif;
                 endif;
                 
@@ -162,29 +171,37 @@ LibraryModule AimmsWebUI {
                 Property: Input;
             }
             StringParameter bareCasename;
+            StringParameter storageServerPath;
+            StringParameter caseUrl;
             Parameter success;
         }
         Procedure SaveCase {
             Arguments: (casename);
             Body: {
-                empty success;
+                empty success, caseUrl;
                 
                 bareCasename := GetBareCasename(casename,"PRO:/");
                 if ( StringLength(bareCasename) > 0 ) then
-                	if ( pro::webui::SaveWebUICase(bareCasename) ) then
-                		success := 1;
-                	endif;
+                	! PRO Storage case
+                	storageServerPath := GetCaseStorageServerPath;
+                	caseUrl := FormatString("%s/%s.data",storageServerPath,bareCasename);
                 else
                 	bareCasename := GetBareCasename(casename,"file:/");
                 	if ( StringLength(bareCasename) > 0 ) then
+                		! Case in project folder
                 		if ( not DirectoryExists("Data") ) then
                 			DirectoryCreate("Data");
                 		endif;
-                		bareCaseName := FormatString("Data/%s.data",bareCasename);
-                		StoredIdentifiers := AllIdentifiers;
-                		StoredIdentifiers -= 'webui::CurrentCaseIsDirty';
-                		StoredIdentifiers -= 'webui::CurrentCasePath';
-                		CaseFileSave(bareCaseName,StoredIdentifiers);
+                		caseUrl := FormatString("./Data/%s.data",bareCasename);
+                	endif;
+                endif;
+                
+                if ( StringLength(caseUrl) > 0 ) then
+                	StoredIdentifiers := AllIdentifiers;
+                	StoredIdentifiers -= 'webui::CurrentCaseIsDirty';
+                	StoredIdentifiers -= 'webui::CurrentCasePath';
+                	pro::management::LocalLogInfo("Saving WebUI case to : " + caseUrl);
+                	if ( CaseFileSave(caseUrl,StoredIdentifiers) ) then
                 		success := 1;
                 	endif;
                 endif;
@@ -200,6 +217,8 @@ LibraryModule AimmsWebUI {
                 Property: Input;
             }
             StringParameter bareCasename;
+            StringParameter storageServerPath;
+            StringParameter caseUrl;
             Parameter success;
             Set StoredIdentifiers {
                 SubsetOf: AllIdentifiers;
@@ -208,26 +227,50 @@ LibraryModule AimmsWebUI {
         Procedure ExistsCase {
             Arguments: (casename);
             Body: {
-                empty success;
+                empty numberOfVersions;
                 
                 bareCasename := GetBareCasename(casename,"PRO:/");
                 if ( StringLength(bareCasename) > 0 ) then
-                	return pro::webui::ExistsWebUICase(bareCasename);
+                	! PRO Storage case
+                	bareCaseName := FormatString("%s.data",bareCasename);
+                	storageServerPath := GetCaseStorageServerPath + "/";
+                	! strip "PRO:" from path
+                	len := StringLength(storageServerPath);
+                	storageServerPath := SubString(storageServerPath,5,len-1);
+                	pro::storage::GetObjectInfo(storageServerPath,bareCaseName,objFileName,objFileType,numberOfVersions,authorization,lastVersionID);
+                	logInfo := FormatString("Exists WebUI PRO storage case : (%s,%s) = %n",storageServerPath,bareCaseName,numberOfVersions);
+                	pro::management::LocalLogInfo(logInfo);
                 else
                 	bareCasename := GetBareCasename(casename,"file:/");
                 	if ( StringLength(bareCasename) > 0 ) then
-                		bareCaseName := FormatString("Data/%s.data",bareCasename);
-                		return FileExists(bareCasename);
+                		! Case in project folder
+                		pro::management::LocalLogInfo("Exists WebUI local case : " + caseUrl);
+                		caseUrl := FormatString("./Data/%s.data",bareCasename);
+                		numberOfVersions := FileExists(caseUrl);
+                		logInfo := FormatString("Exists WebUI local case : %s = %n",caseUrl,numberOfVersions);
+                		pro::management::LocalLogInfo(logInfo);
                 	endif;
                 endif;
                 
-                return 0;
+                if ( numberOfVersions > 0 ) then
+                	return 1;
+                else
+                	return 0;
+                endif;
             }
             StringParameter casename {
                 Property: Input;
             }
             StringParameter bareCasename;
-            Parameter success;
+            StringParameter storageServerPath;
+            Parameter len;
+            Parameter numberOfVersions;
+            StringParameter objFileName;
+            StringParameter objFileType;
+            StringParameter authorization;
+            StringParameter lastVersionID;
+            StringParameter logInfo;
+            StringParameter caseUrl;
         }
         Procedure CreateCase {
             Arguments: (casename);
@@ -253,14 +296,20 @@ LibraryModule AimmsWebUI {
                 
                 	bareCasename := GetBareCasename(casename,"PRO:/");
                 	if ( StringLength(bareCasename) > 0 ) then
-                		if ( pro::webui::DeleteWebUICase(bareCasename) ) then
-                			success := 1;
-                		endif;
+                		! PRO Storage case
+                		bareCaseName := FormatString("%s.data",bareCasename);
+                		storageServerPath := GetCaseStorageServerPath + "/";
+                		! strip "PRO:" from path
+                		len := StringLength(storageServerPath);
+                		storageServerPath := SubString(storageServerPath,5,len-1);
+                		pro::storage::DeleteObjectAllVersions(storageServerPath,bareCasename);
+                		success := 1;
                 	else
                 		bareCasename := GetBareCasename(casename,"file:/");
                 		if ( StringLength(bareCasename) > 0 ) then
-                			bareCaseName := FormatString("Data/%s.data",bareCasename);
-                			if ( FileDelete(bareCaseName) ) then
+                			! Case in project folder
+                			caseUrl := FormatString("./Data/%s.data",bareCasename);
+                			if ( FileDelete(caseUrl) ) then
                 				success := 1;
                 			endif;
                 		endif;
@@ -279,6 +328,9 @@ LibraryModule AimmsWebUI {
                 Property: Input;
             }
             StringParameter bareCasename;
+            StringParameter storageServerPath;
+            Parameter len;
+            StringParameter caseUrl;
             Parameter success;
         }
     }
