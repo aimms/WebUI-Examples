@@ -22,8 +22,8 @@ Section AIMMS_Version_Dependent_Functionalities {
                        scalar string : dllFolder,
                        scalar string : logConfigFile,
                        scalar integer : lang,
-                       scalar string : environment,
-                       scalar string : userName,
+                       handle : environment,
+                       handle : userName,
                        scalar string : password
                      )
                 }
@@ -43,10 +43,10 @@ Section AIMMS_Version_Dependent_Functionalities {
                     Property: Input;
                 }
                 StringParameter environment {
-                    Property: Input;
+                    Property: InOut;
                 }
                 StringParameter userName {
-                    Property: Input;
+                    Property: InOut;
                 }
                 StringParameter password {
                     Property: Input;

@@ -558,10 +558,14 @@ LibraryModule AimmsProLibrary {
                     Arguments: (versionID,selectFolder);
                     Body: {
                         if DirectorySelect(selectFolder,selectFolder,"Select Destination Folder") then
-                                ret := GetObjectVersion(versionID,PROTempFolder,getFileName);
+                        		tempFolder := PROTempFolder + "\\folder";
+                                if not DirectoryExists(tempFolder) then
+                                    DirectoryCreate(tempFolder);
+                                endif;
+                                ret := GetObjectVersion(versionID,tempFolder,getFileName);
                                 if not (ret) then return 0; endif;
                         
-                                if not FileMove(PROTempFolder + "\\" + getFileName, selectFolder, 1) then
+                                if not FileMove(tempFolder + "\\" + getFileName, selectFolder, 1) then
                                     raise error CurrentErrorMessage code 'PRO-Error-moving-file' ;
                                 endif;
                         endif;
@@ -578,24 +582,31 @@ LibraryModule AimmsProLibrary {
                         Default: "";
                         Property: InOut;
                     }
+                    StringParameter tempFolder;
                 }
                 Procedure GetObjectVersion {
                     Arguments: (versionID,folder,getFileName);
                     Body: {
+                        ! create output folder if necessary
+                        if not DirectoryExists(folder) then
+                           	DirectoryCreate(folder);
+                        endif;
+                        
                         if openedAsWorker then
                                 ! Worker sessions do not have buffer
                                 return storage::GetObjectVersionUnbuffered(versionID,folder,getFileName);
                         else
-                                bufferPath := PROTempFolder + "\\prosbuf\\";
+                                bufferPath := PROTempFolder + "\\prosbuf";
                                 if not DirectoryExists(bufferPath) then
-                                        DirectoryCreate(bufferPath);
+                                    DirectoryCreate(bufferPath);
                                 endif;
-                                if not FileExists(bufferPath + versionID) then
+                                bufferedFilePath := bufferPath + "\\" + versionID;
+                                if not FileExists(bufferedFilePath) then
                                         ! Get the file and add to the buffer
                                         ret := storage::GetObjectVersionUnbuffered(versionID,folder,getFileName);
                                         if not (ret) then return 0; endif;
                         
-                                        ret := FileCopy(folder + "\\" + getFileName,bufferPath + versionID);
+                                        ret := FileCopy(folder + "\\" + getFileName,bufferedFilePath);
                                         if not (ret) then return 0; endif;
                         
                                         ! Check buffer total size (files can be deleted here, if the buffer became bigger than 10 MB)
@@ -606,7 +617,7 @@ LibraryModule AimmsProLibrary {
                                         ret := storage::GetVersionInfo(versionID, path, bucket, getFileName, fileSize, dateCreated);
                                         if not (ret) then return 0; endif;
                         
-                                        ret := FileCopy(bufferPath + versionID,folder + "\\" + getFileName);
+                                        ret := FileCopy(bufferedFilePath,folder + "\\" + getFileName);
                                         if not (ret) then return 0; endif;
                                 endif;
                         endif;
@@ -625,6 +636,7 @@ LibraryModule AimmsProLibrary {
                     }
                     Parameter ret;
                     StringParameter bufferPath;
+                    StringParameter bufferedFilePath;
                     Parameter fileSize;
                     StringParameter bucket;
                     StringParameter path;
@@ -708,12 +720,16 @@ LibraryModule AimmsProLibrary {
                         ret := storage::GetObjectInfo(storageBucketPath,storageFileWithoutPath, tmpLocalFileName, tmpType, tmpNum, tmpAuth, tmpVersion);
                         if ret then ! Object exists
                             ! retrieve file to temp folder
-                            ret := GetObjectVersion(tmpVersion, pro::PROTempFolder, tmpLocalFileName);
+                            centralFolder := pro::PROTempFolder + "\\central";
+                            if not DirectoryExists(centralFolder) then
+                                DirectoryCreate(centralFolder);
+                            endif;
+                            ret := GetObjectVersion(tmpVersion, centralFolder, tmpLocalFileName);
                             if not pro::HandleError(ret,"GetObjectVersion") then return 0; endif;
                         
                             !Now that we have the file in the PROTempFolder, we move it to the destination folder and destination
                             !file name denoted by the arguments.
-                            if not FileMove( pro::PROTempFolder + "\\" + tmpLocalFileName, localPath ) then
+                            if not FileMove( centralFolder + "\\" + tmpLocalFileName, localPath ) then
                                     raise error "Error while moving file retrieved from server to destination folder: " + CurrentErrorMessage ;
                             endif ;
                         
@@ -736,6 +752,7 @@ LibraryModule AimmsProLibrary {
                     StringParameter tmpLocalFileName;
                     StringParameter tmpType;
                     StringParameter tmpVersion;
+                    StringParameter centralFolder;
                 }
                 Procedure CreateStorageFolder {
                     Arguments: (storagePath,authorization);
@@ -1442,14 +1459,18 @@ LibraryModule AimmsProLibrary {
                     StringParameter workerSessionID {
                         Property: NoSave;
                     }
-                    Parameter workerDelegationLevel;
+                    Parameter workerDelegationLevel {
+                        Property: NoSave;
+                    }
                     Parameter openedAsWorker {
                         Range: binary;
                         Default: 0;
                         Property: NoSave;
                         Definition: 1 $ workerSessionID;
                     }
-                    Parameter workerCallbackCalled;
+                    Parameter workerCallbackCalled {
+                        Property: NoSave;
+                    }
                 }
                 DeclarationSection Worker_Trace_Info {
                     StringParameter workerErrorMsg {
@@ -2145,31 +2166,26 @@ LibraryModule AimmsProLibrary {
                             version::ResetCaseStatus();
                             
                             ! Get the message log and the case file from the Storage Service
+                            cbFolder := PROTempFolder + "\\callback";
+                            if not DirectoryExists(cbFolder) then
+                                DirectoryCreate(cbFolder);
+                            endif;
                             
                             if MessageLogVersionID(SessionElement) <> "" then
-                            	if (DirectoryExists("log")) then
-                            		logFolderLocation := "log";
-                            	else
-                            		logFolderLocation := PROTempFolder;
-                            	endif;
-                                ret := GetObjectVersion(MessageLogVersionID(SessionElement),logFolderLocation,tmpFileLog);
+                                ret := GetObjectVersion(MessageLogVersionID(SessionElement),cbFolder,tmpFileLog);
                                 if not HandleError(ret) then return 0; endif;
                             endif;
                             
                             if (ResponseVersionID(SessionElement)) then
-                                ret := GetObjectVersion(ResponseVersionID(SessionElement),PROTempFolder,tmpFile);
+                                ret := GetObjectVersion(ResponseVersionID(SessionElement),cbFolder,tmpFile);
                                 if not HandleError(ret) then return 0; endif;
                             
                                 ! Load file
-                                ret := version::LoadCaseByFile(PROTempFolder + "\\" + tmpFile);
+                                ret := version::LoadCaseByFile(cbFolder + "\\" + tmpFile);
                             
                                 if not ret then
-                                        DialogMessage("Error during load. File corrupted.", "PRO Framework - Load Solution");
-                                        ! Maybe the case has problems because of some execution error; check messages.log if it exists
-                                        if (MessageLogVersionID(SessionElement) <> "") then
-                                                ShowMessageWindow();
-                                        endif;
-                                        return 0;
+                                    DialogMessage("Error during load. File corrupted.", "PRO Framework - Load Solution");
+                                    return 0;
                                 endif;
                             
                                 Apply(PostLoadResultCaseHook);
@@ -2191,7 +2207,7 @@ LibraryModule AimmsProLibrary {
                         StringParameter tmpFileLog {
                             InitialData: "";
                         }
-                        StringParameter logFolderLocation;
+                        StringParameter cbFolder;
                     }
                     Procedure EmptyCallBack {
                         Arguments: (RequestID);
@@ -3162,51 +3178,6 @@ LibraryModule AimmsProLibrary {
                             GetWebUICaseStoragePath := FormatString("PRO:/UserData/%s/%s/Cases/%s",PROEnvironment,PROUserName,ModelName);
                         }
                     }
-                    Procedure ListWebUICases {
-                        Body: {
-                            StoragePath := GetWebUICaseStoragePath + "/";
-                            ! strip "PRO:" from path
-                            len := StringLength(StoragePath);
-                            StoragePath := SubString(StoragePath,5,len-1);
-                            
-                            management::LocalLogInfo("ListWebUICases on PRO server in path " + StoragePath);
-                            
-                            storage::ListObjects(StoragePath,listedCases,listedCaseName,listedCaseType,listedCaseSize,listedCaseAuthorization);
-                            
-                            ! filter out all actual cases files and store them in the public set ManagedSessionListedCases
-                            empty AvailableCases;
-                            for (lc) do
-                            	casename := FormatString("%e",lc);
-                            	len := StringLength(casename);
-                            	if ( SubString(casename,len-4,len) = ".data" ) then
-                            		SetElementAdd(AvailableCases,webUICase,casename);
-                            	endif;
-                            endfor;
-                            
-                            management::LocalLogInfo("ListWebUICases found " + Card(AvailableCases) + " on PRO server");
-                        }
-                        StringParameter casename;
-                        Parameter len;
-                        ElementParameter webUICase {
-                            Range: AvailableCases;
-                        }
-                        StringParameter StoragePath;
-                        Set listedCases {
-                            Index: lc;
-                        }
-                        StringParameter listedCaseName {
-                            IndexDomain: lc;
-                        }
-                        StringParameter listedCaseType {
-                            IndexDomain: lc;
-                        }
-                        Parameter listedCaseSize {
-                            IndexDomain: lc;
-                        }
-                        StringParameter listedCaseAuthorization {
-                            IndexDomain: lc;
-                        }
-                    }
                     Procedure LoadWebUICase {
                         Arguments: (casename);
                         Body: {
@@ -3234,12 +3205,19 @@ LibraryModule AimmsProLibrary {
                             management::LocalLogInfo("SaveWebUICase to PRO server : " + StoragePath);
                             
                             WebUICaseIdentifiers := AllIdentifiers;
-                            WebUICaseIdentifiers -= 'pro::webui::CurrentCaseIsDirty';
-                            WebUICaseIdentifiers -= 'pro::webui::CurrentCaseName';
+                            if ( StringToElement(WebUICaseIdentifiers,"webui::CurrentCaseIsDirty") <> '' ) then
+                            	WebUICaseIdentifiers -= 'webui::CurrentCaseIsDirty';
+                            endif;
+                            if ( StringToElement(WebUICaseIdentifiers,"webui::CurrentCasePath") <> '' ) then
+                            	WebUICaseIdentifiers -= 'webui::CurrentCasePath';
+                            endif;
                             
                             if (not CaseFileSave(StoragePath,WebUICaseIdentifiers)) then
                             	pro::management::PassMessage(2,CurrentErrorMessage);
+                            	return 0;
                             endif;
+                            
+                            return 1;
                         }
                         StringParameter casename {
                             Property: Input;
@@ -3326,19 +3304,55 @@ LibraryModule AimmsProLibrary {
                             }
                             StringParameter WebUICaseStoragePath;
                         }
+                        Procedure ExistsWebUIState {
+                            Body: {
+                                WebUICaseStoragePath := GetWebUICaseStoragePath;
+                                StoragePath := FormatString("%s/WebUIStates/",WebUICaseStoragePath);
+                                
+                                ! strip "PRO:" from path
+                                len := StringLength(StoragePath);
+                                StoragePath := SubString(StoragePath,5,len-1);
+                                
+                                DataSessionID := ReadArguments('_pro-webui-session-id');
+                                StateName := FormatString("%s.data",DataSessionID);
+                                
+                                management::LocalLogInfo("ExistsWebUIState on PRO server : " + StoragePath);
+                                
+                                storage::GetObjectInfo(StoragePath,StateName,objFileName,objFileType,numberOfVersions,authorization,lastVersionID);
+                                
+                                management::LocalLogInfo("ExistsWebUIState sees " + numberOfVersions + " versions");
+                                
+                                return numberOfVersions;
+                            }
+                            StringParameter DataSessionID {
+                                Property: Input;
+                            }
+                            StringParameter WebUICaseStoragePath;
+                            StringParameter StoragePath;
+                            StringParameter StateName;
+                            Parameter len;
+                            Parameter numberOfVersions;
+                            StringParameter objFileName;
+                            StringParameter objFileType;
+                            StringParameter authorization;
+                            StringParameter lastVersionID;
+                        }
                         Procedure RestoreWebUIState {
                             Body: {
                                 DataSessionID := ReadArguments('_pro-webui-session-id');
                                 
                                 Apply(PreRestoreWebUIStateHook,DataSessionID);
                                 
-                                StoragePath := GetWebUIStateStoragePath(DataSessionID);
-                                Message := "Restoring WebUI state from '" + StoragePath + "'";
-                                display Message;
-                                pro::management::PassMessage(3,Message);
+                                numberOfVersions := ExistsWebUIState;
+                                if ( numberOfVersions > 0 ) then
+                                	StoragePath := GetWebUIStateStoragePath(DataSessionID);
+                                	Message := "Restoring WebUI state from '" + StoragePath + "'";
+                                	display Message;
+                                	pro::management::PassMessage(3,Message);
                                 
-                                if (not CaseFileMerge(StoragePath)) then
-                                	pro::management::PassMessage(2,CurrentErrorMessage);
+                                	if (not CaseFileMerge(StoragePath)) then
+                                		pro::management::PassMessage(2,CurrentErrorMessage);
+                                	endif;
                                 endif;
                                 
                                 Apply(PostRestoreWebUIStateHook,DataSessionID);
@@ -3346,6 +3360,7 @@ LibraryModule AimmsProLibrary {
                             StringParameter DataSessionID;
                             StringParameter Message;
                             StringParameter StoragePath;
+                            Parameter numberOfVersions;
                         }
                         Procedure SaveWebUIState {
                             Body: {
@@ -3410,9 +3425,6 @@ LibraryModule AimmsProLibrary {
                     Default: 'pro::session::EmptyCallBack';
                     Property: NoSave;
                 }
-                Set AvailableCases;
-                Parameter CurrentCaseIsDirty;
-                StringParameter CurrentCaseName;
                 Procedure EmptyCallback {
                     Arguments: (DataSessionID);
                     Body: {
