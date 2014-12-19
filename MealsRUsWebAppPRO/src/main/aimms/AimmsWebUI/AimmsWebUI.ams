@@ -2,20 +2,26 @@
 
 LibraryModule AimmsWebUI {
     Prefix: webui;
+    Interface: Public_Declarations;
     Section Data_Management {
-        Set AllCases {
-            Text: "All available WebUI cases (local cases as wel as cases stored on the PRO server)";
-            Index: IndexCases;
+        DeclarationSection Public_Declarations {
+            Set AllCases {
+                Text: "All available WebUI cases (local cases as wel as cases stored on the PRO server)";
+                Index: IndexCases;
+            }
+            ElementParameter CurrentCase {
+                Text: "Reference to the latest touched (i.e. created, saved or loaded) WebUI case";
+                Range: AllCases;
+            }
+            StringParameter CasePath {
+                IndexDomain: IndexCases;
+            }
+            Parameter CaseReadOnly {
+                IndexDomain: IndexCases;
+            }
+            StringParameter CurrentCasePath;
+            Parameter CurrentCaseIsDirty;
         }
-        ElementParameter CurrentCase {
-            Text: "Reference to the latest touched (i.e. created, saved or loaded) WebUI case";
-            Range: AllCases;
-        }
-        StringParameter CasePath {
-            IndexDomain: IndexCases;
-        }
-        StringParameter CurrentCasePath;
-        Parameter CurrentCaseIsDirty;
         Function GetCaseStorageServerPath {
             Range: string;
             Body: {
@@ -78,10 +84,13 @@ LibraryModule AimmsWebUI {
                 	DirectoryGetFiles("Data","*.data",LocalFileNames);
                 endif;
                 
+                PROIsInitialized := pro::management::IsInitialized;
+                
                 for (fn) do
                 	casename := FormatString("local-case-%n",Ord(fn));
                 	SetElementAdd(AllCases,aCase,casename);
                 	CasePath(aCase) := FormatString("file:/%s",LocalFileNames(fn));
+                	CaseReadOnly(aCase) := if ( PROIsInitialized ) then 1 else 0 endif;
                 endfor;
                 
                 StoragePath := GetCaseStorageServerPath + "/";
@@ -89,7 +98,7 @@ LibraryModule AimmsWebUI {
                 len := StringLength(StoragePath);
                 StoragePath := SubString(StoragePath,5,len-1);
                 
-                if ( pro::management::IsInitialized ) then
+                if ( PROIsInitialized ) then
                 	pro::management::LocalLogInfo("List WebUI Cases on PRO server in path " + StoragePath);
                 	pro::storage::ListObjects(StoragePath,PROCases,PROCaseName,PROCaseType,PROCaseSize,PROCaseAuthorization);
                 	! filter out all actual cases files and store them in the public set ManagedSessionListedCases
@@ -100,11 +109,13 @@ LibraryModule AimmsWebUI {
                 			casename := FormatString("server-case-%n",casecount+1);
                 			SetElementAdd(AllCases,aCase,casename);
                 			CasePath(aCase) := FormatString("pro:/%e",pc);
+                			CaseReadOnly(aCase) := 0;
                 			casecount += 1;
                 		endif;
                 	endfor;
                 endif;
             }
+            Parameter PROIsInitialized;
             Set LocalFileNumbers {
                 SubsetOf: Integers;
                 Index: fn;
