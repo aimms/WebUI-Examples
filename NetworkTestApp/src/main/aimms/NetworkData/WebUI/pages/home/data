@@ -1,1 +1,21 @@
-{"widgets":"literal:[{\"uri\":\"MapWithCities\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"3\"}},{\"uri\":\"TableWithCities\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"2\"}},{\"uri\":\"TableWithTransport\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"2\"}}]","aimms.widget.type":"literal:\"page\"","username":"literal:\"\"","fullname":"literal:\"\"","email":"literal:\"\""}
+{
+	"slot0": "",
+	"------------------------------------------------------------------<<<<-aimms.widget.type-": "",
+	"aimms.widget.type": "literal:\"page\"",
+	"------------------------------------------------------------------>>>>-aimms.widget.type-": "",
+	"slot1": "",
+	"------------------------------------------------------------------<<<<-awf.persistence.version-": "",
+	"awf.persistence.version": "1.1",
+	"------------------------------------------------------------------>>>>-awf.persistence.version-": "",
+	"------------------------------------------------------------------<<<<-widgets-": "",
+	"widgets": "literal:[{\"uri\":\"MapWithCities\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"3\"}},{\"uri\":\"TableWithCities\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"2\"}},{\"uri\":\"TableWithTransport\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"2\"}},{\"uri\":\"Compute Transport\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"1\"}}]",
+	"------------------------------------------------------------------>>>>-widgets-": "",
+	"slot2": "",
+	"slot3": "",
+	"slot4": "",
+	"slot5": "",
+	"slot6": "",
+	"slot7": "",
+	"slot8": "",
+	"slot9": ""
+}

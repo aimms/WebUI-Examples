@@ -1,1 +1,27 @@
-<div tabindex="0" data-username="literal:&quot;&quot;" data-fullname="literal:&quot;&quot;" data-email="literal:&quot;&quot;" data-aimms.widget.type="literal:&quot;table&quot;" data-contents="aimms:{&quot;contents&quot;:[&quot;Transport&quot;]}" data-contents.partition="literal:{&quot;rowHeader&quot;:[&quot;c_from&quot;,&quot;c_to&quot;],&quot;colHeader&quot;:[&quot;<IDENTIFIER-SET>&quot;]}"></div>
+{
+	"slot0": "",
+	"slot1": "",
+	"slot2": "",
+	"------------------------------------------------------------------<<<<-title-": "",
+	"title": "literal:\"Computed Transport\"",
+	"------------------------------------------------------------------>>>>-title-": "",
+	"slot3": "",
+	"------------------------------------------------------------------<<<<-aimms.widget.type-": "",
+	"aimms.widget.type": "literal:\"table\"",
+	"------------------------------------------------------------------>>>>-aimms.widget.type-": "",
+	"------------------------------------------------------------------<<<<-contents-": "",
+	"contents": "aimms:{\"contents\":[\"Transport\"]}",
+	"------------------------------------------------------------------>>>>-contents-": "",
+	"slot4": "",
+	"------------------------------------------------------------------<<<<-contents.partition-": "",
+	"contents.partition": "literal:{\"rowHeader\":[\"c_from\",\"c_to\"],\"colHeader\":[\"<IDENTIFIER-SET>\"]}",
+	"------------------------------------------------------------------>>>>-contents.partition-": "",
+	"slot5": "",
+	"slot6": "",
+	"slot7": "",
+	"------------------------------------------------------------------<<<<-awf.persistence.version-": "",
+	"awf.persistence.version": "1.1",
+	"------------------------------------------------------------------>>>>-awf.persistence.version-": "",
+	"slot8": "",
+	"slot9": ""
+}
