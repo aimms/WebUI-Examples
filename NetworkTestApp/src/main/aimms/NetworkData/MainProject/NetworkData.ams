@@ -68,7 +68,7 @@ Model Main_NetworkData {
                 data
                     { Cities             , c                  , c_from             , c_to               , Demand             , Supply             ,
                       NumberOfInhabitants, TransportCost      , Transport          , TotalTransportCost , LonLat             , iLonLat            ,
-                      WebUICoordinates   , Throughput, PTransport   }
+                      WebUICoordinates   , Throughput, PTransport, SolveModel   }
             }
         }
         Set LonLat {
@@ -127,10 +127,13 @@ Model Main_NetworkData {
             Demand(c) := Round(100 * (1-IsSupplier(c)) * Uniform(10,25))/100;
         }
     }
-    Procedure MainInitialization;
-    Procedure SolveModel {
+    Procedure MainInitialization {
         Body: {
             InitializeNodes;
+        }
+    }
+    Procedure SolveModel {
+        Body: {
             solve NetworkModel;
         }
     }
