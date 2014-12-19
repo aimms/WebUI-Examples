@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<TemplateManager>
+	<Page Name="Terminate" PageGUID="FF43DB21-0851-48D5-B00C-5629083815FA" />
+	<Page Name="Progress Window" PageGUID="FB84BF23-8AC7-4328-84D8-12A39BA6CAFB" />
+	<Page Name="Log File Viewer" PageGUID="5E94DD51-A5B5-433D-BAD9-0E070C233C44" />
+	<Page Name="Load Response" PageGUID="43B7B6EB-1606-4C94-B955-18603F4F55FC" />
+	<Page Name="Managed Requests" PageGUID="4371A622-2E3C-4D57-BE0C-DB31F10C6A72" />
+	<Page Name="Authorization Manager" PageGUID="9156D5E8-2E41-44AD-A887-91E41857B2BD" />
+</TemplateManager>

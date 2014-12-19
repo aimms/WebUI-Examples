@@ -1,0 +1,8 @@
+pro::LocalizedTextDescription(pro::lti) := Data {
+  '1'      : "pro::Login: PageTitle",
+  '2'      : "pro::Login: TextObject",
+  '3'      : "pro::Login: Button",
+  '4'      : "pro::Login: Button",
+  '5'      : "pro::Login: TextObject"
+};
+

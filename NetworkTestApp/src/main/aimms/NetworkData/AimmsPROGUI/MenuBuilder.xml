@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<UserMenuTree Version="3130" TimeStamp="2014-04-11 13:13:51">
+	<Toolbar Name="RunRemote" UUID="06304029-08E2-4F1D-975E-E7D70D55CF20">
+		<MenuItem Name="CheckRequests" UUID="A89B2244-37F3-476E-92DF-D1BA74CE8277" BitmapIndex="94">
+			<Comment>Open the Request Manager Page from the PRO Framework</Comment>
+			<Control>
+				<NameInGUI>guipro::LocalizedText( '46', guipro::CurrentLanguage )</NameInGUI>
+			</Control>
+			<ActionSequence>
+				<Action Type="LinkedPage">
+					<Page PageGUID="4371A622-2E3C-4D57-BE0C-DB31F10C6A72" Name="Managed Requests" />
+				</Action>
+			</ActionSequence>
+		</MenuItem>
+	</Toolbar>
+</UserMenuTree>

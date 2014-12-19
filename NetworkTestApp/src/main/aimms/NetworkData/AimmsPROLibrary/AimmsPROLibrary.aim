@@ -1,0 +1,4198 @@
+
+LIBRARYMODULE AimmsProLibrary
+  prefix    :  pro
+  interface :  PRO_API +
+                              session::Public_Declarations +
+                              Public_Framework_Declarations +
+                              Worker_Setup +
+                              Case_Load_and_Save +
+                              DLL_Interface
+
+  SECTION AIMMS_Version_Independent_Functionality
+
+
+    SECTION PRO_API
+
+
+      DECLARATION SECTION Constants
+
+        PARAMETER:
+           identifier :  PROMFLAG_ACK
+           range      :  integer
+           property   :  NoSave
+           definition :  1 ;
+
+        PARAMETER:
+           identifier :  PROMFLAG_PRIORITY
+           range      :  integer
+           property   :  NoSave
+           definition :  2 ;
+
+        PARAMETER:
+           identifier :  PROMFLAG_SYNC_ONLY
+           range      :  integer
+           property   :  NoSave
+           definition :  4 ;
+
+        PARAMETER:
+           identifier :  PROMFLAG_LIVE
+           range      :  integer
+           property   :  NoSave
+           definition :  8 ;
+
+        PARAMETER:
+           identifier :  PROMFLAG_REQUEST
+           range      :  integer
+           property   :  NoSave
+           definition :  16 ;
+
+        PARAMETER:
+           identifier :  PROMFLAG_RESPONSE
+           range      :  integer
+           property   :  NoSave
+           definition :  32 ;
+
+        PARAMETER:
+           identifier :  PROMFLAG_ERROR
+           range      :  integer
+           property   :  NoSave
+           definition :  64 ;
+
+        PARAMETER:
+           identifier :  PROMFLAG_SESSION
+           range      :  integer
+           property   :  NoSave
+           definition :  128 ;
+
+        PARAMETER:
+           identifier :  PROMFLAG_USER
+           range      :  integer
+           property   :  NoSave
+           definition :  256 ;
+
+        PARAMETER:
+           identifier :  PROTS_CREATED
+           range      :  integer
+           property   :  NoSave
+           definition :  0
+           comment    :  "Worker created but project not opened yet" ;
+
+        PARAMETER:
+           identifier :  PROTS_QUEUED
+           range      :  integer
+           property   :  NoSave
+           definition :  1
+           comment    :  "Project opening requested and being executed" ;
+
+        PARAMETER:
+           identifier :  PROTS_INITIALIZING
+           range      :  integer
+           property   :  NoSave
+           definition :  2
+           comment    :  "Project opening requested and being executed" ;
+
+        PARAMETER:
+           identifier :  PROTS_READY
+           range      :  integer
+           property   :  NoSave
+           definition :  3
+           comment    :  "Waiting for new tasks to be executed" ;
+
+        PARAMETER:
+           identifier :  PROTS_RUNNING
+           range      :  integer
+           property   :  NoSave
+           definition :  4
+           comment    :  "Running a task" ;
+
+        PARAMETER:
+           identifier :  PROTS_CLOSING
+           range      :  integer
+           property   :  NoSave
+           definition :  5
+           comment    :  "Project closing; no more tasks will be handled" ;
+
+        PARAMETER:
+           identifier :  PROTS_FINISHED
+           range      :  integer
+           property   :  NoSave
+           definition :  6
+           comment    :  "Project closed; no more tasks will be handled" ;
+
+        PARAMETER:
+           identifier :  PROTS_TERMINATED
+           range      :  integer
+           property   :  NoSave
+           definition :  7
+           comment    :  "Project terminated during execution; no more tasks will be handled" ;
+
+        PARAMETER:
+           identifier :  PROTS_ERROR
+           range      :  integer
+           property   :  NoSave
+           definition :  8
+           comment    :  "Project ended with an error; no more tasks will be handled" ;
+
+        PARAMETER:
+           identifier :  PROTS_DELETED
+           range      :  integer
+           property   :  NoSave
+           definition :  9
+           comment    :  "Project ended with an error; no more tasks will be handled" ;
+
+        PARAMETER:
+           identifier :  AIMMSAPI_INTERRUPT_EXECUTE
+           range      :  integer
+           property   :  NoSave
+           definition :  1
+           comment    :  "Interrupt the current running procedure" ;
+
+        PARAMETER:
+           identifier :  AIMMSAPI_INTERRUPT_SOLVE
+           range      :  integer
+           property   :  NoSave
+           definition :  2
+           comment    :  "Interrupt the current solve statement" ;
+
+        PARAMETER:
+           identifier :  PROA_ADMIN_GROUP
+           property   :  NoSave
+           definition :  128 ;
+
+      ENDSECTION  ;
+
+      SECTION User_Management
+
+
+        FUNCTION
+          identifier :  GetPROEnvironment
+          range      :  string
+          body       :  
+            GetPROEnvironment := PROEnvironment;
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  GetPROUserName
+          range      :  string
+          body       :  
+            GetPROUserName := PROUserName;
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  GetPROTempFolder
+          range      :  string
+          body       :  
+            GetPROTempFolder := PROTempFolder;
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  GetPROEndPoint
+          range      :  string
+          body       :  
+            GetPROEndPoint := PROEndPoint;
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  GetPROSUserBucket
+          range      :  string
+          body       :  
+            GetPROSUserBucket := PROS_ROOT_USER_BUCKET + "/" + PROEnvironment + "/" + PROUserName;;
+
+        ENDFUNCTION  ;
+
+        PROCEDURE
+          identifier :  GetCurrentUserInfo
+          arguments  :  (environment,username,userBucket,userGroups,userGroupname)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier   :  environment
+               property     :  Output
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  username
+               property     :  Output
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  userBucket
+               property     :  Output
+               initial data :  "" ;
+
+            SET:
+               identifier   :  userGroups
+               index        :  usrGrp
+               parameter    :  UserGroupElement
+               property     :  Output ;
+
+            STRING PARAMETER:
+               identifier   :  userGroupname
+               index domain :  usrGrp
+               property     :  Output ;
+
+            PARAMETER:
+               identifier   :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Initialize PRO Framework (if not initialized yet)
+            ret := Initialize();
+            if not (ret) then return 0; endif;
+            
+            for userGroup do
+                SetElementAdd(userGroups,UserGroupElement,userGroup);
+                userGroupname(UserGroupElement) := PROUserGroupName(userGroup);
+            endfor;
+            
+            environment := GetPROEnvironment;
+            username := GetPROUserName;
+            userBucket := GetPROSUserBucket;
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION User_Management ;
+
+      SECTION Procedure_Preparation_for_Remote_Execution
+
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  DebugServerSession
+             default    :  0
+             property   :  NoSave ;
+
+          PARAMETER:
+             identifier :  DeveloperModeDelegation
+             default    :  0
+             property   :  NoSave
+             comment    :  "0 = ask, 1 = delegate always, 2 = always solve locally" ;
+
+        ENDSECTION  ;
+
+        PROCEDURE
+          identifier :  DelegateToServer
+          arguments  :  (procedureName,requestDescription,requestQueue,timeOut,flags,waitForCompletion,completionCallback,
+                             inputCase,delegationOverride,authorization,licenseName,priorityAdjustment,scheduledAt)
+
+          DECLARATION SECTION 
+
+            ELEMENT PARAMETER:
+               identifier :  err
+               range      :  errh::PendingErrors ;
+
+            STRING PARAMETER:
+               identifier :  clientQueue ;
+
+            STRING PARAMETER:
+               identifier :  requestQueue
+               property   :  Optional ;
+
+            STRING PARAMETER:
+               identifier :  requestDescription
+               property   :  Optional ;
+
+            ELEMENT PARAMETER:
+               identifier :  procedureName
+               range      :  AllProcedures
+               default    :  ''
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  timeOut
+               range      :  integer
+               default    :  3600000
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  flags
+               range      :  integer
+               default    :  0
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+            PARAMETER:
+               identifier :  waitForCompletion
+               range      :  binary
+               property   :  Optional ;
+
+            ELEMENT PARAMETER:
+               identifier :  completionCallback
+               range      :  AllProcedures
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  waited ;
+
+            PARAMETER:
+               identifier :  delegationOverride
+               property   :  Optional
+               comment    :  "  -1 : always run locally,
+                                 0 : ask if running in developer mode,
+                              >= 1 : delegate if override level > level of current session" ;
+
+            STRING PARAMETER:
+               identifier :  inputCase
+               property   :  Optional ;
+
+            STRING PARAMETER:
+               identifier :  authorization
+               property   :  Optional ;
+
+            STRING PARAMETER:
+               identifier :  licenseName
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  priorityAdjustment
+               range      :  integer
+               property   :  Optional ;
+
+            STRING PARAMETER:
+               identifier :  scheduledAt
+               property   :  Optional ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Determine the procedure name if not given explicitly
+            if (procedureName = '') then
+                DetermineProcedureName(procedureName);
+            endif;
+            
+            ! Check conditions to start a new session or send to an existing session.
+            if (requestQueue = "") then
+                return DelegateToNewSession(procedureName,requestDescription,timeOut,waitForCompletion,completionCallback,inputCase,delegationOverride,authorization,licenseName,priorityAdjustment);
+            else
+                return DelegateToPeer(requestQueue,procedureName,flags);
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  DelegateToNewSession
+          arguments  :  (procedureName,requestDescription,timeOut,waitForCompletion,completionCallback,inputCase,
+                             delegationOverride,authorization,licenseName,priorityAdjustment,scheduledAt)
+
+          DECLARATION SECTION 
+
+            ELEMENT PARAMETER:
+               identifier :  err
+               range      :  errh::PendingErrors ;
+
+            STRING PARAMETER:
+               identifier :  clientQueue ;
+
+            STRING PARAMETER:
+               identifier :  requestQueue ;
+
+            STRING PARAMETER:
+               identifier :  requestDescription
+               property   :  Optional ;
+
+            ELEMENT PARAMETER:
+               identifier :  procedureName
+               range      :  AllProcedures
+               default    :  ''
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  timeOut
+               range      :  integer
+               default    :  3600000
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+            PARAMETER:
+               identifier :  waitForCompletion
+               range      :  binary
+               property   :  Optional ;
+
+            ELEMENT PARAMETER:
+               identifier :  completionCallback
+               range      :  AllProcedures
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  waited ;
+
+            PARAMETER:
+               identifier :  delegationOverride
+               property   :  Optional
+               comment    :  "  -1 : always run locally,
+                                 0 : ask if running in developer mode,
+                              >= 1 : delegate if override level > level of current session" ;
+
+            STRING PARAMETER:
+               identifier :  inputCase
+               property   :  Optional ;
+
+            STRING PARAMETER:
+               identifier :  authorization
+               property   :  Optional ;
+
+            STRING PARAMETER:
+               identifier :  licenseName
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  priorityAdjustment
+               range      :  integer
+               property   :  Optional ;
+
+            STRING PARAMETER:
+               identifier :  scheduledAt
+               property   :  Optional ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Determine whether we need to delegate or run locally
+            if (RunLocally(delegationOverride)) then
+                return 0;
+            else
+                ! Run remotely
+            
+                if procedureName = '' then
+                    DetermineProcedureName(procedureName);
+                endif ;
+            
+                ! Create a new session to do it
+                session::RunManagedSession(clientQueue,requestQueue,procedureName,delegationOverride,timeOut,requestDescription,callbackProcedure:completionCallback,
+                                           InputCase:inputCase,Authorization:authorization,licenseName:licenseName,priorityAdjustment:priorityAdjustment,scheduledAt:scheduledAt);
+            
+                if waitForCompletion then
+                    waited := 0;
+                    while (waited < timeout and not messaging::WaitForMessages(clientQueue,PROMFLAG_SESSION,1000)) do
+                        waited += 1000;
+                    endwhile;
+                endif ;
+            
+                return 1;
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  DelegateToCurrentSession
+          arguments  :  (procedureName,flags)
+
+          DECLARATION SECTION 
+
+            ELEMENT PARAMETER:
+               identifier :  procedureName
+               range      :  AllProcedures
+               default    :  ''
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  flags
+               range      :  integer
+               default    :  0
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ret := Initialize();
+            HandleError(ret);
+            
+            if procedureName = '' then
+                DetermineProcedureName(procedureName);
+            endif ;
+            
+            ! Call remotely
+            return DelegateToPeer(session::CurrentSessionQueue,procedureName,flags);
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  DelegateToClient
+          arguments  :  (procedureName,flags)
+
+          DECLARATION SECTION 
+
+            ELEMENT PARAMETER:
+               identifier :  err
+               range      :  errh::PendingErrors ;
+
+            ELEMENT PARAMETER:
+               identifier :  procedureName
+               range      :  AllProcedures
+               default    :  ''
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  flags
+               range      :  integer
+               default    :  0
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            !If the user did not provide the name of the procedure, then first find this
+            !with using error handling
+            if ProcedureName = '' then
+                DetermineProcedureName(procedureName);
+            endif ;
+            
+            return DelegateToPeer(clientQueueID,procedureName,flags);
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  DelegateToPeer
+          arguments  :  (requestQueue,procedureName,flags)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  requestQueue
+               property   :  Input ;
+
+            ELEMENT PARAMETER:
+               identifier :  err
+               range      :  errh::PendingErrors ;
+
+            ELEMENT PARAMETER:
+               identifier :  procedureName
+               range      :  AllProcedures
+               default    :  ''
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  flags
+               range      :  integer
+               default    :  0
+               property   :  Optional ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if ((not requestQueue) or IsHandlingQueue(requestQueue)) then
+                return 0;
+            endif;
+            
+            !If the user did not provide the name of the procedure, then first find this
+            !with using error handling
+            if ProcedureName = '' then
+                DetermineProcedureName(procedureName);
+            endif ;
+            
+            ! Call remotely
+            ret := client::SendRunProcedure(requestQueue,procedureName,procedureName,-1,flags);
+            if (ret) then
+                management::LocalLogInfo("Execution request: '" + procedureName + "' at " + requestQueue);
+            else
+                management::LocalLogError("Execution request failed: '" + procedureName + "' at " + requestQueue);
+            endif;
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        FUNCTION
+          identifier :  CurrentDelegationLevel
+          body       :  
+            CurrentDelegationLevel := workerDelegationLevel;
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  IsRunningAtServer
+          range      :  binary
+          body       :  
+            IsRunningAtServer := openedAsWorker;
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  GetPROLastErrorMessage
+          range      :  string
+          body       :  
+            GetPROLastErrorMessage := PROLastErrorMessage;
+
+        ENDFUNCTION  ;
+
+      ENDSECTION Procedure_Preparation_for_Remote_Execution ;
+
+      SECTION Extended_API
+
+
+        PROCEDURE
+          identifier :  GetVersionFullInfo
+          arguments  :  (versionID,path,bucket,object,objFileName,objFileType,objFileSize,objAuthorization,lastVersionID,dateCreated)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier   :  versionID
+               property     :  Input ;
+
+            STRING PARAMETER:
+               identifier   :  path
+               property     :  Output
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  bucket
+               property     :  Output
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  object
+               property     :  Output
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  objFileName
+               property     :  Output
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  objFileType
+               property     :  Output
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  objFileSize
+               property     :  Output
+               initial data :  0 ;
+
+            STRING PARAMETER:
+               identifier   :  objAuthorization
+               property     :  Output
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  ret ;
+
+            PARAMETER:
+               identifier   :  numberOfVersions
+               initial data :  0 ;
+
+            STRING PARAMETER:
+               identifier   :  dateCreated
+               property     :  Output ;
+
+            STRING PARAMETER:
+               identifier   :  lastVersionID
+               property     :  Output ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ret := storage::GetVersionInfo(versionID, path, bucket, object, objFileSize, dateCreated);
+            if not (ret) then return 0;
+            else
+                    ret := storage::GetObjectInfo(path + "/" + bucket, object, objFileName, objFileType, numberOfVersions, objAuthorization, lastVersionID);
+                    if not (ret) then return 0; endif;
+            endif;
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  SaveVersionInFolder
+          arguments  :  (versionID,selectFolder)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier   :  versionID
+               property     :  Input ;
+
+            STRING PARAMETER:
+               identifier   :  getFileName
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  ret ;
+
+            STRING PARAMETER:
+               identifier   :  selectFolder
+               default      :  ""
+               property     :  InOut ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if DirectorySelect(selectFolder,selectFolder,"Select Destination Folder") then
+                    ret := GetObjectVersion(versionID,PROTempFolder,getFileName);
+                    if not (ret) then return 0; endif;
+            
+                    if not FileMove(PROTempFolder + "\\" + getFileName, selectFolder, 1) then
+                        raise error CurrentErrorMessage code 'PRO-Error-moving-file' ;
+                    endif;
+            endif;
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  GetObjectVersion
+          arguments  :  (versionID,folder,getFileName)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier   :  versionID
+               property     :  Input ;
+
+            STRING PARAMETER:
+               identifier   :  folder
+               property     :  Input ;
+
+            STRING PARAMETER:
+               identifier   :  getFileName
+               property     :  Output
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  ret ;
+
+            STRING PARAMETER:
+               identifier   :  bufferPath ;
+
+            PARAMETER:
+               identifier   :  fileSize ;
+
+            STRING PARAMETER:
+               identifier   :  bucket ;
+
+            STRING PARAMETER:
+               identifier   :  path ;
+
+            STRING PARAMETER:
+               identifier   :  dateCreated ;
+
+          ENDSECTION  ;
+
+          comment    :  "Add local buffer management to GetObjectVersion"
+          body       :  
+            if openedAsWorker then
+                    ! Worker sessions do not have buffer
+                    return storage::GetObjectVersionUnbuffered(versionID,folder,getFileName);
+            else
+                    bufferPath := PROTempFolder + "\\prosbuf\\";
+                    if not DirectoryExists(bufferPath) then
+                            DirectoryCreate(bufferPath);
+                    endif;
+                    if not FileExists(bufferPath + versionID) then
+                            ! Get the file and add to the buffer
+                            ret := storage::GetObjectVersionUnbuffered(versionID,folder,getFileName);
+                            if not (ret) then return 0; endif;
+            
+                            ret := FileCopy(folder + "\\" + getFileName,bufferPath + versionID);
+                            if not (ret) then return 0; endif;
+            
+                            ! Check buffer total size (files can be deleted here, if the buffer became bigger than 10 MB)
+                            ret := management::ManageFileBuffer(bufferPath,10,fileSize);
+                            if not (ret) then return 0; endif;
+                    else
+                            ! Get only information about the file, that is already in the buffer
+                            ret := storage::GetVersionInfo(versionID, path, bucket, getFileName, fileSize, dateCreated);
+                            if not (ret) then return 0; endif;
+            
+                            ret := FileCopy(bufferPath + versionID,folder + "\\" + getFileName);
+                            if not (ret) then return 0; endif;
+                    endif;
+            endif;
+            return 1;
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION Extended_API ;
+
+      SECTION Central_Storage
+
+
+        PROCEDURE
+          identifier :  SaveFileToCentralStorage
+          arguments  :  (localPath,storagePath,authorization)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  localPath
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  storagePath
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  authorization
+               property   :  Optional ;
+
+            STRING PARAMETER:
+               identifier :  localFileNameWithoutPath ;
+
+            STRING PARAMETER:
+               identifier :  storageBucketPath ;
+
+            STRING PARAMETER:
+               identifier :  storageFileWithoutPath ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+            PARAMETER:
+               identifier :  tmpNum ;
+
+            STRING PARAMETER:
+               identifier :  tmpAuth ;
+
+            STRING PARAMETER:
+               identifier :  tmpDate ;
+
+            STRING PARAMETER:
+               identifier :  tmpLocalFileName ;
+
+            STRING PARAMETER:
+               identifier :  tmpType ;
+
+            STRING PARAMETER:
+               identifier :  tmpVersion ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Initialize PRO (if not initialized yet)
+            ret := Initialize();
+            if not HandleError(ret,"PROInitialize") then return 0; endif;
+            
+            !Sanity checking the existence of the local file
+            if not FileExists( localPath ) then
+                    raise error "File '" + localPath + "' does not exist." ;
+                    return 0 ;
+            endif ;
+            
+            !Determine the filename of the file we need to store. This means that we need
+            !to remove the absolute/relative path related part before the last / or \
+            localFileNameWithoutPath := FindReplaceStrings( localPath , "\\", "/" ) ;
+            if StringOccurrences( localFileNameWithoutPath , "/" ) then
+                    localFileNameWithoutPath := substring( localFileNameWithoutPath ,
+                                                           FindNthString( localFileNameWithoutPath , "/", -1) + 1 ,
+                                                           StringLength(localFileNameWithoutPath ) ) ;
+            endif ;
+            
+            SplitStoragePath(storagePath,storageBucketPath,storageFileWithoutPath);
+            
+            !First try to create the necessary folder in central storage
+            ret := CreateStorageFolder(storageBucketPath,authorization);
+            if (not ret) then return 0; endif;
+            
+            !Now that we have created the required subbucket structure, we can now check if there already
+            !exists an object/file with the given name.
+            ret := storage::GetObjectInfo(storageBucketPath,storageFileWithoutPath, tmpLocalFileName, tmpType, tmpNum, tmpAuth, tmpVersion) ;
+            if ret and tmpNum>0 then ! Object versions exist
+                    ret := storage::DeleteObjectAllVersions( storageBucketPath , storageFileWithoutPath ) ;
+                    if not pro::HandleError(ret,"DeleteObjectAllVersions") then return 0; endif;
+            endif ;
+            
+            !Now store the local file into the bucket
+            ret := storage::PutObjectVersion( storageBucketPath, storageFileWithoutPath, localFileNameWithoutPath, authorization, tmpVersion ) ;
+            if not pro::HandleError(ret,"PutObjectVersion") then return 0; endif;
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  RetrieveFileFromCentralStorage
+          arguments  :  (storagePath,localPath)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  storagePath
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  localPath
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  storageFileWithoutPath ;
+
+            STRING PARAMETER:
+               identifier :  storageBucketPath ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+            PARAMETER:
+               identifier :  tmpNum ;
+
+            STRING PARAMETER:
+               identifier :  tmpAuth ;
+
+            STRING PARAMETER:
+               identifier :  tmpLocalFileName ;
+
+            STRING PARAMETER:
+               identifier :  tmpType ;
+
+            STRING PARAMETER:
+               identifier :  tmpVersion ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Initialize PRO (if not initialized yet)
+            ret := Initialize();
+            if not HandleError(ret,"PROInitialize") then return 0; endif;
+            
+            SplitStoragePath(storagePath, storageBucketPath, storageFileWithoutPath);
+            
+            !Now that we have created the required subbucket structure, we can now check if there already
+            !exists an object/file with the given name.
+            ret := storage::GetObjectInfo(storageBucketPath,storageFileWithoutPath, tmpLocalFileName, tmpType, tmpNum, tmpAuth, tmpVersion);
+            if ret then ! Object exists
+                ! retrieve file to temp folder
+                ret := GetObjectVersion(tmpVersion, pro::PROTempFolder, tmpLocalFileName);
+                if not pro::HandleError(ret,"GetObjectVersion") then return 0; endif;
+            
+                !Now that we have the file in the PROTempFolder, we move it to the destination folder and destination
+                !file name denoted by the arguments.
+                if not FileMove( pro::PROTempFolder + "\\" + tmpLocalFileName, localPath ) then
+                        raise error "Error while moving file retrieved from server to destination folder: " + CurrentErrorMessage ;
+                endif ;
+            
+                return 1;
+            endif;
+            
+            return 0;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  CreateStorageFolder
+          arguments  :  (storagePath,authorization)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier   :  storagePath
+               property     :  Input ;
+
+            STRING PARAMETER:
+               identifier   :  authorization
+               property     :  Optional ;
+
+            STRING PARAMETER:
+               identifier   :  storageBucketPath ;
+
+            STRING PARAMETER:
+               identifier   :  storageObjectWithoutPath ;
+
+            SET:
+               identifier   :  Positions
+               subset of    :  Integers
+               index        :  iPosition ;
+
+            STRING PARAMETER:
+               identifier   :  subBuckets
+               index domain :  (iPosition) ;
+
+            STRING PARAMETER:
+               identifier   :  currentBucketPath ;
+
+            PARAMETER:
+               identifier   :  ret ;
+
+            PARAMETER:
+               identifier   :  tmpNum ;
+
+            STRING PARAMETER:
+               identifier   :  tmpAuth ;
+
+            STRING PARAMETER:
+               identifier   :  tmpDate ;
+
+            PARAMETER:
+               identifier   :  BucketsLeft ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Initialize PRO (if not initialized yet)
+            ret := Initialize();
+            if not HandleError(ret,"PROInitialize") then return 0; endif;
+            
+            SplitStoragePath(storagePath, storageBucketPath, storageObjectWithoutPath);
+            
+            while (storageObjectWithoutPath) do
+                ! check if current path exists already
+                ret := storage::GetBucketInfo(storageBucketPath,storageObjectWithoutPath,tmpNum,tmpAuth,tmpDate);
+            
+                ! If ret = 1, we've found a parent bucket that exists, and we can start building from there.
+                ! Note, however, that the parent may not be writable so further errors may ensue when
+                ! trying to create additional folders.
+            
+                ! If the bucket itself does not exist or is not readable, then tmpNum = -1. In that case we should
+                ! still try to create the bucket. For existing buckets, tmpNum >= 0.
+            
+                    if (not ret or tmpNum = -1) then
+                            ! if the parent or bucket does not exist store the last part of the path for creation
+                        Positions += card(Positions);
+                            subBuckets(card(Positions)-1) := storageObjectWithoutPath;
+                    storagePath := storageBucketPath;
+                endif;
+            
+                ! break from the loop when the parent does exist
+                break when ret;
+            
+                    ! otherwise try again with the parent bucket one higher
+                SplitStoragePath(storagePath, storageBucketPath, storageObjectWithoutPath, 0);
+            endwhile;
+            
+            BucketsLeft := card(Positions);
+            while (BucketsLeft) do
+                ret := storage::CreateBucket(storagePath, SubBuckets(BucketsLeft-1), authorization);
+                if (not HandleError(ret, "CreateBucket")) then return 0; endif;
+            
+                storagePath += "/" + SubBuckets(BucketsLeft-1);
+                BucketsLeft -= 1;
+            endwhile;
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  DeleteStorageFolder
+          arguments  :  (storagePath)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  storagePath
+               property   :  Input ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Initialize PRO (if not initialized yet)
+            ret := Initialize();
+            if not HandleError(ret,"PROInitialize") then return 0; endif;
+            
+            NormalizeStoragePath(storagePath);
+            
+            ret := storage::DeleteBucket(storagePath);
+            if not pro::HandleError(ret,"DeleteBucket") then return 0; endif;
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  DeleteStorageFile
+          arguments  :  (storagePath)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  storagePath
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  storageFileWithoutPath ;
+
+            STRING PARAMETER:
+               identifier :  storageBucketPath ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Initialize PRO (if not initialized yet)
+            ret := Initialize();
+            if not HandleError(ret,"PROInitialize") then return 0; endif;
+            
+            SplitStoragePath(storagePath, storageBucketPath, storageFileWithoutPath);
+            
+            ret := storage::DeleteObjectAllVersions(storageBucketPath,storageFileWithoutPath);
+            if not pro::HandleError(ret,"DeleteObjectAllVersions") then return 0; endif;
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION Central_Storage ;
+
+    ENDSECTION PRO_API ;
+
+    SECTION Framework_Management
+
+
+      SECTION Public_Framework_Declarations
+
+
+        DECLARATION SECTION Local_Configuration
+
+          SET:
+             identifier   :  CommandLineArguments
+             index        :  CL
+             parameter    :  CommandLineArgument
+             property     :  NoSave
+             definition   :  data
+                                 { _pro-modelname    , _pro-modelversion , _pro-dll-directory, _pro-environment  , _pro-username     , _pro-logfile      ,
+                                   _pro-tmpfolder    , _pro-endpoint     , _pro-language     , _pro-ticket       , _pro-secur        , _pro-session-id   } ;
+
+          STRING PARAMETER:
+             identifier   :  ReadArguments
+             index domain :  (CL)
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROConfigFile
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROEnvironment
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROUserName
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROPassword
+             property     :  NoSave ;
+
+          SET:
+             identifier   :  PROUserGroups
+             index        :  userGroup
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROUserGroupName
+             index domain :  (userGroup)
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROLastUserName
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROLogConfigFile
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROTempFolder
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROEndPoint
+             property     :  NoSave ;
+
+          PARAMETER:
+             identifier   :  PROLanguageCode
+             index domain :  language
+             range        :  integer
+             property     :  NoSave
+             definition   :  data { English : 0 } ;
+
+          PARAMETER:
+             identifier   :  _PROLanguageCode
+             range        :  integer
+             default      :  0
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  PROAppCurrentDir
+             property     :  NoSave ;
+
+        ENDSECTION  ;
+
+        DECLARATION SECTION Model_Fixed_Configuration
+
+          SET:
+             identifier :  ConfigIdentifiers
+             subset of  :  AllIdentifiers
+             property   :  NoSave
+             definition :  data { 'pro::ModelName', 'pro::ModelVersion', 'pro::ModelDLLPath', 'pro::CurrentLanguage' } ;
+
+          STRING PARAMETER:
+             identifier :  ModelName
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  ModelVersion
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  ModelDLLPath
+             property   :  NoSave ;
+
+        ENDSECTION  ;
+
+        PROCEDURE
+          identifier :  HandleError
+          arguments  :  (ret,msg)
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier   :  ret
+               property     :  Input ;
+
+            PARAMETER:
+               identifier   :  errorCode
+               default      :  0
+               initial data :  0 ;
+
+            STRING PARAMETER:
+               identifier   :  description
+               default      :  ""
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  msg
+               default      :  ""
+               property     :  Optional ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if (not ret) then
+                ! Error prefix
+                if (msg <> "") then
+                    msg := "Error at " + msg + ": ";
+                else
+                    msg := "Error: ";
+                endif;
+            
+                ! Get error message in DLL
+                ret := management::GetLastError(errorCode,description);
+                if (not ret) then
+                    msg += "Unknown";
+                else
+                    msg += description;
+                endif;
+            
+                    ! Display the error message in a proper way
+                if (IsRunningAtServer) then
+                    management::LocalLogError(msg);
+                else
+                    raise error msg code 'PRO-Framework' ;
+                endif;
+            
+                    PROLastErrorMessage := msg;
+                return 0;
+            endif;
+            
+            PROLastErrorMessage := "";
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  Initialize
+          arguments  :  (bufferSize)
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier   :  ret
+               initial data :  -1 ;
+
+            STRING PARAMETER:
+               identifier   :  tmpStr
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  bufferSize
+               range        :  integer
+               default      :  1
+               property     :  Optional
+               comment      :  "Usable amount of disk space (in Megabytes) to store files from PROS" ;
+
+          ENDSECTION  ;
+
+          comment    :  "All public declarations in this section should be available after calling pro::Initialize"
+          body       :  
+            if (ProjectDeveloperMode and ModelName = "undefined" ) then
+                    ! Initialization fails but does not further frustrate testing during PRO-enabling a project
+                    raise warning "No model name, version or endpoint specified, trying to connect to PRO server during development will fail" ;
+                    RETURN 0;
+            
+            ! Check if a critical error ocurred during library initialization
+            elseif PROCriticalError then
+                    raise error "No model name or version specified, or no client DLL present (probably due to trying to connect to a PRO server from an unpublished model)" code 'PRO-Critical-initialization-error' ;
+                    RETURN 0;
+            elseif (not CheckForNoEmpty) then
+                    raise error "An apparent empty statement has been applied to the PRO library. This can result in undefined behavior" ;
+                    RETURN 0;
+            endif;
+            
+            if (not ModelDLLPath and FileExists("pro_arguments.txt")) then
+                    PROLoadClientConfiguration;
+            endif;
+            
+            ! Check if its already initialized
+            if (not management::IsInitialized()) then
+            
+                    ! If there is a shared ticket, don't need user information
+                    IF ReadArguments('_pro-ticket') = "" THEN
+                            ! Login information
+                            IF PROEnvironment = "" THEN PROEnvironment := "ROOT"; ENDIF;
+                            IF PROUserName = "" THEN PROUserName := "anonymous"; ENDIF;
+                            SetLogin;
+                            IF PROCancelLogin THEN
+                                    RETURN 0;
+                            ELSEIF PROUserName = "" THEN
+                                    raise error "Cannot connect to the PRO server with an empty user name." code 'PRO-Empty-username' ;
+                                    RETURN 0;
+                            ENDIF;
+                            IF PROEnvironment = "" THEN
+                                    PROEnvironment := "ROOT";
+                            ENDIF;
+            
+                            ! Collect user password info
+                            if (not IsRunningAtServer()) AND SessionHasVisibleGUI AND (PROPassword = "" OR PROUserName <> PROLastUserName) then
+                                    DialogGetPassword("User Password",PROPassword,"AIMMS PRO Framework");
+                            endif;
+                    ENDIF;
+            
+                    ! Forward configuration to the DLL
+                    tmpStr := ReadArguments('_pro-dll-directory');
+                    if (not FileExists(PROLogConfigFile)) then
+                            GenerateDefaultLogConfigFile;
+                    endif;
+                    ret := management::Initialize(PROEndPoint,PROTempFolder,tmpStr,PROLogConfigFile,_PROLanguageCode,PROEnvironment,PROUserName,PROPassword);
+                    if not HandleError(ret) then
+                            PROPassword := "";
+                            return 0;
+                    else
+                            PROLastUserName := PROUserName;
+                    endif;
+            
+                    ! Startup arguments
+                    PROSBufferSize := bufferSize;
+            
+                    ret := authentication::GetCurrentUserGroupList(PROUserGroups, PROUserGroupName);
+            
+                    GetListeningConnection(tmpStr);
+                    if (not IsRunningAtServer()) then
+                            ! Reload session information ("Optimize Current Case" function)
+                            ret := session::InitializeManagedSessions;
+                    endif;
+            
+                    ! Initialize active session
+                    session::ActiveSession := '';
+                    session::LastKnowActiveSession := '';
+            
+                    if not ret then return 0; endif;
+            endif;
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        FUNCTION
+          identifier :  ListeningConnectionID
+          range      :  string
+          body       :  
+            ListeningConnectionID := InternalListenConnectionID;
+
+        ENDFUNCTION  ;
+
+        PROCEDURE
+          identifier :  GetListeningConnection
+          arguments  :  (ConnectionID)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier   :  ConnectionID
+               property     :  Output
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if (management::IsConnected() and  InternalListenConnectionID <> "") then
+                    ! Use already-stablished connection
+                    ConnectionID := InternalListenConnectionID;
+                    return 1;
+            else
+                    return CreateListeningConnection(ConnectionID);
+            endif;
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION Public_Framework_Declarations ;
+
+      SECTION Private_Tools
+
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  CheckForNoEmpty
+             property   :  NoSave ;
+
+        ENDSECTION  ;
+
+        PROCEDURE
+          identifier :  DetermineProcedureName
+          arguments  :  (procedureName)
+
+          DECLARATION SECTION 
+
+            ELEMENT PARAMETER:
+               identifier :  procedureName
+               range      :  AllProcedures
+               property   :  InOut ;
+
+            ELEMENT PARAMETER:
+               identifier :  err
+               range      :  errh::PendingErrors ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! If the user did not provide the name of the procedure, then first find it
+            ! using a little trick involving error handling
+            if procedureName = '' then
+                block
+                    raise error "Artificial error induced by PRO Client library to detect procedure name in any of the delegation procedures" ;
+                onerror err do
+                    ! To get the name of the procedure that actually called this procedure, we must
+                    ! get the third node in the stacktrace.
+                    procedureName := errh::Node( err, 3) ;
+                    errh::MarkAsHandled(err,1) ;
+                    CurrentErrorMessage := "";
+                endblock ;
+            endif ;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  RunLocally
+          arguments  :  (delegationOverride)
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier :  delegationOverride
+               default    :  0
+               property   :  InOut
+               comment    :  "  -1 : always run locally,
+                                 0 : ask if running in developer mode,
+                              >= 1 : delegate if override level > level of current session" ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! When running in the context of a server side session, use the delegation level
+            ! to determine whether to run locally or distribute further.
+            if (IsHandlingQueue(workerQueueID) and delegationOverride <= CurrentDelegationLevel) then
+                return 1;
+            endif;
+            
+            ! In developermode, we may want to run locally, or want to delegate to a server side session.
+            if ProjectDeveloperMode then
+                if (delegationOverride = 0 and not DeveloperModeDelegation) then
+                    DeveloperModeDelegation := dialogAsk("Use PRO server for solving during this session?", "Yes", "No");
+                endif;
+            
+                if (DeveloperModeDelegation = 2) then
+                    ! always run locally, so don't delegate
+                    return 1;
+                else
+                    ! set the delegationOverride level to 1, which is passed on to the
+                    ! server side session, and is used there to determine whether to
+                    ! solve locally there or further distribute a request.
+                    delegationOverride := 1;
+                    return 0;
+                endif;
+            endif ;
+            
+            ! Run remotely via PRO
+            return 0;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  IsHandlingQueue
+          arguments  :  (requestQueue)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  requestQueue
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  CurrentlyHandledQueue ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if (not requestQueue) then
+                    return 0;
+            else
+                    messaging::CurrentlyHandledQueue(CurrentlyHandledQueue);
+                    return (CurrentlyHandledQueue = requestQueue);
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  GenerateDefaultLogConfigFile
+
+          DECLARATION SECTION 
+
+            FILE:
+               identifier :  LogConfigFile
+               name       :  PROLogConfigFile
+               device     :  disk
+               mode       :  replace ;
+
+          ENDSECTION  ;
+
+          body       :  
+            put LogConfigFile;
+            put "# PRO global log configuration",/;
+            put "log4j.rootLogger=INFO, file",/;
+            put /;
+            put "# Write appender to file (max 50MB, at most 10 backup files)",/;
+            put "log4j.appender.file=org.apache.log4j.RollingFileAppender",/;
+            put "log4j.appender.file.file=AimmsPROClientLog.xml",/;
+            put "log4j.appender.file.ImmediateFlush=true",/;
+            put "log4j.appender.file.layout=org.apache.log4j.xml.XMLLayout",/;
+            put "log4j.appender.file.MaxFileSize=50MB",/;
+            put "log4j.appender.file.MaxBackupIndex=10",/;
+            put /;
+            put "# Special tracing for some loggers",/;
+            put "log4j.logger.PRO.FileTransfer=ERROR",/;
+            put "log4j.logger.ARMI=INFO",/;
+            putclose LogConfigFile;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  PROLoadClientConfiguration
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier   :  CLIdx
+               range        :  integer
+               initial data :  0 ;
+
+            STRING PARAMETER:
+               identifier   :  CLArg ;
+
+            PARAMETER:
+               identifier   :  retval
+               default      :  0 ;
+
+          ENDSECTION  ;
+
+          comment    :  "Read the parameters mandatory to the client, in the following order:
+                         (1) Command-line arguments; (2) \"PROConf.xml\" in the root folder, if any; (3) \"PROConf.xml\" in the command-line
+                         provided temp folder, if any; (4) \"PROConf.xml\" in \".\\temp\" folder, if any."
+          body       :  
+            ! Read session command-line arguments (pair key-value)
+            CLIdx := 1;
+            empty ReadArguments;
+            WHILE CLIdx <= 20 and SessionArgument(CLIdx,CLArg) = 1 DO
+                    CommandLineArgument := StringToElement(CommandLineArguments,CLArg);
+                    IF CommandLineArgument <> '' THEN
+                            ! If it is a known key, check the value (next argument)
+                            CLIdx += 1;
+                            IF SessionArgument(CLIdx,CLArg) = 0 THEN
+                                    ! No value informed for this key; assign "1"
+                                    ReadArguments(CommandLineArgument) := "1";
+                                    CLIdx -= 1;
+                            ELSEIF SubString(CLArg,1,5) = "_pro-" THEN
+                                    ! The next argument is also a key; no value informed for this one, assign "1"
+                                    ReadArguments(CommandLineArgument) := "1";
+                                    CLIdx -= 1;
+                            ELSE
+                                    ! Interpret key and value
+                                    ReadArguments(CommandLineArgument) := CLArg;
+                            ENDIF;
+                    ENDIF;
+                    ! Check next pair (or next argument, in the case the last one was a invalid key)
+                    CLIdx += 1;
+            ENDWHILE;
+            
+            !If the argument _pro-username is filled in, this means it is very likely that
+            !we were started via the portal (otherwise, somebody has provided this manually
+            !as a CLI argument).
+            if ReadArguments('_pro-username') then
+                    if FileExists("pro_arguments.txt") then
+                            FileDelete("pro_arguments.txt") ;
+                    endif ;
+            
+                    !Ensure that we do not have any newlines, was problem ran into with longer path names
+                    write ReadArguments to file "pro_arguments.txt" ;
+            endif ;
+            
+            !If you are running as developer, and the file exists, and no arguments have been provided, then
+            !use the file to read the information
+            if ProjectDeveloperMode and FileExists("pro_arguments.txt") and not ReadArguments('_pro-username') then
+                    if FileExists("debug_arguments.txt") then
+                        retval := DialogAsk("Found server-side debug initialization file", "Setup server-side debug session", "Delete and start normal client session", title: "Run Mode");
+                        if ( retval = 1 ) then
+                            raise warning "Setting up server-side debug session" ;
+                            read from file "debug_arguments.txt" ;
+                            DebugServerSession := 1;
+                        else
+                            retval := 0;
+                        endif;
+                        ! A debug session can only be used once, so in any case we have to delete the file with debug arguments
+                        FileDelete("debug_arguments.txt");
+                    endif;
+            
+                    if (retval = 0) then
+                        raise warning "PRO - Not started via portal, reading PRO configuration from file" ;
+                        read from file "pro_arguments.txt" ;
+                        !And make sure that we empty the ticket, otherwise we will problems with shared tickets
+                    endif;
+            
+                    ReadArguments('_pro-ticket') := "";
+            endif ;
+            
+            ! Set the DLL file (if not provided, , uses the default "AimmsPROClient.dll")
+            IF ReadArguments('_pro-dll-directory') <> "" THEN
+                    ModelDLLPath := ReadArguments('_pro-dll-directory') + "\\" + AimmsStringConstants('Architecture')+ "\\AimmsPROClient.dll";
+            ELSE
+                    ReadArguments('_pro-dll-directory') := "AimmsProLibrary";
+                    ModelDLLPath := "AimmsProLibrary\\" + AimmsStringConstants('Architecture')+ "\\AimmsPROClient.dll";
+            ENDIF;
+            
+            ! Create the temporary directory for internal use
+            IF ReadArguments('_pro-tmpfolder') <> "" THEN PROTempFolder := ReadArguments('_pro-tmpfolder'); ENDIF;
+            IF NOT DirectoryExists(PROTempFolder) THEN
+                    DirectoryCreate(PROTempFolder);
+            ENDIF;
+            
+            ! Override local configuration with the command-line arguments
+            IF ReadArguments('_pro-modelname') <> "" THEN ModelName := ReadArguments('_pro-modelname'); ENDIF;
+            IF ReadArguments('_pro-modelversion') <> "" THEN ModelVersion := ReadArguments('_pro-modelversion'); ENDIF;
+            IF ReadArguments('_pro-environment') <> "" THEN PROEnvironment := ReadArguments('_pro-environment'); ENDIF;
+            IF ReadArguments('_pro-username') <> "" THEN PROUserName := ReadArguments('_pro-username'); ENDIF;
+            IF ReadArguments('_pro-logfile') <> "" THEN PROLogConfigFile := ReadArguments('_pro-logfile'); ENDIF;
+            IF ReadArguments('_pro-endpoint') <> "" THEN PROEndPoint := ReadArguments('_pro-endpoint'); ENDIF;
+            IF ReadArguments('_pro-language') <> "" THEN
+                    IF StringToElement(AllLanguages,ReadArguments('_pro-language')) <> '' THEN
+                            CurrentLanguage := StringToElement(AllLanguages,ReadArguments('_pro-language'));
+                    ENDIF;
+            ENDIF;
+            IF ReadArguments('_pro-session-id') <> "" THEN workerSessionID := ReadArguments('_pro-session-id'); ENDIF;
+            
+            RETURN 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  NormalizeStoragePath
+          arguments  :  (storagePath)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  storagePath
+               property   :  InOut ;
+
+            PARAMETER:
+               identifier :  location ;
+
+          ENDSECTION  ;
+
+          body       :  
+            !Convert any \ character into a / character, as the rest of the code below will
+            !assume / as the separator.
+            storagePath := FindReplaceStrings( storagePath , "\\", "/" ) ;
+            
+            ! Strip any occurring 'PRO:' from the path
+            location := FindNthString(storagePath, "PRO:", 1, 0);
+            if (location) then
+                storagePath := SubString(storagePath, location + 4, StringLength(storagePath));
+            endif;
+            
+            !Now remove all leading and trailing / characters.
+            while SubString( storagePath , 1, 1) = "/" do
+                    storagePath := SubString( storagePath, 2 , StringLength( storagePath ) ) ;
+            endwhile ;
+            
+            while SubString( storagePath , -1, -1) = "/" do
+                    storagePath := SubString( storagePath, 1 , StringLength( storagePath ) -1 ) ;
+            endwhile ;
+            
+            !And just (re-)add just one leading /
+            storagePath := "/" + storagePath ;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  SplitStoragePath
+          arguments  :  (storagePath,storageBucketPath,storageFileWithoutPath,normalize)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  storagePath
+               property   :  InOut ;
+
+            STRING PARAMETER:
+               identifier :  storageBucketPath
+               property   :  Output ;
+
+            STRING PARAMETER:
+               identifier :  storageFileWithoutPath
+               property   :  Output ;
+
+            PARAMETER:
+               identifier :  normalize
+               default    :  1
+               property   :  Optional ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if (normalize) then
+                NormalizeStoragePath(storagePath)
+            endif;
+            
+            !Retrieve the bucket path
+            storageBucketPath := SubString(storagePath,1,FindNthString( storagePath, "/", -1 ) - 1) ;
+            
+            !And retrieve the storage file name
+            storageFileWithoutPath := SubString( storagePath,
+                                                 FindNthString(storagePath,"/",-1) + 1 ,
+                                                 StringLength(storagePath) ) ;
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION Private_Tools ;
+
+      SECTION Listening_Connection
+
+
+        DECLARATION SECTION 
+
+          STRING PARAMETER:
+             identifier :  InternalListenConnectionID
+             property   :  NoSave ;
+
+        ENDSECTION  ;
+
+        PROCEDURE
+          identifier :  ListenCallBack
+          arguments  :  (queue,refNumber,callType)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  queue
+               property   :  Input ;
+
+            PARAMETER:
+               identifier :  refNumber
+               range      :  integer
+               property   :  Input ;
+
+            PARAMETER:
+               identifier :  callType
+               range      :  integer
+               property   :  Input ;
+
+          ENDSECTION  ;
+
+          comment    :  "Callback that gets called right before handling every incoming message. Useful for debugging and logging purposes."
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  CreateListeningConnection
+          arguments  :  (ConnectionID)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier   :  ConnectionID
+               property     :  Output
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if (not management::IsInitialized()) then
+                    !DialogMessage("PRO Framework not initialized", "PRO Framework");
+                    raise error "PRO Framework not initialized" code 'PRO-Not-initialized' ;
+                    ret := 0;
+            elseif (management::IsConnected() and  InternalListenConnectionID <> "") then
+                    ! Use already-stablished connection
+                    ConnectionID := InternalListenConnectionID;
+                    ret := 1;
+            else
+                    ! Listen to a new connection
+                    ret := messaging::CreateConnection(InternalListenConnectionID,'pro::ListenCallBack');
+                    if not HandleError(ret) then return 0; endif;
+                    ConnectionID := InternalListenConnectionID;
+            endif;
+            
+            return ret;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  CloseListeningConnection
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Close PRO-managed connections
+            if (management::IsConnected()) then
+                ret := messaging::TerminateConnection(InternalListenConnectionID);
+                if not HandleError(ret) then return 0; endif;
+            endif;
+            
+            InternalListenConnectionID := "";
+            return 1;
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION Listening_Connection ;
+
+      SECTION Worker_Setup
+
+
+        DECLARATION SECTION Worker_State
+
+          STRING PARAMETER:
+             identifier :  clientQueueID
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  workerQueueID
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  workerSessionID
+             property   :  NoSave ;
+
+          PARAMETER:
+             identifier :  workerDelegationLevel ;
+
+          PARAMETER:
+             identifier :  openedAsWorker
+             range      :  binary
+             default    :  0
+             property   :  NoSave
+             definition :  1 $ workerSessionID ;
+
+          PARAMETER:
+             identifier :  workerCallbackCalled ;
+
+        ENDSECTION  ;
+
+        DECLARATION SECTION Worker_Trace_Info
+
+          STRING PARAMETER:
+             identifier :  workerErrorMsg
+             property   :  NoSave
+             comment    :  "Don't have the NoSave flag because it can be informed from worker to client." ;
+
+        ENDSECTION  ;
+
+        DECLARATION SECTION Worker_Request_Info
+
+          STRING PARAMETER:
+             identifier :  workerRequestClientRef
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  workerRequestDescription
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  workerRequestProcedure
+             property   :  NoSave ;
+
+          PARAMETER:
+             identifier :  workerRequestTimeout
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  workerInputDataVersion
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  workerOutputDataVersion
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  workerLogFileVersion
+             property   :  NoSave ;
+
+          STRING PARAMETER:
+             identifier :  workerErrorMessage
+             property   :  NoSave ;
+
+          PARAMETER:
+             identifier :  workerActiveStatus
+             property   :  NoSave ;
+
+          PARAMETER:
+             identifier :  workerErrorCode
+             property   :  NoSave ;
+
+        ENDSECTION  ;
+
+        PROCEDURE
+          identifier :  PublishingVerification
+          body       :  
+            ! Check if DLL exists
+            IF NOT FileExists(ModelDLLPath) THEN
+                    return -1;
+            ! Check if the DLL responds to a call
+            ELSEIF NOT management::LocalLogInfo("Test Publishing...") THEN
+                    return -2;
+            ELSEIF NOT StringToElement(AllIdentifiers, "MainInitialization") THEN
+                    return -3;
+            ENDIF;
+            
+            ! System OK
+            RETURN PROP_LIBPRJ_OK;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  PROWorkerHandleError
+          arguments  :  (ret)
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier   :  ret
+               range        :  integer
+               property     :  Input ;
+
+            PARAMETER:
+               identifier   :  errorCode
+               default      :  0
+               initial data :  0 ;
+
+            STRING PARAMETER:
+               identifier   :  description
+               default      :  ""
+               initial data :  "" ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if (not ret) then
+                    ret := management::GetLastError(errorCode,description);
+                    if (not ret) then
+                            workerErrorMsg := "Unknown Error";
+                    else
+                            workerErrorMsg := description;
+                    endif;
+                    return 0;
+            endif;
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  PROWorkerInitialization
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  tmpStr ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Check if LibraryInitialization was already run
+            if (not PROLibraryInit) then
+                    LibraryInitialization;
+            endif;
+            
+            ! If PRO is not initialized, start it
+            if (not management::IsInitialized()) then
+                tmpStr := ReadArguments('_pro-dll-directory');
+                if (DebugServerSession AND SessionHasVisibleGUI AND PROPassword = "")  then
+                    DialogGetPassword("Password for user " + PROUserName,PROPassword,"AIMMS PRO Framework");
+                endif;
+                ret := management::Initialize(PROEndPoint,PROTempFolder,tmpStr,PROLogConfigFile,_PROLanguageCode,PROEnvironment,PROUserName,PROPassword);
+                if not PROWorkerHandleError(ret) then return 0; endif;
+            endif;
+            
+            management::LocalLogInfo("Worker Initialization: session " + workerSessionID);
+            
+            ret := PROWorkerRetrieveRequestInfo;
+            if not PROWorkerHandleError(ret) then return 0; endif;
+            
+            ret := sessionmanager::SetSessionReference(workerSessionID,clientQueueID,workerQueueID);
+            if not PROWorkerHandleError(ret) then return 0; endif;
+            
+            ret := PROWorkerListen;
+            return ret;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  PROWorkerFinalization
+          body       :  
+            if (not workerCallbackCalled) then
+                pro::SessionCompletedCallBackProxy(workerSessionID);
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  PROWorkerListen
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier :  ret ;
+
+            STRING PARAMETER:
+               identifier :  connectionID ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if (management::IsInitialized()) then
+                    ret := GetListeningConnection(connectionID);
+                    if not PROWorkerHandleError(ret) then return 0; endif;
+                    ret := messaging::AddQueueToConnection(workerQueueID, connectionID);
+                    if not PROWorkerHandleError(ret) then return 0; endif;
+            endif;
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  PROWorkerRetrieveRequestInfo
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier   :  ret ;
+
+            SET:
+               identifier   :  _Sessions
+               index        :  sess
+               parameter    :  _Session ;
+
+            STRING PARAMETER:
+               identifier   :  _ClientQueueID
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _WorkerQueueID
+               index domain :  sess
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  _LastKnownStatus
+               index domain :  sess
+               default      :  0 ;
+
+            STRING PARAMETER:
+               identifier   :  _RequestTime
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _UserEnv
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _UserName
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _Application
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _OriginalCasePath
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _RequestDescription
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _RequestProcedure
+               index domain :  sess
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  _RunTimeOut
+               index domain :  sess
+               default      :  0 ;
+
+            STRING PARAMETER:
+               identifier   :  _VersionID
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _ResponseVersionID
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _MessageLogVersionID
+               index domain :  sess
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  _ErrorMessage
+               index domain :  sess
+               initial data :  "" ;
+
+            PARAMETER:
+               identifier   :  _ActiveStatus
+               index domain :  sess
+               default      :  0 ;
+
+            PARAMETER:
+               identifier   :  _ErrorCode
+               index domain :  sess
+               default      :  0 ;
+
+          ENDSECTION  ;
+
+          body       :  
+            SetElementAdd(_Sessions, _Session, workerSessionId);
+            
+            ret := sessionmanager::RetrieveSessionList(_Sessions, _ClientQueueID, _WorkerQueueID, _LastKnownStatus, _RequestTime, _UserEnv,
+                            _UserName, _Application, _OriginalCasePath, _RequestDescription, _RequestProcedure,
+                            _RunTimeOut, _VersionID, _ResponseVersionID, _MessageLogVersionID,
+                            _ErrorMessage, _ActiveStatus, _ErrorCode);
+            if not PROWorkerHandleError(ret) then return 0; endif;
+            
+            clientQueueID := _ClientQueueID(_Session);
+            workerQueueID := _WorkerQueueID(_Session);
+            workerRequestClientRef := _OriginalCasePath(_Session);
+            workerRequestDescription := _RequestDescription(_Session);
+            workerRequestProcedure := _RequestProcedure(_Session);
+            workerRequestTimeout := _RunTimeOut(_Session);
+            workerInputDataVersion := _VersionID(_Session);
+            workerOutputDataVersion := _ResponseVersionID(_Session);
+            workerLogFileVersion := _MessageLogVersionID(_Session);
+            workerErrorMessage := _ErrorMessage(_Session);
+            workerActiveStatus := _ActiveStatus(_Session);
+            workerErrorCode := _ErrorCode(_Session);
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  PROWorkerSaveRequestInfo
+          body       :  
+            return sessionmanager::SetRequestInfo(workerSessionID,
+                    workerRequestClientRef, workerRequestDescription, workerRequestProcedure, workerRequestTimeout,
+                    workerInputDataVersion, workerOutputDataVersion, workerLogFileVersion, workerErrorMessage,
+                    workerActiveStatus, workerErrorCode);
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  SessionCompletedCallBackProxy
+          arguments  :  (RequestID)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  RequestID
+               property   :  Input ;
+
+            PARAMETER:
+               identifier :  ret ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ret := client::SendRunProcedure(
+                    pro::clientQueueID,
+                    'pro::session::SessionCompletedCallBack',
+                    'pro::session::SessionCompletedCallBackProxy',
+                    -1,
+                    PROMFLAG_SESSION + PROMFLAG_RESPONSE
+            );
+            HandleError(ret);
+            
+            return ret;
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION Worker_Setup ;
+
+      SECTION Localization
+
+
+        DECLARATION SECTION 
+
+          SET:
+             identifier   :  AllLanguages
+             index        :  language
+             parameter    :  CurrentLanguage
+             property     :  NoSave
+             order by     :  User
+             definition   :  Data { English }
+             comment      :  "This set should contain all languages for which you want to
+                              localize your AIMMS end-user application. You can add new
+                              languages at any time. However, you should always make sure
+                              that your development language remains the first language
+                              in the set. AIMMS will use this language to create new
+                              localization entries during the automated localization
+                              procedure as well as in the localization wizards." ;
+
+          SET:
+             identifier   :  LocalizedTextIndexSet
+             subset of    :  Integers
+             index        :  lti
+             property     :  NoSave
+             definition   :  Data { 1 .. 5 }
+             comment      :  "This set is used to number all localized strings in your
+                              end-user interface. The localization wizards automatically
+                              update the definition of this set whenever new localization
+                              strings are added. Therefore, you should not edit the
+                              definition of this set by hand, unless you are sure
+                              what you are doing." ;
+
+          STRING PARAMETER:
+             identifier   :  LocalizedText
+             index domain :  (lti,language)
+             property     :  NoSave
+             comment      :  "This string parameter contains the actual localized strings
+                              that are visible in the end-user interface. You can edit its
+                              contents in the `Localized Text` window, which is accessible
+                              through the `Tools-Localization` menu. The `Localized Text`
+                              window is also opened when you invoke the `Data ...` menu
+                              for any of the localization identifiers." ;
+
+          STRING PARAMETER:
+             identifier   :  LocalizedTextDescription
+             index domain :  (lti)
+             property     :  NoSave
+             comment      :  "This string parameter contains an (optional) description for
+                              each localization string. You can edit its contents in the
+                              `Localized Text` window, which is accessible through the
+                              `Tools-Localization` menu. The `Localized Text` window is
+                              also opened when you invoke the `Data ...` menu for any of
+                              the localization identifiers." ;
+
+        ENDSECTION  ;
+
+        PROCEDURE
+          identifier :  LocalizationReadLanguage
+          arguments  :  ThisLanguage
+
+          DECLARATION SECTION 
+
+            ELEMENT PARAMETER:
+               identifier :  ThisLanguage
+               range      :  AllLanguages
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  LanguageFileName ;
+
+          ENDSECTION  ;
+
+          comment    :  "This procedure reads the localization data for a single language."
+          body       :  
+            LanguageFileName := FormatString("<lib:pro>:Localization\\%e.txt", ThisLanguage );
+            
+            if FileExists( LanguageFileName ) then
+                Read From File LanguageFileName;
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  LocalizationWriteLanguage
+          arguments  :  ThisLanguage
+
+          DECLARATION SECTION 
+
+            ELEMENT PARAMETER:
+               identifier :  ThisLanguage
+               range      :  AllLanguages
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  LanguageFileName ;
+
+            FILE:
+               identifier :  f
+               name       :  LanguageFileName
+               device     :  disk
+               mode       :  replace ;
+
+          ENDSECTION  ;
+
+          comment    :  "This procedure writes the localization data for a single language.
+                         AIMMS will only write data, if data for the language is actually
+                         present. This will prevent loss of localization data which is
+                         written without being read before."
+          body       :  
+            if ( ProjectDeveloperMode and
+                 Count( lti | LocalizedText(lti,ThisLanguage) ) ) then
+            
+                LanguageFileName := FormatString("<lib:pro>:Localization\\%e.txt", ThisLanguage );
+                put f;
+                display LocalizedText(lti,ThisLanguage);
+                putclose;
+            
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  LocalizationReadAll
+          comment    :  "Execute this procedure if you intend to edit the localization
+                         parameters by hand (i.e. without using the localization wizards).
+                         In that case, do not forget to call LocalizationWriteAll before
+                         the end of your AIMMS session."
+          body       :  
+            for ( language ) do
+                LocalizationReadLanguage( language );
+            endfor;
+            
+            if ( ProjectDeveloperMode and
+                 FileExists("<lib:pro>:Localization\\Descriptions.txt") ) then
+                read from file "<lib:pro>:Localization\\Descriptions.txt";
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  LocalizationWriteAll
+          comment    :  "You should execute this procedure if you have edited the
+                         localization parameters by hand. Before editing, you can
+                         call LocalizationReadAll to obtain all currently present
+                         localization data."
+          body       :  
+            for ( language ) do
+                LocalizationWriteLanguage( language );
+            endfor;
+            
+            if ( ProjectDeveloperMode and
+                 Count( lti | LocalizedTextDescription(lti) ) ) then
+            
+                write LocalizedTextDescription to file "<lib:pro>:Localization\\Descriptions.txt";
+            
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  LocalizationInitialize
+          comment    :  "This procedure initializes localization support for your application.
+                         It is automatically added to the end of MainInitialization during the
+                         localization setup. If the element parameter CurrentLanguage already
+                         has been assigned a value at that time, AIMMS will read the localization
+                         strings for that language. In all other cases, the localization data
+                         for the development language is read."
+          body       :  
+            if not CurrentLanguage then
+                CurrentLanguage := first(AllLanguages);
+            endif;
+            
+            LocalizationReadLanguage(CurrentLanguage);
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION Localization ;
+
+      SECTION Developer_GUI
+
+
+        PROCEDURE
+          identifier :  SetLogin
+          body       :  
+            IF SessionHasVisibleGUI THEN
+                    PROCancelLogin := 0;
+                    PageOpen("Login");
+            ENDIF;
+
+        ENDPROCEDURE  ;
+
+      ENDSECTION Developer_GUI ;
+
+      DECLARATION SECTION General_Declarations
+
+        STRING PARAMETER:
+           identifier :  PROS_ROOT_USER_BUCKET
+           property   :  NoSave
+           definition :  "UserData" ;
+
+        PARAMETER:
+           identifier :  PROP_LIBPRJ_OK
+           range      :  integer
+           property   :  NoSave
+           definition :  42577
+           comment    :  "Key Code for Publishing: 0xA651" ;
+
+        STRING PARAMETER:
+           identifier :  PROLastErrorMessage
+           property   :  NoSave ;
+
+        PARAMETER:
+           identifier :  PROSBufferSize
+           range      :  integer
+           default    :  1
+           property   :  NoSave ;
+
+      ENDSECTION  ;
+
+      DECLARATION SECTION Startup_and_Login
+
+        PARAMETER:
+           identifier :  PROLibraryInit
+           range      :  binary
+           default    :  0
+           property   :  NoSave ;
+
+        PARAMETER:
+           identifier :  PROCriticalError
+           range      :  binary
+           default    :  0
+           property   :  NoSave ;
+
+        PARAMETER:
+           identifier :  PROCancelLogin
+           range      :  binary
+           default    :  0
+           property   :  NoSave ;
+
+      ENDSECTION  ;
+
+      PROCEDURE
+        identifier :  Finalize
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier   :  ret
+             initial data :  -1 ;
+
+        ENDSECTION  ;
+
+        body       :  
+          ! Finalize connection with PRO server
+          if management::IsInitialized() then
+                  CloseListeningConnection;
+                  if not ret then return 0; endif;
+          
+                  ret := management::Finalize();
+                  HandleError(ret);
+          endif;
+          
+          if DirectoryExists(PROTempFolder) then
+                  DirectoryDelete(PROTempFolder);
+          endif;
+          
+          session::ActiveSession := '';
+          return 1;
+
+      ENDPROCEDURE  ;
+
+    ENDSECTION Framework_Management ;
+
+    MODULE Managed_Sessions
+        prefix     :  session
+
+
+      SECTION Public_Declarations
+
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier :  ActiveSessionRunning
+             property   :  NoSave
+             definition :  1 $ (ActiveSession and LastKnownStatus(ActiveSession) < PROTS_FINISHED) ;
+
+          STRING PARAMETER:
+             identifier :  LastKnownActiveSessionStatus
+             property   :  NoSave
+             definition :  if(LastKnownStatus(LastKnowActiveSession) = 0) then
+                           "Created"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 1) then
+                           "Queued"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 2) then
+                           "Starting server session"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 3) then
+                           "Waiting for tasks"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 4) then
+                           "Running"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 5) then
+                           "Closing server session"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 6) then
+                           "Finished"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 7) then
+                           "Terminated"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 8) then
+                           "Finished with errors"
+                           elseif(LastKnownStatus(LastKnowActiveSession) = 9) then
+                           "Deleted"
+                           else
+                           "Unknown"
+                           endif ;
+
+          PARAMETER:
+             identifier :  RetainSessionCases
+             default    :  0
+             property   :  NoSave ;
+
+          PARAMETER:
+             identifier :  SaveSessionMessages
+             default    :  1
+             property   :  NoSave ;
+
+        ENDSECTION  ;
+
+        DECLARATION SECTION Managed_Session_Data
+
+          SET:
+             identifier   :  ManagedSessions
+             index        :  manSess
+             parameters   :  ManagedSession, LastStartedSession, ActiveSession, LastKnowActiveSession
+             property     :  NoSave ;
+
+          SET:
+             identifier   :  ManagedSessionsActive
+             subset of    :  ManagedSessions
+             index        :  msAct
+             parameter    :  ManagedSessionActive
+             property     :  NoSave ;
+
+          SET:
+             identifier   :  ManagedSessionsFinished
+             subset of    :  ManagedSessions
+             index        :  msFinish
+             parameter    :  ManagedSessionInactive
+             property     :  NoSave
+             definition   :  ManagedSessions - ManagedSessionsActive ;
+
+          STRING PARAMETER:
+             identifier   :  BucketBasePath
+             property     :  NoSave
+             definition   :  GetPROSUserBucket + "/ManagedSessions_" + ModelName + "_" + ModelVersion ;
+
+          PARAMETER:
+             identifier   :  MaxInitTimeout
+             default      :  30000
+             property     :  NoSave ;
+
+          PARAMETER:
+             identifier   :  MaxCloseTimeout
+             default      :  30000
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  ClientQueueID
+             index domain :  manSess
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  WorkerQueueID
+             index domain :  manSess
+             property     :  NoSave
+             initial data :  "" ;
+
+          PARAMETER:
+             identifier   :  LastKnownStatus
+             index domain :  (manSess)
+             default      :  0
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  RequestTime
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  UserEnv
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  UserName
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  Application
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  OriginalCasePath
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  RequestDescription
+             index domain :  manSess
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  RequestProcedure
+             index domain :  manSess
+             property     :  NoSave
+             initial data :  "" ;
+
+          PARAMETER:
+             identifier   :  RunTimeOut
+             index domain :  (manSess)
+             default      :  0
+             property     :  NoSave ;
+
+          STRING PARAMETER:
+             identifier   :  VersionID
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  ResponseVersionID
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  MessageLogVersionID
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  ErrorMessage
+             index domain :  (manSess)
+             property     :  NoSave
+             initial data :  "" ;
+
+          PARAMETER:
+             identifier   :  ActiveStatus
+             index domain :  (manSess)
+             default      :  0
+             property     :  NoSave ;
+
+          PARAMETER:
+             identifier   :  ErrorCode
+             index domain :  (manSess)
+             default      :  0
+             property     :  NoSave ;
+
+        ENDSECTION  ;
+
+        SECTION Hooks_and_Callbacks
+
+
+          DECLARATION SECTION 
+
+            ELEMENT PARAMETER:
+               identifier :  PostLoadInputCaseHook
+               range      :  AllProcedures
+               default    :  'pro::session::AuxEmpty'
+               property   :  NoSave ;
+
+            ELEMENT PARAMETER:
+               identifier :  PostLoadResultCaseHook
+               range      :  AllProcedures
+               default    :  'pro::session::AuxEmpty'
+               property   :  NoSave ;
+
+            ELEMENT PARAMETER:
+               identifier :  ServerErrorCallBackHook
+               range      :  AllProcedures
+               default    :  'pro::session::EmptyCallBack'
+               property   :  NoSave ;
+
+          ENDSECTION  ;
+
+          PROCEDURE
+            identifier :  DefaultCallBack
+            arguments  :  (RequestID)
+
+            DECLARATION SECTION 
+
+              ELEMENT PARAMETER:
+                 identifier   :  SessionElement
+                 range        :  ManagedSessions ;
+
+              STRING PARAMETER:
+                 identifier   :  tmpStr
+                 initial data :  "" ;
+
+              STRING PARAMETER:
+                 identifier   :  RequestID
+                 property     :  Input ;
+
+            ENDSECTION  ;
+
+            body       :  
+              ! Notify the user discretely
+              SessionElement := StringToElement(ManagedSessions,RequestID);
+              tmpStr := "*** " + CurrentToString("%H:%M:%S") + " - New request result available: '" + RequestDescription(SessionElement) + "'! Check Request Manager! ***";
+              StatusMessage(tmpStr);
+
+          ENDPROCEDURE  ;
+
+          PROCEDURE
+            identifier :  LoadResultsCallBack
+            arguments  :  (RequestID)
+
+            DECLARATION SECTION 
+
+              ELEMENT PARAMETER:
+                 identifier   :  SessionElement
+                 range        :  ManagedSessions ;
+
+              STRING PARAMETER:
+                 identifier   :  tmpStr
+                 initial data :  "" ;
+
+              STRING PARAMETER:
+                 identifier   :  RequestID
+                 property     :  Input ;
+
+              PARAMETER:
+                 identifier   :  ret ;
+
+              STRING PARAMETER:
+                 identifier   :  tmpFile
+                 initial data :  "" ;
+
+              STRING PARAMETER:
+                 identifier   :  tmpFileLog
+                 initial data :  "" ;
+
+            ENDSECTION  ;
+
+            body       :  
+              !Automatically load the results
+              SessionElement := StringToElement(session::ManagedSessions,RequestID);
+              
+              version::ResetCaseStatus();
+              
+              ! Get the message log and the case file from the Storage Service
+              
+              if MessageLogVersionID(SessionElement) <> "" then
+                  ret := GetObjectVersion(MessageLogVersionID(SessionElement),"log",tmpFileLog);
+                  if not HandleError(ret) then return 0; endif;
+              endif;
+              
+              if (ResponseVersionID(SessionElement)) then
+                  ret := GetObjectVersion(ResponseVersionID(SessionElement),PROTempFolder,tmpFile);
+                  if not HandleError(ret) then return 0; endif;
+              
+                  ! Load file
+                  ret := version::LoadCaseByFile(PROTempFolder + "\\" + tmpFile);
+              
+                  if not ret then
+                          DialogMessage("Error during load. File corrupted.", "PRO Framework - Load Solution");
+                          ! Maybe the case has problems because of some execution error; check messages.log if it exists
+                          if (MessageLogVersionID(SessionElement) <> "") then
+                                  ShowMessageWindow();
+                          endif;
+                          return 0;
+                  endif;
+              
+                  Apply(PostLoadResultCaseHook);
+              endif;
+
+          ENDPROCEDURE  ;
+
+          PROCEDURE
+            identifier :  EmptyCallBack
+            arguments  :  (RequestID)
+
+            DECLARATION SECTION 
+
+              STRING PARAMETER:
+                 identifier :  RequestID
+                 property   :  Input ;
+
+            ENDSECTION  ;
+
+            body       :  
+              ! Does nothing
+
+          ENDPROCEDURE  ;
+
+          PROCEDURE
+            identifier :  SessionCompletedCallBack
+            arguments  :  (RequestID)
+
+            DECLARATION SECTION 
+
+              STRING PARAMETER:
+                 identifier :  RequestID
+                 property   :  Input ;
+
+            ENDSECTION  ;
+
+            body       :  
+              ! Does nothing
+
+          ENDPROCEDURE  ;
+
+          PROCEDURE
+            identifier :  ServerErrorCallBack
+            arguments  :  (RequestID)
+
+            DECLARATION SECTION 
+
+              ELEMENT PARAMETER:
+                 identifier :  SessionElement
+                 range      :  ManagedSessions ;
+
+              STRING PARAMETER:
+                 identifier :  RequestID
+                 property   :  Input ;
+
+            ENDSECTION  ;
+
+            body       :  
+              OptimizationCallBack(ServerErrorCallBackHook, RequestID);
+              
+              SessionElement := StringToElement(session::ManagedSessions,RequestID);
+              if (SessionElement) then
+                      LastKnownStatus(SessionElement) := PROTS_ERROR;
+              endif;
+
+          ENDPROCEDURE  ;
+
+        ENDSECTION Hooks_and_Callbacks ;
+
+        PROCEDURE
+          identifier :  LoadManagedSessions
+
+          DECLARATION SECTION 
+
+            PARAMETER:
+               identifier   :  ret
+               initial data :  -1 ;
+
+            STRING PARAMETER:
+               identifier   :  tmpStr ;
+
+            PARAMETER:
+               identifier   :  tmpVal
+               initial data :  0 ;
+
+            PARAMETER:
+               identifier   :  tmpVal2
+               initial data :  0 ;
+
+            STRING PARAMETER:
+               identifier   :  tmpContActive
+               initial data :  "" ;
+
+            STRING PARAMETER:
+               identifier   :  tmpContInactive
+               initial data :  "" ;
+
+            SET:
+               identifier   :  Containers
+               indices      :  CONT, CONT2
+               parameters   :  Container, Container2 ;
+
+            SET:
+               identifier   :  Items
+               indices      :  ITEM, ITEM2 ;
+
+            STRING PARAMETER:
+               identifier   :  Value
+               index domain :  (CONT,ITEM) ;
+
+            ELEMENT PARAMETER:
+               identifier   :  Ref
+               index domain :  (CONT,ITEM)
+               range        :  Containers ;
+
+            SET:
+               identifier   :  ClosedRequests
+               subset of    :  ManagedSessions
+               index        :  RRS_CLOSED ;
+
+            SET:
+               identifier   :  CheckRequests
+               subset of    :  ManagedSessions
+               index        :  msCheck ;
+
+            STRING PARAMETER:
+               identifier   :  tmpConnection ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ! Collect a tree of data: session-list-container with all session references (level 1), and session properties (level 2)
+            
+            ret := sessionmanager::ListActiveSessions(CheckRequests,
+                            ClientQueueID, WorkerQueueID, LastKnownStatus, RequestTime, UserEnv,
+                            UserName, Application, OriginalCasePath, RequestDescription, RequestProcedure,
+                            RunTimeOut, VersionID, ResponseVersionID, MessageLogVersionID,
+                            ErrorMessage, ActiveStatus, ErrorCode, 0 /*allUsers*/, ModelName, "" /*projectId*/);
+            
+            if not HandleError(ret) then return 0; endif;
+            
+            ! Collect the request status
+            if Card(CheckRequests) > 0 then
+                    GetListeningConnection(tmpConnection);
+                    ! Check que session status
+                    ret := sessionmanager::CurrentState(ManagedSessions,LastKnownStatus);
+                    if not HandleError(ret) then return 0; endif;
+            
+                    ! Clear data for already-finished sessions
+                    for (msCheck | LastKnownStatus(msCheck) >= PROTS_CLOSING) do
+                            ! Check the incoming queue status
+                            ret := messaging::GetQueueInfo(ClientQueueID(msCheck),tmpVal,tmpVal2);
+                            if not HandleError(ret) then return 0; endif;
+            
+                            ! Set the status to inactive if there are no more messages
+                            if (tmpVal = 0) then
+                                    ActiveStatus(msCheck) := 0;
+                                    sessionmanager::SetRequestInfo(msCheck, OriginalCasePath(msCheck), RequestDescription(msCheck),
+                                            RequestProcedure(msCheck), RunTimeOut(msCheck), VersionID(msCheck),
+                                            ResponseVersionID(msCheck), MessageLogVersionID(msCheck),
+                                            ErrorMessage(msCheck), ActiveStatus(msCheck), ErrorCode(msCheck));
+                                    if (msCheck in ManagedSessionsActive) then
+                                        messaging::RemoveQueueFromConnection(ClientQueueID(msCheck), tmpConnection);
+                                        ManagedSessionsActive -= msCheck;
+                                    endif;
+                            endif;
+                    endfor;
+            
+                    ! Add all sessions queued and running to the set of active sessions on the queues of which we actively listen
+                    for (msCheck | LastKnownStatus(msCheck) <= PROTS_RUNNING) do
+                            if (not msCheck in ManagedSessionsActive) then
+                                    ret := messaging::AddQueueToConnection(ClientQueueID(msCheck), tmpConnection);
+                                    if not HandleError(ret) then skip; endif;
+                                    ManagedSessionsActive += msCheck;
+                            endif;
+                    endfor;
+            endif;
+            
+            
+            return 1;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  SetSessionData
+          arguments  :  (session,description,clientQueue,workerQueue,procedureName,_runTimeout,_versionId,_responseVersionId,_messageLogVersionId,_currentErorrMessage,_requestTime,_originalCasePath)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  description
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  clientQueue
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  workerQueue
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  procedureName
+               property   :  Input ;
+
+            PARAMETER:
+               identifier :  _runTimeout
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  _versionId
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  _responseVersionId
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  _messageLogVersionId
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  _currentErorrMessage
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  _requestTime
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  _originalCasePath
+               property   :  Input ;
+
+            STRING PARAMETER:
+               identifier :  session
+               property   :  Input ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ManagedSession := StringToElement(ManagedSessions,session);
+            if ManagedSession = '' then
+                    ! Not stored locally yet
+                    SetElementAdd(ManagedSessions,ManagedSession,session);
+            endif;
+            
+            RequestDescription(ManagedSession) := description;
+            ClientQueueID(ManagedSession) := clientQueue;
+            WorkerQueueID(ManagedSession) := workerQueue;
+            RequestProcedure(ManagedSession) := procedureName;
+            RunTimeOut(ManagedSession) := _runTimeout;
+            VersionID(ManagedSession) := _versionId;
+            ResponseVersionID(ManagedSession) := _responseVersionId;
+            MessageLogVersionID(ManagedSession) := _messageLogVersionId;
+            ErrorMessage(ManagedSession) := _currentErorrMessage;
+            RequestTime(ManagedSession) := _requestTime;
+            OriginalCasePath(ManagedSession) := _originalCasePath;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  SetActiveSession
+          arguments  :  (session)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  session
+               property   :  Input ;
+
+          ENDSECTION  ;
+
+          body       :  
+            if (session) then
+                    ActiveSession := StringToElement(ManagedSessions, session);
+                    LastKnowActiveSession := ActiveSession;
+            else
+                    ActiveSession := '';
+            endif;
+
+        ENDPROCEDURE  ;
+
+        PROCEDURE
+          identifier :  RemoveManagedSession
+          arguments  :  (session)
+
+          DECLARATION SECTION 
+
+            STRING PARAMETER:
+               identifier :  session
+               property   :  Input ;
+
+          ENDSECTION  ;
+
+          body       :  
+            ManagedSession := StringToElement(ManagedSessions,session);
+            if (ManagedSession) then
+                    ManagedSessions -= ManagedSession;
+            endif;
+
+        ENDPROCEDURE  ;
+
+        FUNCTION
+          identifier :  CurrentSession
+          range      :  ManagedSessions
+          body       :  
+            CurrentSession := LastStartedSession;
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  CurrentClientQueue
+          range      :  string
+          body       :  
+            CurrentClientQueue := ClientQueueID(LastStartedSession);
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  CurrentSessionQueue
+          range      :  string
+          body       :  
+            CurrentSessionQueue := WorkerQueueID(LastStartedSession);
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  CurrentSessionStatus
+          body       :  
+            CurrentSessionStatus := LastKnownStatus(LastStartedSession);
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  CurrentInputCaseID
+          range      :  string
+          body       :  
+            CurrentInputCaseID := VersionID(LastStartedSession);
+
+        ENDFUNCTION  ;
+
+        FUNCTION
+          identifier :  CurrentOutputCaseID
+          range      :  string
+          body       :  
+            CurrentOutputCaseID := ResponseVersionID(LastStartedSession);
+
+        ENDFUNCTION  ;
+
+      ENDSECTION Public_Declarations ;
+
+      PROCEDURE
+        identifier :  RunManagedSession
+        arguments  :  (ClientQueue,WorkerQueue,RunProcedure,DelegationLevel,TimeOut,ReqDescription,CallBackProcedure,
+                           InputCase,Authorization,licenseName,priorityAdjustment,scheduledAt)
+
+        DECLARATION SECTION 
+
+          ELEMENT PARAMETER:
+             identifier   :  RunProcedure
+             range        :  AllProcedures
+             default      :  ''
+             property     :  Input
+             comment      :  "Procedure to be run remotely" ;
+
+          PARAMETER:
+             identifier   :  DelegationLevel
+             property     :  Input ;
+
+          PARAMETER:
+             identifier   :  TimeOut
+             default      :  3600000
+             property     :  Optional
+             comment      :  "Maximal running time before aborting the procedure (in miliseconds)" ;
+
+          ELEMENT PARAMETER:
+             identifier   :  CallBackProcedure
+             range        :  AllProcedures
+             default      :  ''
+             property     :  Optional
+             comment      :  "Procedure to be called back when the procedure had run." ;
+
+          PARAMETER:
+             identifier   :  ret ;
+
+          STRING PARAMETER:
+             identifier   :  tmpCont
+             initial data :  "" ;
+
+          PARAMETER:
+             identifier   :  tmpNum
+             initial data :  0 ;
+
+          STRING PARAMETER:
+             identifier   :  tmpAuth
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpDate
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpVersion
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpBucket
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpSessionID
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpConnection
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  ReqDescription
+             property     :  Optional ;
+
+          STRING PARAMETER:
+             identifier   :  Authorization
+             property     :  Optional ;
+
+          STRING PARAMETER:
+             identifier   :  WorkerQueue
+             property     :  Output
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  ClientQueue
+             property     :  Output
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  InputCase
+             property     :  Optional ;
+
+          STRING PARAMETER:
+             identifier   :  licenseName
+             property     :  Optional ;
+
+          PARAMETER:
+             identifier   :  priorityAdjustment
+             range        :  integer
+             property     :  Optional ;
+
+          STRING PARAMETER:
+             identifier   :  scheduledAt
+             property     :  Optional ;
+
+          ELEMENT PARAMETER:
+             identifier   :  err
+             range        :  errh::PendingErrors ;
+
+        ENDSECTION  ;
+
+        body       :  
+          ! Parameter validation
+          if RunProcedure = '' then
+                  raise error "The RunProcedure argument cannot be empty" code 'PRO-Empty-RunProcedure-argument' ;
+                  return 0;
+          elseif TimeOut < 0 then
+                  raise error "Invalid timeout value" code 'PRO-Invalid-timeout-value' ;
+                  return 0;
+          endif;
+          
+          ! Adjustments
+          if (CallBackProcedure = '') then
+                  CallBackProcedure := 'pro::session::DefaultCallBack';
+          else
+                  !Check if the given procedure has exactly one string as an input argument
+                  if not management::CheckCallbackProcedurePrototype(CallBackProcedure) then
+                          raise error "Callback procedure " + CallBackProcedure + " does not have exactly one string parameter as input argument" code 'PRO-Invalid-callback-prototype' ;
+                          return 0 ;
+                  endif ;
+          endif;
+          
+          ! Initialize PRO (if not initialized yet)
+          ret := Initialize();
+          if not HandleError(ret,"PROInitialize") then return 0; endif;
+          
+          if (not InputCase) then
+                  ! Save the case to be processed in the Storage Service
+                  ret := version::SaveInputCase(GetPROTempFolder + "\\" + version::ManagedSessionInputCaseName);
+          
+                  if (ret = 2) then
+                          ! no content stored in case, just register empty input case
+                          InputCase := "-";
+                  elseif (ret = 1) then
+                          ret := storage::GetBucketInfo(GetPROSUserBucket,"ManagedSessions_"+ModelName+"_"+ModelVersion,tmpNum,tmpAuth,tmpDate);
+                          if not HandleError(ret,"GetBucketInfo") then return 0; endif;
+                          if (tmpNum = -1) then
+                                          ret := storage::CreateBucket(GetPROSUserBucket,"ManagedSessions_"+ModelName+"_"+ModelVersion,Authorization);
+                                          if not HandleError(ret,"CreateBucket") then return 0; endif;
+                          endif;
+                          ret := storage::PutObjectVersion(BucketBasePath,version::ManagedSessionInputCaseName,GetPROTempFolder + "\\" + version::ManagedSessionInputCaseName,Authorization,tmpVersion);
+          
+                          if not HandleError(ret,"PutObjectVersion") then return 0; endif;
+                  endif;
+          endif;
+          
+          ! Request a new session (do not start it yet; prepare the job first)
+          ret := sessionmanager::NewSession(ModelName, ModelVersion, MaxInitTimeout, MaxCloseTimeout, Authorization, tmpSessionID, ClientQueue, WorkerQueue);
+          if not HandleError(ret,"NewSession") then return 0; endif;
+          
+          ! Start to listen to the worker agent of that session
+          ret := GetListeningConnection(tmpConnection);
+          if not HandleError(ret,"GetListeningConnection") then
+                  ! Close the session manually
+                  ret := sessionmanager::EndSession(tmpSessionID);
+                  HandleError(ret,"EndSession");
+                  return 0;
+          endif;
+          ret := messaging::AddQueueToConnection(ClientQueue, tmpConnection);
+          if not HandleError(ret,"AddQueueToConnection") then
+                  ! Close the session manually
+                  ret := sessionmanager::EndSession(tmpSessionID);
+                  HandleError(ret,"EndSession");
+                  return 0;
+          endif;
+          
+          ! Register the session and its properties in PROG
+          SetElementAdd(ManagedSessionsActive,ManagedSession,tmpSessionID);
+          ClientQueueID(ManagedSession) := ClientQueue;
+          WorkerQueueID(ManagedSession) := WorkerQueue;
+          RunTimeOut(ManagedSession) := TimeOut;
+          RequestTime(ManagedSession) := CurrentToString("%c%y-%m-%d %H:%M:%S");
+          
+          if (InputCase) then
+                  ! only pass over non-empty input cases.
+                  if (InputCase <> "-") then
+                      ! Wrap InputCase id to make distinguishable from input case created here.
+                      VersionID(ManagedSession) := "[" + InputCase + "]";
+                  endif;
+          else
+                  VersionID(ManagedSession) := tmpVersion;
+          endif;
+          
+          version::CaseFilePath(CurrentCase,tmpVersion);
+          if(tmpVersion <> "") then
+                  OriginalCasePath(ManagedSession) := tmpVersion;
+          else
+                  tmpVersion := "unnamed-case";
+          endif;
+          
+          if(ReqDescription="")then
+                  tmpVersion := FindReplaceStrings(tmpVersion, "\\", "/");
+                  tmpNum := FindNthString(tmpVersion, "/", -1);
+                  if (tmpNum <> 0) then
+                          tmpVersion := SubString(tmpVersion, tmpNum+1, StringLength(tmpVersion));
+                  endif;
+                  tmpNum := FindNthString(tmpVersion, ".", -1);
+                  if (tmpNum <> 0) then
+                          tmpVersion := SubString(tmpVersion, 1, tmpNum-1);
+                  endif;
+          
+                  ReqDescription := tmpVersion + CurrentToString("@%c%y-%m-%d %H:%M:%S");
+          endif;
+          
+          RequestDescription(ManagedSession) := ReqDescription;
+          RequestProcedure(ManagedSession) := RunProcedure;
+          ActiveStatus(ManagedSession) := 1; ! Set to active status
+          ErrorCode(ManagedSession) := 0;  ! success
+          
+          sessionmanager::SetRequestInfo(ManagedSession, OriginalCasePath(ManagedSession), RequestDescription(ManagedSession),
+                              RequestProcedure(ManagedSession), RunTimeOut(ManagedSession), VersionID(ManagedSession),
+                              ResponseVersionID(ManagedSession),MessageLogVersionID(ManagedSession),
+                              ErrorMessage(ManagedSession), ActiveStatus(ManagedSession), ErrorCode(ManagedSession));
+          
+          !  Request task to the session
+          ret := OptimizeCurrentCaseProxy(RunProcedure,DelegationLevel,CallBackProcedure,VersionID(ManagedSession),Authorization);
+          if not (ret) then
+                  ! Close the session manually
+                  ret := sessionmanager::EndSession(tmpSessionID);
+                  HandleError(ret,"EndSession");
+                  return 0;
+          endif;
+          
+          if (not DebugServerSession) then
+                  ! Request the session manager to start the auto close session (job prepared)
+                  ret := sessionmanager::StartSession(tmpSessionID,licenseName,priorityAdjustment,scheduledAt);
+                  if not HandleError(ret,"StartSession") then
+                      ! Problems with the session: close manually
+                      ret := sessionmanager::EndSession(tmpSessionID);
+                      HandleError(ret,"EndSession");
+                      return 0;
+                  endif;
+          else
+                  ! Add additional arguments to ReadArguments to allow starting a debug session
+                  ReadArguments('_pro-session-id') := tmpSessionID;
+          
+                  ! write a file that can be used to initialize a debug AIMMS session to host the optimization worker
+                  write ReadArguments to file "debug_arguments.txt" ;
+          endif;
+          
+          LastStartedSession := ManagedSession;
+          
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  OptimizeCurrentCase
+        arguments  :  (RunProcedure,DelegationLevel,CallBackProcedure,CaseVersion,Authorization)
+
+        DECLARATION SECTION 
+
+          ELEMENT PARAMETER:
+             identifier   :  RunProcedure
+             range        :  AllProcedures
+             default      :  'pro::session::AuxEmpty'
+             property     :  Input ;
+
+          PARAMETER:
+             identifier   :  DelegationLevel
+             property     :  Input ;
+
+          ELEMENT PARAMETER:
+             identifier   :  CallBackProcedure
+             range        :  AllProcedures
+             property     :  Input ;
+
+          STRING PARAMETER:
+             identifier   :  CaseVersion
+             property     :  Input ;
+
+          STRING PARAMETER:
+             identifier   :  Authorization
+             default      :  ""
+             property     :  Input ;
+
+          PARAMETER:
+             identifier   :  SharedInputCase ;
+
+          PARAMETER:
+             identifier   :  ret ;
+
+          ELEMENT PARAMETER:
+             identifier   :  err
+             range        :  errh::PendingErrors ;
+
+          PARAMETER:
+             identifier   :  nrOfErrors
+             default      :  0 ;
+
+          STRING PARAMETER:
+             identifier   :  tmpErrorDescription
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpFileToLoad
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpResponseCase
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpLogFile
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  LogFileLocation ;
+
+        ENDSECTION  ;
+
+        comment    :  "OBS: This procedure is supposed to be executed in the server side."
+        body       :  
+          ! if we're debugging a server-side session, we jump into the AIMMS debugger here
+          ! such that the entire execution taking place in a server session can be debugged.
+          if (DebugServerSession) then
+                  DebuggerBreakpoint();
+          endif;
+          
+          ! do not allow incoming priority messages prior to running the user code
+          messaging::BlockIncomingMessages();
+          
+          ! set worker state
+          workerErrorCode := 0;
+          workerDelegationLevel := DelegationLevel;
+          
+          if ( not CaseVersion ) then
+              ! no input case, which is perfectly fine
+              ret := 1;
+          elseif ( SubString(CaseVersion,1,1) = "[" ) then
+                  ! Strip wrapping "[" and "]" to indicate shared case file
+                  SharedInputCase := 1;
+                  CaseVersion := SubString(CaseVersion,2,StringLength(CaseVersion)-1);
+          
+                  if (StringLength(CaseVersion) > 4 and SubString(CaseVersion,1,4) = "PRO:") then
+                      ! assume case file which is stored in PRO central storage
+                      ret := version::LoadCaseByFile(CaseVersion);
+                  else
+                      ! Get the case file in the Storage Service
+                      ret := GetObjectVersion(CaseVersion,PROTempFolder,tmpFileToLoad);
+                      version::LoadCaseByFile(PROTempFolder + "\\" + tmpFileToLoad);
+                  endif;
+          else
+                  ! Get the case file in the Storage Service
+                  ret := GetObjectVersion(CaseVersion,PROTempFolder,tmpFileToLoad);
+                  version::LoadCaseByFile(PROTempFolder + "\\" + tmpFileToLoad);
+          endif;
+          
+          if not (ret) then
+                  ret := management::GetLastError(ret,tmpErrorDescription);
+                  if (ret) then CurrentErrorMessage += " [pro] " + tmpErrorDescription;
+                  else CurrentErrorMessage += " [pro] Unknown error: GetObjectVersion"; endif;
+                  workerErrorCode := ret;
+          endif;
+          
+          ! Load data and run (do not halt on errors)
+          block
+                  Apply(PostLoadInputCaseHook);
+          
+                  ! stop blocking priority messages until just before the main user routine.
+                  messaging::UnblockIncomingMessages();
+                  ! wait for the message describing the actual workload
+                  ret := messaging::WaitForMessagesInternal(pro::workerQueueID,PROMFLAG_REQUEST + PROMFLAG_SYNC_ONLY,30000);
+                  ! wait for any other messages with additional workload
+                  repeat
+                          ret := messaging::WaitForMessagesInternal(pro::workerQueueID,PROMFLAG_REQUEST,0);
+                          break when ret=0;
+                  endrepeat;
+          onerror err do
+                  if (errh::Severity(err) <> 'warning') then
+                      tmpErrorDescription := FormatString("[pro] %e %e: %s", errh::Category(err), errh::Severity(err), errh::Message(err));
+          
+                      if nrOfErrors = 0 then
+                              CurrentErrorMessage := tmpErrorDescription;
+                              workerErrorCode := 3000;
+                      endif;
+          
+                      nrOfErrors += 1;
+                  endif;
+          
+                  management::LocalLogError(tmpErrorDescription);
+                  errh::MarkAsHandled(err);
+          endblock;
+          
+          ! check whether there are still error messages that occurred during calls
+          ! to WaitForMessages. If so, they have to be taken into account in the error count
+          
+          if (messaging::GetRuntimeErrors()) then
+                  tmpErrorDescription := FormatString("[pro] runtime error: %s", messaging::GetRuntimeErrors());
+          
+                  if nrOfErrors = 0 then
+                          CurrentErrorMessage := tmpErrorDescription;
+                          workerErrorCode := 3000;
+                  endif;
+          
+                  nrOfErrors += 1;
+                  management::LocalLogError(tmpErrorDescription);
+          endif;
+          
+          ! do not allow incoming priority messages after running the user code
+          messaging::BlockIncomingMessages();
+          
+          InitializeUserProjectBuckets(Authorization);
+          
+          if (SaveSessionMessages) then
+              if (FileExists("log\\messages.log")) then
+                  LogFileLocation := "log\\messages.log";
+              elseif (FileExists(PROTempFolder + "\\messages.log")) then
+                  LogFileLocation := PROTempFolder + "\\messages.log";
+              endif;
+              ! Store the messages.log file in the server if present
+              if (LogFileLocation) then
+                      ret := storage::PutObjectVersion(BucketBasePath, "messages.log", LogFileLocation, Authorization, tmpLogFile);
+                      if not (ret) then
+                              ret := management::GetLastError(ret,tmpErrorDescription);
+                              if (ret) then CurrentErrorMessage += "[pro] " + tmpErrorDescription;
+                              else CurrentErrorMessage += "[pro] Unknown error: PutObjectVersion"; endif;
+                              workerErrorCode := ret;
+                      endif;
+              endif;
+          endif;
+          
+          ! Update the case file in the Storage Service, but only if there are no runtime errors
+          if (not nrOfErrors) then
+              ret := version::SaveOutputCase(PROTempFolder + "\\" + version::ManagedSessionOutputCaseName);
+          
+              if (ret = 1) then
+                      ! Saved output exists, ret = 2 implies no case file stored because of empty identifier set
+                      ret := storage::PutObjectVersion(BucketBasePath, version::ManagedSessionOutputCaseName, PROTempFolder + "\\" + version::ManagedSessionOutputCaseName, Authorization, tmpResponseCase);
+                      if not (ret) then
+                              ret := management::GetLastError(ret,tmpErrorDescription);
+                              if (ret) then CurrentErrorMessage += "[pro] " + tmpErrorDescription;
+                              else CurrentErrorMessage += "[pro] Unknown error: UpdateObjectVersion"; endif;
+                              workerErrorCode := ret;
+                      endif;
+              endif;
+          endif;
+          
+          ! Update the request info at the server to communicate the output data to the client
+          workerOutputDataVersion := tmpResponseCase;
+          workerLogFileVersion := tmpLogFile;
+          workerErrorMessage := CurrentErrorMessage;
+          
+          PROWorkerSaveRequestInfo;
+          
+          messaging::UnblockIncomingMessages();
+          
+          ! Call client back
+          return OptimizationCallBackProxy(CallBackProcedure,workerSessionID);
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  OptimizeCurrentCaseProxy
+        arguments  :  (RunProcedure,DelegationLevel,CallBackProcedure,CaseVersion,Authorization)
+
+        DECLARATION SECTION 
+
+          ELEMENT PARAMETER:
+             identifier :  RunProcedure
+             range      :  AllProcedures
+             default    :  'pro::session::AuxEmpty'
+             property   :  Input ;
+
+          PARAMETER:
+             identifier :  DelegationLevel
+             property   :  Input ;
+
+          ELEMENT PARAMETER:
+             identifier :  CallBackProcedure
+             range      :  AllProcedures
+             property   :  Input ;
+
+          STRING PARAMETER:
+             identifier :  CaseVersion
+             property   :  Input ;
+
+          STRING PARAMETER:
+             identifier :  Authorization
+             default    :  ""
+             property   :  Input ;
+
+          PARAMETER:
+             identifier :  ret ;
+
+        ENDSECTION  ;
+
+        comment    :  "OBS: This procedure is supposed to be executed in the server side."
+        body       :  
+          ! First, send message to run OptimizeCurrentCase remotely
+          ret := client::SendRunProcedure(
+                  WorkerQueueID(ManagedSession),
+                  'pro::session::OptimizeCurrentCase',
+                  'pro::session::OptimizeCurrentCaseProxy',
+                  RunTimeOut(ManagedSession),
+                  PROMFLAG_SESSION + PROMFLAG_REQUEST
+          );
+          HandleError(ret);
+          
+          ! Next, send messages to remotely execute RunProcedure synchronously
+          ! from within OptimizeCurrentCase. Timeout is ignored for SYNC_ONLY messages
+          ret := client::SendRunProcedure(
+                  WorkerQueueID(ManagedSession),
+                  RunProcedure,
+                  RunProcedure,
+                  -1,
+                  PROMFLAG_SESSION + PROMFLAG_REQUEST + PROMFLAG_SYNC_ONLY
+          );
+          HandleError(ret);
+          
+          return ret;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  OptimizeCurrentCaseInterrupted
+        arguments  :  (CaseVersion,Authorization)
+
+        DECLARATION SECTION 
+
+          STRING PARAMETER:
+             identifier   :  CaseVersion
+             property     :  Input ;
+
+          PARAMETER:
+             identifier   :  ret ;
+
+          SET:
+             identifier   :  Containers
+             indices      :  CONT, CONT2
+             parameters   :  Container, Container2 ;
+
+          SET:
+             identifier   :  Items
+             indices      :  ITEM, ITEM2
+             parameter    :  ContItem ;
+
+          STRING PARAMETER:
+             identifier   :  Value
+             index domain :  (CONT,ITEM) ;
+
+          ELEMENT PARAMETER:
+             identifier   :  Ref
+             index domain :  (CONT,ITEM)
+             range        :  Containers ;
+
+          STRING PARAMETER:
+             identifier   :  Authorization
+             property     :  Input ;
+
+          PARAMETER:
+             identifier   :  tmpNum
+             initial data :  0 ;
+
+          STRING PARAMETER:
+             identifier   :  tmpAuth
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpDate
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpErrorDescription ;
+
+          STRING PARAMETER:
+             identifier   :  tmpLogFile ;
+
+        ENDSECTION  ;
+
+        comment    :  "OBS: This procedure is supposed to be executed in the server side, when the user sends a
+                       request to interrupt the current execution. As it has a \"halt\" effect in PRO execution,
+                       this procedure set proper information about the session in the environment."
+        body       :  
+          InitializeUserProjectBuckets(Authorization);
+          
+          ! Put the messages.log file in the server
+          if FileExists("log\\messages.log") then
+                  ret := storage::PutObjectVersion(BucketBasePath, "messages.log", "log\\messages.log", Authorization, tmpLogFile);
+                  if not (ret) then
+                          ret := management::GetLastError(ret,tmpErrorDescription);
+                          if (ret) then CurrentErrorMessage += " [pro] " + tmpErrorDescription;
+                          else CurrentErrorMessage += " [pro] Unknown error: PutObjectVersion"; endif;
+                  endif;
+          endif;
+          
+          ! If no error message is presented, update CurrentErrorMessage
+          if (CurrentErrorMessage = "") then
+                  CurrentErrorMessage := "Procedure terminated by user request";
+          endif;
+          
+          ! Register the finished session and its properties in PROG
+          workerErrorMessage := CurrentErrorMessage;
+          workerLogFileVersion := tmpLogFile;
+          
+          PROWorkerSaveRequestInfo;
+          
+          ! Call client back
+          return OptimizationCallBackProxy('pro::session::EmptyCallBack',workerSessionID);
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  OptimizationCallBack
+        arguments  :  (CallBackProcedure,SessionID)
+
+        DECLARATION SECTION 
+
+          ELEMENT PARAMETER:
+             identifier   :  CallBackProcedure
+             range        :  AllProcedures
+             default      :  'pro::session::DefaultCallBack'
+             property     :  Input ;
+
+          STRING PARAMETER:
+             identifier   :  SessionID
+             property     :  Input ;
+
+          ELEMENT PARAMETER:
+             identifier   :  SessionElement
+             range        :  ManagedSessions ;
+
+          PARAMETER:
+             identifier   :  ret ;
+
+          ELEMENT PARAMETER:
+             identifier   :  err
+             range        :  errh::PendingErrors ;
+
+          STRING PARAMETER:
+             identifier   :  tmpErrorDescription
+             initial data :  "" ;
+
+          SET:
+             identifier   :  Containers
+             indices      :  CONT, CONT2
+             parameters   :  Container, Container2 ;
+
+          SET:
+             identifier   :  Items
+             indices      :  Item, ITEM2
+             parameter    :  PeItem ;
+
+          STRING PARAMETER:
+             identifier   :  Value
+             index domain :  (CONT,ITEM) ;
+
+          ELEMENT PARAMETER:
+             identifier   :  Ref
+             index domain :  (CONT,ITEM)
+             range        :  Containers ;
+
+          STRING PARAMETER:
+             identifier   :  tmpContActive
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpConnection ;
+
+        ENDSECTION  ;
+
+        body       :  
+          ! Identify the session and register event
+          SessionElement := StringToElement(ManagedSessions,SessionID);
+          if (SessionElement <> '') then
+                  ! Collect session properties
+          
+                  sessionmanager::GetRequestInfo(SessionElement, OriginalCasePath(SessionElement), RequestDescription(SessionElement),
+                              RequestProcedure(SessionElement), RunTimeOut(SessionElement), VersionID(SessionElement),
+                              ResponseVersionID(SessionElement),MessageLogVersionID(SessionElement),
+                              ErrorMessage(SessionElement), ActiveStatus(SessionElement), ErrorCode(SessionElement));
+          
+                  ! Update status
+                  LastKnownStatus(SessionElement) := PROTS_FINISHED;
+          
+                  ! Finish progress window, if activated
+                  if(ActiveSession = SessionID) then
+                          ActiveSession := '';
+                  endif;
+          
+                  ! Remove the session from the set of active sessions on which we actively listen on the queue
+                  GetListeningConnection(tmpConnection);
+                  messaging::RemoveQueueFromConnection(ClientQueueID(SessionElement), tmpConnection);
+          
+                  ManagedSessionsActive -= SessionElement;
+                  ! Unset active status in server, so that it won't be reloaded next time
+                  ActiveStatus(SessionElement) := 0;
+          
+                  sessionmanager::SetRequestInfo(SessionElement, OriginalCasePath(SessionElement), RequestDescription(SessionElement),
+                          RequestProcedure(SessionElement), RunTimeOut(SessionElement), VersionID(SessionElement),
+                          ResponseVersionID(SessionElement), MessageLogVersionID(SessionElement),
+                          ErrorMessage(SessionElement), ActiveStatus(SessionElement), ErrorCode(SessionElement));
+          
+                  ! Call-back procedure
+                  BLOCK;
+                          if (CallBackProcedure <> '') then
+                                  Apply(CallBackProcedure,SessionID);
+                          endif;
+          
+                  ONERROR err DO
+                          tmpErrorDescription := FormatString("[pro] %e %e: %s", errh::Category(err), errh::Severity(err), errh::Message(err));
+          
+                          management::LocalLogError(tmpErrorDescription);
+                          CurrentErrorMessage += tmpErrorDescription;
+                  ENDBLOCK;
+          
+          else
+                  ! Silently ignore the callback, it may be for a session that has been just removed by the user.
+                  ! raise error "Received response for unknown session " + SessionID code 'PRO-Response-for-unknown-session' ;
+          endif;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  OptimizationCallBackProxy
+        arguments  :  (CallBackProcedure,SessionID)
+
+        DECLARATION SECTION 
+
+          ELEMENT PARAMETER:
+             identifier :  CallBackProcedure
+             range      :  AllProcedures
+             default    :  'pro::session::DefaultCallBack'
+             property   :  Input ;
+
+          STRING PARAMETER:
+             identifier :  SessionID
+             property   :  Input ;
+
+          PARAMETER:
+             identifier :  ret ;
+
+        ENDSECTION  ;
+
+        body       :  
+          ret := client::SendRunProcedure(
+                  pro::clientQueueID,
+                  'pro::session::OptimizationCallBack',
+                  'pro::session::OptimizationCallBackProxy',
+                  -1,
+                  PROMFLAG_SESSION + PROMFLAG_RESPONSE
+          );
+          HandleError(ret);
+          
+          ! Notify that a callback is called by the worker
+          pro::workerCallbackCalled := 1;
+          
+          return ret;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  InitializeUserProjectBuckets
+        arguments  :  (Authorization)
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier   :  ret ;
+
+          PARAMETER:
+             identifier   :  tmpNum
+             initial data :  0 ;
+
+          STRING PARAMETER:
+             identifier   :  tmpAuth
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpDate
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  tmpErrorDescription
+             initial data :  "" ;
+
+          STRING PARAMETER:
+             identifier   :  Authorization
+             property     :  Input ;
+
+        ENDSECTION  ;
+
+        body       :  
+          ! Check for the existence of the model-specific user directory, and if not present, create it.
+          ret := storage::GetBucketInfo(GetPROSUserBucket,"ManagedSessions_"+ModelName+"_"+ModelVersion,tmpNum,tmpAuth,tmpDate);
+          if not (ret) then
+                  ret := management::GetLastError(ret,tmpErrorDescription);
+                  if (ret) then CurrentErrorMessage += " [pro] " + tmpErrorDescription;
+                  else CurrentErrorMessage += " [pro] Unknown error: GetBucketInfo"; endif;
+                  workerErrorCode := ret;
+          endif;
+          if (tmpNum = -1) then
+                  ret := storage::CreateBucket(GetPROSUserBucket,"ManagedSessions_"+ModelName+"_"+ModelVersion,Authorization);
+                  if not (ret) then
+                          ret := management::GetLastError(ret,tmpErrorDescription);
+                          if (ret) then CurrentErrorMessage += " [pro] " + tmpErrorDescription;
+                          else CurrentErrorMessage += " [pro] Unknown error: CreateBucket"; endif;
+                          workerErrorCode := ret;
+                  endif;
+          endif;
+          
+          return ret;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  InitializeManagedSessions
+
+        DECLARATION SECTION 
+
+          PARAMETER:
+             identifier   :  ret
+             initial data :  -1 ;
+
+        ENDSECTION  ;
+
+        body       :  
+          ! Load session information from the server
+          ret := LoadManagedSessions;
+          if not ret then return 0; endif;
+          
+          return 1;
+
+      ENDPROCEDURE  ;
+
+      PROCEDURE
+        identifier :  AuxEmpty
+        comment    :  "Only to have a fixed dummy procedure to use as default"
+        body       :  
+          ! Does nothing
+
+      ENDPROCEDURE  ;
+
+    ENDMODULE Managed_Sessions ;
+
+    PROCEDURE
+      identifier :  BasicDataInitialization
+      body       :  
+        ! Some basic initialization
+        PROEnvironment   := "ROOT";
+        PROUserName      := "";
+        PROPassword      := "";
+        PROLastUserName  := "";
+        PROEndPoint      := "";
+        PROAppCurrentDir := "";
+        PROCriticalError := 1;
+        CheckForNoEmpty  := 1;
+        
+        workerErrorMsg   := "";
+        workerSessionID  := "";
+        workerQueueID    := "";
+        clientQueueID    := "";
+        
+        ModelDLLPath     := "AimmsProLibrary\\" + AimmsStringConstants('Architecture')+ "\\AimmsPROClient.dll";
+        PROConfigFile    := "PROConf.xml";
+        PROLogConfigFile := "PROLog.cfg";
+        PROTempFolder    := "PROTemp";
+        
+        ModelVersion     := "undefined";
+        ModelName        := "undefined";
+        
+        session::ManagedSessionsActive := data {};
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  LibraryInitialization
+
+      DECLARATION SECTION 
+
+        PARAMETER:
+           identifier :  ret ;
+
+        STRING PARAMETER:
+           identifier :  tmpStr ;
+
+      ENDSECTION  ;
+
+      comment    :  "If opened in GUI mode, this procedure have restricted access to the model; so, it only checks for the DLL
+                     and ask this same DLL to make an asynchronous call back to AIMMS to do the actual PRO initialization.
+                     See procedure: LibraryInitializationGUI."
+      body       :  
+        ! Check if it have already been run
+        if PROLibraryInit then return 1; endif;
+        
+        ! Initialize basic data from LibraryInitialization to prevent data reset to initial data after MEF recompile
+        BasicDataInitialization;
+        
+        DetermineDataManagementStyle;
+        
+        ! Set the name of the current folder
+        DirectoryGetCurrent(PROAppCurrentDir);
+        
+        ! Initialize internationalization module
+        LocalizationInitialize;
+        
+        ! Read basic configuration
+        IF FileExists("<prj>:PROFramework\\PROModel.cfg") THEN
+                ! Model was already used before: DLL should be on place
+                READ FROM FILE "<prj>:PROFramework\\PROModel.cfg";
+        ENDIF;
+        
+        ! Load client configuration (end-point, temp folder, etc) in both command-line arguments and XML file
+        PROLoadClientConfiguration;
+        
+        ! Initialization for developers and end-users
+        IF (not IsRunningAtServer()) AND SessionHasVisibleGUI THEN
+                ! Check if is loaded without critical errors
+                IF NOT ((ModelName="") OR (ModelVersion="") OR (PROEndPoint="") OR (NOT FileExists(ModelDLLPath))) THEN
+                        PROCriticalError := 0;
+                ENDIF;
+        
+                ! If there is a shared ticket, connect immediately
+                IF ReadArguments('_pro-ticket') <> "" THEN
+                        ret := Initialize();
+                        if not HandleError(ret) then return 0; endif;
+                ENDIF;
+        
+        ELSE
+                ! No further initialization
+                PROCriticalError := 0;
+        ENDIF;
+        
+        PROLibraryInit := 1;
+        
+        ! In case we're going to debug a server session, start listening to the server-side queue here.
+        ! When the actual request comes in, we will automatically jump into the AIMMS debugger.
+        if (DebugServerSession) then
+                PROWorkerInitialization;
+        endif;
+        
+        RETURN 1;
+
+    ENDPROCEDURE  ;
+
+    PROCEDURE
+      identifier :  LibraryTermination
+
+      DECLARATION SECTION 
+
+        ELEMENT PARAMETER:
+           identifier :  err
+           range      :  errh::PendingErrors ;
+
+        PARAMETER:
+           identifier :  ret ;
+
+      ENDSECTION  ;
+
+      body       :  
+        ! Finalize PRO if necessary, handle any error occurring in here
+        ! to prevent unnecessary errors during logoff.
+        block
+                if (not ModelDLLPath and FileExists("pro_arguments.txt")) then
+                        PROLoadClientConfiguration;
+                endif;
+                if (management::IsInitialized()) then
+                        Finalize;
+                endif;
+        onerror err do
+                errh::MarkAsHandled(err,1) ;
+        endblock;
+        
+        return 1 ;
+
+    ENDPROCEDURE  ;
+
+  ENDSECTION AIMMS_Version_Independent_Functionality ;
+
+  SECTION AIMMS_Version_Dependent_Functionalities
+    source file	:	"AimmsPROLibrary\\AimmsPRO-%AIMMSVERSION%.aim"
+
+  ENDSECTION AIMMS_Version_Dependent_Functionalities ;
+
+ENDLIBRARYMODULE AimmsProLibrary ;

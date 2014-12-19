@@ -1,0 +1,2890 @@
+## ams_version=1.0
+
+Section AIMMS_Version_Dependent_Functionalities {
+    Section DLL_Interface {
+        ElementParameter NativeUnicodeEncoding {
+            Range: AllCharacterEncodings;
+            Default: 'UTF-16LE';
+            Definition: if (AimmsStringConstants('Platform')="Linux") then 'UTF-32LE' else 'UTF-16LE' endif;
+            Comment: "Because of a bug in earlier 3.14 versions, the specification of the default value is important here.";
+        }
+        Module PRO_Management {
+            Prefix: management;
+            ExternalProcedure Initialize {
+                Arguments: (endPoint,tempFolder,dllFolder,logConfigFile,lang,environment,userName,password);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PRO_Initialize(
+                       scalar string : endPoint,
+                       scalar string : tempFolder,
+                       scalar string : dllFolder,
+                       scalar string : logConfigFile,
+                       scalar integer : lang,
+                       handle : environment,
+                       handle : userName,
+                       scalar string : password
+                     )
+                }
+                StringParameter endPoint {
+                    Property: Input;
+                }
+                StringParameter tempFolder {
+                    Property: Input;
+                }
+                StringParameter dllFolder {
+                    Property: Input;
+                }
+                StringParameter logConfigFile {
+                    Property: Input;
+                }
+                Parameter lang {
+                    Property: Input;
+                }
+                StringParameter environment {
+                    Property: InOut;
+                }
+                StringParameter userName {
+                    Property: InOut;
+                }
+                StringParameter password {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure IsInitialized {
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: PRO_IsInitialized();
+            }
+            ExternalProcedure IsConnected {
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: PRO_IsConnected();
+            }
+            ExternalProcedure Finalize {
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: PRO_Finalize();
+            }
+            ExternalProcedure GetLastError {
+                Arguments: (errorID,description);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PRO_GetLastError(
+                        scalar integer : errorID,
+                        handle : description
+                      )
+                }
+                Parameter errorID {
+                    Property: Output;
+                }
+                StringParameter description {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure RunProcedureAsync {
+                Arguments: (procName,delay);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PRO_RunProcedureAsync(
+                        scalar string : procName,
+                        scalar integer : delay
+                      )
+                }
+                ElementParameter procName {
+                    Range: AllProcedures;
+                    Property: Input;
+                }
+                Parameter delay {
+                    Default: 5000;
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure GetConfig {
+                Arguments: (service,key,value);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PRO_GetConfig(
+                        scalar string : service,
+                        scalar string : key,
+                        handle : value
+                      )
+                }
+                StringParameter key {
+                    Property: Input;
+                }
+                StringParameter value {
+                    Property: Output;
+                }
+                StringParameter service {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure GetConfigVector {
+                Arguments: (service,keyVector,valueVector);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PRO_GetConfigVector(
+                        scalar string : service,
+                        handle : keyVector,
+                        handle : valueVector
+                      )
+                }
+                Handle keyVector {
+                    Property: Input;
+                }
+                Handle valueVector {
+                    Property: Output;
+                }
+                StringParameter service {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure SetConfig {
+                Arguments: (service,key,value,restart);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PRO_SetConfig(
+                       scalar string : service,
+                       scalar string : key,
+                       scalar string : value,
+                       scalar integer : restart
+                     )
+                }
+                StringParameter key {
+                    Property: Input;
+                }
+                StringParameter value {
+                    Property: Input;
+                }
+                StringParameter service {
+                    Property: Input;
+                }
+                Parameter restart {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure UnpackIStorage {
+                Arguments: (archive);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    UnpackIStorage(
+                        scalar string : archive
+                      )
+                }
+                StringParameter archive {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure PackIStorage {
+                Arguments: (folder);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PackIStorage(
+                        scalar string : folder
+                      )
+                }
+                StringParameter folder {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure LocalLogInfo {
+                Arguments: (msg);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    LocalLogInfo(
+                        scalar string : msg
+                      )
+                }
+                StringParameter msg {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure LocalLogError {
+                Arguments: (msg);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    LocalLogError(
+                        scalar string : msg
+                      )
+                }
+                StringParameter msg {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure PassMessage {
+                Arguments: (severity,msg);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PassMessage(
+                        scalar integer : severity,
+                        scalar string : msg
+                      )
+                }
+                Parameter severity {
+                    Property: Input;
+                }
+                StringParameter msg {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure ManageFileBuffer {
+                Arguments: (path,max_size,remain_size);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    ManageFileBuffer(
+                       scalar string : path,
+                       scalar integer : max_size,
+                       scalar integer : remain_size
+                     )
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                Parameter max_size {
+                    Property: Input;
+                }
+                Parameter remain_size {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetScalarSuffixValue {
+                Arguments: (identifierName,suffixName,scalarSuffixValue);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    GetScalarSuffixValue(
+                       scalar string : identifierName,
+                       scalar string : suffixName,
+                       handle : scalarSuffixValue
+                     )
+                }
+                StringParameter identifierName {
+                    Property: Input;
+                }
+                StringParameter suffixName {
+                    Property: Input;
+                }
+                StringParameter scalarSuffixValue {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure SetElementToName {
+                Arguments: (setHandle,elemNumber,elementName);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    SetElementToName(
+                       handle : setHandle,
+                       scalar integer : elemNumber,
+                       handle : elementName
+                     )
+                }
+                Parameter elemNumber {
+                    Property: Input;
+                }
+                StringParameter elementName {
+                    Property: Output;
+                }
+                Handle setHandle {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure CheckCallbackProcedurePrototype {
+                Arguments: (procedureName);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROC_CheckCallBackProcedurePrototype(
+                       scalar string : procedureName
+                     )
+                }
+                StringParameter procedureName {
+                    Property: Input;
+                }
+            }
+        }
+        Module PRO_Authentication_Service {
+            Prefix: authentication;
+            ExternalProcedure AddEnvironment {
+                Arguments: (environment,description,authorization);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_AddEnvironment(
+                        scalar string : environment,
+                        scalar string : description,
+                        scalar string : authorization
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                StringParameter description {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure AddGroup {
+                Arguments: (environment,group,description);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_AddGroup(
+                        scalar string : environment,
+                        scalar string : group,
+                        scalar string : description
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                StringParameter description {
+                    Property: Input;
+                }
+                StringParameter group {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure AddUser {
+                Arguments: (environment,username,fullname,email,password);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_AddUser(
+                        scalar string : environment,
+                        scalar string : username,
+                        scalar string : fullname,
+                        scalar string : email,
+                        scalar string : password
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                StringParameter username {
+                    Property: Input;
+                }
+                StringParameter fullname {
+                    Property: Input;
+                }
+                StringParameter email {
+                    Property: Input;
+                }
+                StringParameter password {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure RemoveEnvironment {
+                Arguments: (environment);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_RemoveEnvironment(
+                        scalar string : environment
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure RemoveGroup {
+                Arguments: (environment,group);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_RemoveGroup(
+                        scalar string : environment,
+                        scalar string : group
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                StringParameter group {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure RemoveUser {
+                Arguments: (environment,username);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_RemoveUser(
+                        scalar string : environment,
+                        scalar string : username
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                StringParameter username {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure AssociateUserGroup {
+                Arguments: (userenv,username,groupenv,group);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_AssociateUserGroup(
+                        scalar string : userenv,
+                        scalar string : username,
+                        scalar string : groupenv,
+                        scalar string : group
+                      )
+                }
+                StringParameter userenv {
+                    Property: Input;
+                }
+                StringParameter username {
+                    Property: Input;
+                }
+                StringParameter groupenv {
+                    Property: Input;
+                }
+                StringParameter group {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure DisassociateUserGroup {
+                Arguments: (userenv,username,groupenv,group);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_DisassociateUserGroup(
+                        scalar string : userenv,
+                        scalar string : username,
+                        scalar string : groupenv,
+                        scalar string : group
+                      )
+                }
+                StringParameter userenv {
+                    Property: Input;
+                }
+                StringParameter username {
+                    Property: Input;
+                }
+                StringParameter groupenv {
+                    Property: Input;
+                }
+                StringParameter group {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure UpdateEnvironment {
+                Arguments: (environment,authorization);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_UpdateEnvironment(
+                        scalar string : environment,
+                        scalar string : authorization
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure UpdateUser {
+                Arguments: (environment,username,fullname,email,password);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_UpdateUser(
+                        scalar string : environment,
+                        scalar string : username,
+                        scalar string : fullname,
+                        scalar string : email,
+                        scalar string : password
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                StringParameter username {
+                    Property: Input;
+                }
+                StringParameter password {
+                    Property: Input;
+                }
+                StringParameter fullname {
+                    Property: Input;
+                }
+                StringParameter email {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure GetCurrentUserGroupList {
+                Arguments: (grpSet,grpName);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROA_GetCurrentUserGroupListInSet(
+                        handle : grpSet,
+                        handle : grpName
+                      )
+                }
+                Set grpSet {
+                    Index: i_gr;
+                    Property: Output;
+                }
+                StringParameter grpName {
+                    IndexDomain: i_gr;
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetEnvironmentList {
+                Arguments: (envSet,envName,description,authorization);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROA_GetEnvironmentListInSet(
+                        handle : envSet,
+                        handle : envName,
+                        handle : description,
+                        handle : authorization
+                      )
+                }
+                Set envSet {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Output;
+                }
+                StringParameter description {
+                    Property: Output;
+                }
+                StringParameter envName {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetEnvironmentUsersAndGroups {
+                Arguments: (environment,usrSet,grpSet,usrName,grpName);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_GetEntityListInSet(
+                        scalar string : environment,
+                        handle : grpSet,
+                        handle : usrSet,
+                        handle : grpName,
+                        handle : usrName,
+                        literal integer: 0
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                Set grpSet {
+                    Index: i_g;
+                    Property: InOut;
+                }
+                Set usrSet {
+                    Index: i_u;
+                    Property: InOut;
+                }
+                StringParameter usrName {
+                    IndexDomain: (i_u);
+                    Property: InOut;
+                }
+                StringParameter grpName {
+                    IndexDomain: (i_g);
+                    Property: InOut;
+                }
+            }
+            ExternalProcedure GetEntityList {
+                Arguments: (environment,usrSet,grpSet,usrName,grpName,usrGrpRelat);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROA_GetEntityListInSet(
+                        scalar string : environment,
+                        handle : grpSet,
+                        handle : usrSet,
+                        handle : grpName,
+                        handle : usrName,
+                        handle : usrGrpRelat
+                      )
+                }
+                StringParameter environment {
+                    Property: Input;
+                }
+                Set grpSet {
+                    Index: i_g;
+                    Property: InOut;
+                }
+                Set usrSet {
+                    Index: i_u;
+                    Property: InOut;
+                }
+                StringParameter usrName {
+                    IndexDomain: (i_u);
+                    Property: InOut;
+                }
+                StringParameter grpName {
+                    IndexDomain: (i_g);
+                    Property: InOut;
+                }
+                Parameter usrGrpRelat {
+                    IndexDomain: (i_u,i_g);
+                    Property: InOut;
+                }
+            }
+        }
+        Module PRO_Session_Manager {
+            Prefix: sessionmanager;
+            ExternalProcedure NewSession {
+                Arguments: {
+                    (projectID,projectVersion,maxInitTime,terminateTimeOut,authorization,sessionID,clientQueue,
+                      workerQueue)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_NewSession(
+                        scalar string : projectID,
+                        scalar string : projectVersion,
+                        scalar integer : maxInitTime,
+                        scalar integer : terminateTimeOut,
+                        scalar string : authorization,
+                        handle : sessionID,
+                        handle : clientQueue,
+                        handle : workerQueue
+                      )
+                }
+                StringParameter projectID {
+                    Property: Input;
+                }
+                Parameter maxInitTime {
+                    Property: Input;
+                }
+                Parameter terminateTimeOut {
+                    Property: Input;
+                }
+                StringParameter sessionID {
+                    Property: Output;
+                }
+                StringParameter clientQueue {
+                    Property: Output;
+                }
+                StringParameter workerQueue {
+                    Property: Output;
+                }
+                StringParameter projectVersion {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure StartSession {
+                Arguments: (sessionID,licenseName,priorityAdjustment,scheduledAt);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_StartSession(
+                       scalar string : sessionID,
+                       scalar string : licenseName,
+                       scalar integer : priorityAdjustment,
+                       scalar string : scheduledAt
+                     )
+                }
+                StringParameter sessionID {
+                    Property: Input;
+                }
+                StringParameter licenseName {
+                    Property: Optional;
+                }
+                Parameter priorityAdjustment {
+                    Range: integer;
+                    Default: 0;
+                    Property: Optional;
+                }
+                StringParameter scheduledAt {
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure EndSession {
+                Arguments: (sessionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_EndSession(
+                        scalar string : sessionID
+                      )
+                }
+                StringParameter sessionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure TerminateSession {
+                Arguments: (sessionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_TerminateSession(
+                        scalar string : sessionID
+                      )
+                }
+                StringParameter sessionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure CurrentState {
+                Arguments: (sessionSet,sessionStatus);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROT_CurrentState(
+                        handle : sessionSet,
+                        handle : sessionStatus
+                      )
+                }
+                Handle sessionSet {
+                    Property: Input;
+                }
+                Handle sessionStatus {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure SetSessionReference {
+                Arguments: (sessionID,clientQueue,workerQueue);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_SetSessionReference(
+                        scalar string : sessionID,
+                        scalar string : clientQueue,
+                        scalar string : workerQueue
+                      )
+                }
+                StringParameter sessionID {
+                    Property: Input;
+                }
+                StringParameter clientQueue {
+                    Property: Input;
+                }
+                StringParameter workerQueue {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure RetrieveSessionList {
+                Arguments: {
+                    (sessionList,clientQueue,workerQueue,currentStatus,createTime,userEnvironment,userName,proj,
+                     clientRef, descr, proc, timeOut, inputDataVersion, outputDataVersion, logFileVersion, errorMessage, modelStatus, errorCode)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROT_RetrieveSessionListInSet(
+                       handle : sessionList,
+                       handle : clientQueue,
+                       handle : workerQueue,
+                       handle : currentStatus,
+                       handle : createTime,
+                       handle : userEnvironment,
+                       handle : userName,
+                       handle : proj,
+                       handle : clientRef,
+                       handle : descr,
+                       handle : proc,
+                       handle : timeOut,
+                       handle : inputDataVersion,
+                       handle : outputDataVersion,
+                       handle : logFileVersion,
+                       handle : errorMessage,
+                       handle : modelStatus,
+                       handle : errorCode
+                     )
+                }
+                Set sessionList {
+                    Property: Input;
+                }
+                StringParameter clientQueue {
+                    Property: Output;
+                }
+                StringParameter workerQueue {
+                    Property: Output;
+                }
+                Parameter currentStatus {
+                    Property: Output;
+                }
+                StringParameter userEnvironment {
+                    Property: Output;
+                }
+                StringParameter userName {
+                    Property: Output;
+                }
+                StringParameter createTime {
+                    Property: Output;
+                }
+                StringParameter proj {
+                    Property: Output;
+                }
+                StringParameter clientRef {
+                    Property: Output;
+                }
+                StringParameter descr {
+                    Property: Output;
+                }
+                StringParameter proc {
+                    Property: Output;
+                }
+                Parameter timeOut {
+                    Property: Output;
+                }
+                StringParameter inputDataVersion {
+                    Property: Output;
+                }
+                StringParameter outputDataVersion {
+                    Property: Output;
+                }
+                StringParameter logFileVersion {
+                    Property: Output;
+                }
+                StringParameter errorMessage {
+                    Property: Output;
+                }
+                Parameter modelStatus {
+                    Property: Output;
+                }
+                Parameter errorCode {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetRequestInfo {
+                Arguments: {
+                    (sessionID,clientRef,description,proc,timeOut,inputDataVersion,outputDataVersion,
+                      logFileVersion,errorMessage,modelStatus,errorCode)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_GetRequestInfo(
+                       scalar string : sessionID,
+                       handle : clientRef,
+                       handle : description,
+                       handle : proc,
+                       scalar integer : timeOut,
+                       handle : inputDataVersion,
+                       handle : outputDataVersion,
+                       handle : logFileVersion,
+                       handle : errorMessage,
+                       scalar integer : modelStatus,
+                       scalar integer : errorCode
+                     )
+                }
+                StringParameter sessionID {
+                    Property: Input;
+                }
+                StringParameter clientRef {
+                    Property: Output;
+                }
+                StringParameter description {
+                    Property: Output;
+                }
+                StringParameter proc {
+                    Property: Output;
+                }
+                Parameter timeOut {
+                    Property: Output;
+                }
+                StringParameter inputDataVersion {
+                    Property: Output;
+                }
+                StringParameter outputDataVersion {
+                    Property: Output;
+                }
+                StringParameter logFileVersion {
+                    Property: Output;
+                }
+                StringParameter errorMessage {
+                    Property: Output;
+                }
+                Parameter modelStatus {
+                    Property: Output;
+                }
+                Parameter errorCode {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure SetRequestInfo {
+                Arguments: {
+                    (sessionID,clientRef,description,proc,timeOut,inputDataVersion,outputDataVersion,
+                      logFileVersion,errorMessage,modelStatus,errorCode)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_SetRequestInfo(
+                             scalar string  : sessionID,
+                             scalar string  : clientRef,
+                             scalar string  : description,
+                             scalar string  : proc,
+                             scalar integer : timeOut,
+                             scalar string  : inputDataVersion,
+                             scalar string  : outputDataVersion,
+                             scalar string  : logFileVersion,
+                             scalar string  : errorMessage,
+                             scalar integer : modelStatus,
+                             scalar integer : errorCode
+                     )
+                }
+                StringParameter sessionID {
+                    Property: Input;
+                }
+                StringParameter clientRef {
+                    Property: Input;
+                }
+                StringParameter description {
+                    Property: Input;
+                }
+                StringParameter proc {
+                    Property: Input;
+                }
+                Parameter timeOut {
+                    Property: Input;
+                }
+                StringParameter inputDataVersion {
+                    Property: Input;
+                }
+                StringParameter outputDataVersion {
+                    Property: Input;
+                }
+                StringParameter logFileVersion {
+                    Property: Input;
+                }
+                StringParameter errorMessage {
+                    Property: Input;
+                }
+                Parameter modelStatus {
+                    Property: Input;
+                }
+                Parameter errorCode {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure ClearSessionDatabase {
+                Arguments: (sessionList,warningMsg);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROT_ClearSessionDatabase(
+                       handle : sessionList,
+                       handle : warningMsg
+                     )
+                }
+                StringParameter warningMsg {
+                    Property: Output;
+                }
+                Set sessionList {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure ListActiveSessions {
+                Arguments: {
+                    (sessionList,clientQueue,workerQueue,currentStatus,createTime,userEnvironment,userName,proj,
+                       clientRef, descr, proc, timeOut, inputDataVersion, outputDataVersion, logFileVersion, errorMessage, modelStatus, errorCode,
+                       allUsers,projectID,projectVersion)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_ListActiveSessionsInSet(
+                         scalar integer : allUsers,
+                         scalar string : projectID,
+                         scalar string : projectVersion,
+                         handle : sessionList,
+                         handle : clientQueue,
+                         handle : workerQueue,
+                         handle : currentStatus,
+                         handle : createTime,
+                         handle : userEnvironment,
+                         handle : userName,
+                         handle : proj,
+                         handle : clientRef,
+                         handle : descr,
+                         handle : proc,
+                         handle : timeOut,
+                         handle : inputDataVersion,
+                         handle : outputDataVersion,
+                         handle : logFileVersion,
+                         handle : errorMessage,
+                         handle : modelStatus,
+                         handle : errorCode
+                       )
+                }
+                StringParameter clientQueue {
+                    Property: Output;
+                }
+                StringParameter workerQueue {
+                    Property: Output;
+                }
+                Set sessionList {
+                    Property: Output;
+                }
+                Parameter currentStatus {
+                    Property: Output;
+                }
+                Parameter allUsers {
+                    Default: 0;
+                    Property: Optional;
+                }
+                StringParameter userEnvironment {
+                    Property: Output;
+                }
+                StringParameter userName {
+                    Property: Output;
+                }
+                StringParameter createTime {
+                    Property: Output;
+                }
+                StringParameter projectID {
+                    Default: "";
+                    Property: Optional;
+                }
+                StringParameter projectVersion {
+                    Default: "";
+                    Property: Optional;
+                }
+                StringParameter proj {
+                    Property: Output;
+                }
+                StringParameter clientRef {
+                    Property: Output;
+                }
+                StringParameter descr {
+                    Property: Output;
+                }
+                StringParameter proc {
+                    Property: Output;
+                }
+                Parameter timeOut {
+                    Property: Output;
+                }
+                StringParameter inputDataVersion {
+                    Property: Output;
+                }
+                StringParameter outputDataVersion {
+                    Property: Output;
+                }
+                StringParameter logFileVersion {
+                    Property: Output;
+                }
+                StringParameter errorMessage {
+                    Property: Output;
+                }
+                Parameter modelStatus {
+                    Property: Output;
+                }
+                Parameter errorCode {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure ListSessionByStatus {
+                Arguments: {
+                    (requestedStatus,sessionList,clientQueue,workerQueue,currentStatus,createTime,userEnvironment,userName,proj,
+                      clientRef, descr, proc, timeOut, inputDataVersion, outputDataVersion, logFileVersion, errorMessage, modelStatus, errorCode,
+                      allUsers,projectID,projectVersion)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_ListSessionByStatusInSet(
+                        scalar integer : requestedStatus,
+                        scalar integer : allUsers,
+                        scalar string : projectID,
+                        scalar string : projectVersion,
+                        handle : sessionList,
+                        handle : clientQueue,
+                        handle : workerQueue,
+                        handle : currentStatus,
+                        handle : createTime,
+                        handle : userEnvironment,
+                        handle : userName,
+                        handle : proj,
+                        handle : clientRef,
+                        handle : descr,
+                        handle : proc,
+                        handle : timeOut,
+                        handle : inputDataVersion,
+                        handle : outputDataVersion,
+                        handle : logFileVersion,
+                        handle : errorMessage,
+                        handle : modelStatus,
+                        handle : errorCode
+                      )
+                }
+                StringParameter clientQueue {
+                    Property: Output;
+                }
+                StringParameter workerQueue {
+                    Property: Output;
+                }
+                Set sessionList {
+                    Property: Output;
+                }
+                Parameter currentStatus {
+                    Property: Output;
+                }
+                Parameter requestedStatus {
+                    Property: Input;
+                }
+                Parameter allUsers {
+                    Default: 0;
+                    Property: Optional;
+                }
+                StringParameter userEnvironment {
+                    Property: Output;
+                }
+                StringParameter userName {
+                    Property: Output;
+                }
+                StringParameter createTime {
+                    Property: Output;
+                }
+                StringParameter projectID {
+                    Default: "";
+                    Property: Optional;
+                }
+                StringParameter projectVersion {
+                    Default: "";
+                    Property: Optional;
+                }
+                StringParameter proj {
+                    Property: Output;
+                }
+                StringParameter clientRef {
+                    Property: Output;
+                }
+                StringParameter descr {
+                    Property: Output;
+                }
+                StringParameter proc {
+                    Property: Output;
+                }
+                Parameter timeOut {
+                    Property: Output;
+                }
+                StringParameter inputDataVersion {
+                    Property: Output;
+                }
+                StringParameter outputDataVersion {
+                    Property: Output;
+                }
+                StringParameter logFileVersion {
+                    Property: Output;
+                }
+                StringParameter errorMessage {
+                    Property: Output;
+                }
+                Parameter modelStatus {
+                    Property: Output;
+                }
+                Parameter errorCode {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure ListSessionSinceDate {
+                Arguments: {
+                    (dateStr,sessionList,clientQueue,workerQueue,currentStatus,createTime,userEnvironment,userName,proj,
+                      clientRef, descr, proc, timeOut, inputDataVersion, outputDataVersion, logFileVersion, errorMessage, modelStatus, errorCode,
+                      AllUsers,projectID,projectVersion)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROT_ListSessionSinceDateInSet(
+                        scalar integer : AllUsers,
+                        scalar string : projectID,
+                        scalar string : projectVersion,
+                        scalar string : dateStr,
+                        handle : sessionList,
+                        handle : clientQueue,
+                        handle : workerQueue,
+                        handle : currentStatus,
+                        handle : createTime,
+                        handle : userEnvironment,
+                        handle : userName,
+                        handle : proj,
+                        handle : clientRef,
+                        handle : descr,
+                        handle : proc,
+                        handle : timeOut,
+                        handle : inputDataVersion,
+                        handle : outputDataVersion,
+                        handle : logFileVersion,
+                        handle : errorMessage,
+                        handle : modelStatus,
+                        handle : errorCode
+                        )
+                }
+                StringParameter clientQueue {
+                    Property: Output;
+                }
+                StringParameter workerQueue {
+                    Property: Output;
+                }
+                Set sessionList {
+                    Property: Output;
+                }
+                Parameter currentStatus {
+                    Property: Output;
+                }
+                StringParameter dateStr {
+                    Property: Input;
+                }
+                Parameter AllUsers {
+                    Default: 0;
+                    Property: Optional;
+                }
+                StringParameter userEnvironment {
+                    Property: Output;
+                }
+                StringParameter userName {
+                    Property: Output;
+                }
+                StringParameter createTime {
+                    Property: Output;
+                }
+                StringParameter projectID {
+                    Default: "";
+                    Property: Optional;
+                }
+                StringParameter projectVersion {
+                    Default: "";
+                    Property: Optional;
+                }
+                StringParameter proj {
+                    Property: Output;
+                }
+                StringParameter clientRef {
+                    Property: Output;
+                }
+                StringParameter descr {
+                    Property: Output;
+                }
+                StringParameter proc {
+                    Property: Output;
+                }
+                Parameter timeOut {
+                    Property: Output;
+                }
+                StringParameter inputDataVersion {
+                    Property: Output;
+                }
+                StringParameter outputDataVersion {
+                    Property: Output;
+                }
+                StringParameter logFileVersion {
+                    Property: Output;
+                }
+                StringParameter errorMessage {
+                    Property: Output;
+                }
+                Parameter modelStatus {
+                    Property: Output;
+                }
+                Parameter errorCode {
+                    Property: Output;
+                }
+            }
+        }
+        Module PRO_Messaging_Service {
+            Prefix: messaging;
+            StringParameter RuntimeErrors;
+            ExternalProcedure CreateQueue {
+                Arguments: (authorization,queueID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_CreateQueue(
+                        scalar string : authorization,
+                        handle : queueID
+                      )
+                }
+                StringParameter queueID {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure GetQueueInfo {
+                Arguments: (queueID,queuedMsg,closedQueue);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_GetQueueInfo(
+                       scalar string : queueID,
+                       scalar integer : queuedMsg,
+                       scalar integer : closedQueue
+                     )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                Parameter queuedMsg {
+                    Property: Output;
+                }
+                Parameter closedQueue {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure TerminateQueue {
+                Arguments: (queueID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_TerminateQueue(
+                        scalar string : queueID
+                      )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure CreateConnection {
+                Arguments: (connectionID,callBackProcedure);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_CreateConnection(
+                        handle : connectionID,
+                        scalar string : callBackProcedure
+                      )
+                }
+                StringParameter connectionID {
+                    Property: Output;
+                }
+                ElementParameter callBackProcedure {
+                    Range: AllProcedures;
+                    Property: Input;
+                }
+            }
+            ExternalProcedure AddQueueToConnection {
+                Arguments: (queueID,connectionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_AddQueueToConnection(
+                        scalar string : queueID,
+                        scalar string : connectionID
+                      )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                StringParameter connectionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure RemoveQueueFromConnection {
+                Arguments: (queueID,connectionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_RemoveQueueFromConnection(
+                        scalar string : queueID,
+                        scalar string : connectionID
+                      )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                StringParameter connectionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure TerminateConnection {
+                Arguments: (connectionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_TerminateConnection(
+                        scalar string : connectionID
+                      )
+                }
+                StringParameter connectionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure ClearMessageDatabase {
+                Arguments: (sessionList);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROM_ClearMessageDatabase(
+                       handle : sessionList
+                     )
+                }
+                Set sessionList {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure WaitForUnhandledMessage {
+                Arguments: (timeoutTime);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROM_WaitForUnhandledMessage(
+                       scalar integer : timeoutTime
+                     )
+                }
+                Parameter timeoutTime {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure WaitForMessagesExternal {
+                Arguments: (queueID,flags,timeoutTime,runtimeErrors);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_WaitForMessages(
+                            scalar string  : queueID,
+                            scalar integer : flags,
+                                scalar integer : timeoutTime,
+                                handle         : runtimeErrors
+                          )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Property: Input;
+                }
+                Parameter timeoutTime {
+                    Property: Input;
+                }
+                StringParameter runtimeErrors {
+                    Property: Output;
+                }
+            }
+            Procedure WaitForMessages {
+                Arguments: (queueID,flags,timeoutTime);
+                Body: {
+                    ! Work around error handling issue in older AIMMS versions
+                    block where external_procedure_error_handling := 'raise_always';
+                        retval := WaitForMessagesExternal(queueID,flags,timeoutTime,RuntimeErrors);
+                    endblock;
+                    
+                    return retval;
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Property: Input;
+                }
+                Parameter timeoutTime {
+                    Property: Input;
+                }
+                ElementParameter err {
+                    Range: errh::PendingErrors;
+                }
+                Parameter retval;
+            }
+            Procedure WaitForMessagesInternal {
+                Arguments: (queueID,flags,timeoutTime);
+                Body: {
+                    ! Work around error handling issue in older AIMMS versions
+                    block where external_procedure_error_handling := 'raise_always';
+                        retval := WaitForMessagesExternal(queueID,flags,timeoutTime,RuntimeErrors);
+                    endblock;
+                    
+                    return retval;
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Property: Input;
+                }
+                Parameter timeoutTime {
+                    Property: Input;
+                }
+                ElementParameter err {
+                    Range: errh::PendingErrors;
+                }
+                Parameter retval;
+            }
+            Function GetRuntimeErrors {
+                Range: string;
+                Body: {
+                    GetRuntimeErrors := RuntimeErrors;
+                }
+            }
+            ExternalProcedure BlockIncomingMessages {
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROM_BlockIncomingMessages(
+                      )
+                }
+            }
+            ExternalProcedure UnblockIncomingMessages {
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROM_UnblockIncomingMessages(
+                      )
+                }
+            }
+            ExternalProcedure IncomingMessagesBlockCount {
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROM_IncomingMessagesBlockCount(
+                      )
+                }
+                Comment: "A count > 0 indicates that incoming priority messages are blocked during AIMMS execution";
+            }
+            ExternalProcedure CurrentlyHandledQueue {
+                Arguments: (queueName);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROM_CurrentlyHandledQueue(
+                              handle  : queueName
+                      )
+                }
+                StringParameter queueName {
+                    Property: Output;
+                }
+            }
+        }
+        Module PRO_Storage_Service {
+            Prefix: storage;
+            ExternalProcedure CreateBucket {
+                Arguments: (path,bucketLabel,authorization,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_CreateBucket(
+                        scalar string : path,
+                        scalar string : separator,
+                        scalar string : bucketLabel,
+                        scalar string : authorization
+                      )
+                }
+                StringParameter bucketLabel {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure DeleteBucket {
+                Arguments: (path,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_DeleteBucket(
+                        scalar string : path,
+                        scalar string : separator
+                      )
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure UpdateBucket {
+                Arguments: (path,authorization,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_UpdateBucket(
+                        scalar string : path,
+                        scalar string : separator,
+                        scalar string : authorization
+                      )
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure PutObjectVersion {
+                Arguments: (path,objectLabel,filePath,authorization,versionID,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_PutObjectVersion(
+                        scalar string : path,
+                        scalar string : separator,
+                        scalar string : objectLabel,
+                        scalar string : filePath,
+                        scalar string : authorization,
+                        handle : versionID
+                      )
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter objectLabel {
+                    Property: Input;
+                }
+                StringParameter filePath {
+                    Property: Input;
+                }
+                StringParameter versionID {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure UpdateObjectVersion {
+                Arguments: (versionID,filePath,newVersionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_UpdateObjectVersion(
+                        scalar string : versionID,
+                        scalar string : filePath,
+                        handle : newVersionID
+                      )
+                }
+                StringParameter versionID {
+                    Property: Input;
+                }
+                StringParameter filePath {
+                    Property: Input;
+                }
+                StringParameter newVersionID {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetObjectVersionUnbuffered {
+                Arguments: (versionID,folder,getFileName);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_GetObjectVersion(
+                        scalar string : versionID,
+                        scalar string : folder,
+                        handle : getFileName
+                      )
+                }
+                StringParameter getFileName {
+                    Property: Output;
+                }
+                StringParameter folder {
+                    Property: Input;
+                }
+                StringParameter versionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure DeleteObjectVersion {
+                Arguments: (versionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_DeleteObjectVersion(
+                        scalar string : versionID
+                      )
+                }
+                StringParameter versionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure DeleteObjectVersionFromSet {
+                Arguments: (versionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROS_DeleteObjectVersionFromSet(
+                        handle : versionID
+                      )
+                }
+                Handle versionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure DeleteObjectAllVersions {
+                Arguments: (path,objectLabel,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_DeleteObjectAllVersions(
+                       scalar string : path,
+                       scalar string : separator,
+                       scalar string : objectLabel
+                     )
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter objectLabel {
+                    Property: Input;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure UpdateObject {
+                Arguments: (path,objectLabel,authorization,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_UpdateObject(
+                        scalar string : path,
+                        scalar string : separator,
+                        scalar string : objectLabel,
+                        scalar string : authorization
+                      )
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter objectLabel {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure ListBuckets {
+                Arguments: (path,BucketSet,BucketSize,BucketAuth,BucketDate,MaxKeys,OffSet,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_ListBucketsInSet(
+                       scalar string : path,
+                       scalar string : separator,
+                       scalar integer : MaxKeys,
+                       scalar integer : OffSet,
+                       handle : BucketSet,
+                       handle : BucketSize,
+                       handle : BucketAuth,
+                       handle : BucketDate
+                     )
+                }
+                Set BucketSet {
+                    Property: Output;
+                }
+                Parameter MaxKeys {
+                    Default: -1;
+                    Property: Optional;
+                }
+                Parameter OffSet {
+                    Property: Optional;
+                }
+                Parameter BucketSize {
+                    Property: Output;
+                }
+                StringParameter BucketAuth {
+                    Property: Output;
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+                StringParameter BucketDate {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure ListObjects {
+                Arguments: (path,ObjectSet,ObjectFileName,ObjectType,ObjectSize,BucketAuth,MaxKeys,OffSet,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_ListObjectsInSet(
+                       scalar string : path,
+                       scalar string : separator,
+                       scalar integer : MaxKeys,
+                       scalar integer : OffSet,
+                       handle : ObjectSet,
+                       handle : ObjectFileName,
+                       handle : ObjectType,
+                       handle : ObjectSize,
+                       handle : BucketAuth
+                     )
+                }
+                Set ObjectSet {
+                    Property: Output;
+                }
+                Parameter MaxKeys {
+                    Default: -1;
+                    Property: Optional;
+                }
+                Parameter OffSet {
+                    Property: Optional;
+                }
+                Parameter ObjectSize {
+                    Property: Output;
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter ObjectFileName {
+                    Property: Output;
+                }
+                StringParameter ObjectType {
+                    Property: Output;
+                }
+                StringParameter BucketAuth {
+                    Property: Output;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure ListVersions {
+                Arguments: (path,objectLabel,VersionSet,VersionSize,BucketDate,MaxKeys,OffSet,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_ListVersionsInSet(
+                       scalar string : path,
+                       scalar string : separator,
+                       scalar string : objectLabel,
+                       scalar integer : MaxKeys,
+                       scalar integer : OffSet,
+                       handle : VersionSet,
+                       handle : VersionSize,
+                       handle : BucketDate
+                     )
+                }
+                Set VersionSet {
+                    Property: Output;
+                }
+                Parameter MaxKeys {
+                    Default: -1;
+                    Property: Optional;
+                }
+                Parameter OffSet {
+                    Property: Optional;
+                }
+                Parameter VersionSize {
+                    Property: Output;
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                StringParameter objectLabel {
+                    Property: Input;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+                StringParameter BucketDate {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetBucketInfo {
+                Arguments: (path,bucketLabel,numberOfObjects,authorization,dateCreated,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_GetBucketInfo(
+                       scalar string  : path,
+                       scalar string  : separator,
+                       scalar string  : bucketLabel,
+                       scalar integer : numberOfObjects,
+                       handle  : authorization,
+                       handle  : dateCreated
+                     )
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                Parameter numberOfObjects {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Output;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+                StringParameter bucketLabel {
+                    Property: Input;
+                }
+                StringParameter dateCreated {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetObjectInfo {
+                Arguments: (path,objectLabel,objFileName,objFileType,numberOfVersions,authorization,lastVersionID,separator);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_GetObjectInfo(
+                       scalar string : path,
+                       scalar string : separator,
+                       scalar string : objectLabel,
+                       handle : objFileName,
+                       handle : objFileType,
+                       scalar integer : numberOfVersions,
+                       handle : authorization,
+                       handle : lastVersionID
+                     )
+                }
+                StringParameter path {
+                    Property: Input;
+                }
+                Parameter numberOfVersions {
+                    Property: Output;
+                }
+                StringParameter objectLabel {
+                    Property: Input;
+                }
+                StringParameter objFileName {
+                    Property: Output;
+                }
+                StringParameter objFileType {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Output;
+                }
+                StringParameter separator {
+                    Default: "/";
+                    Property: Optional;
+                }
+                StringParameter lastVersionID {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetVersionInfo {
+                Arguments: (versionId,path,bucket,object,fileSize,dateCreated);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROS_GetVersionInfo(
+                       scalar string : versionId,
+                       handle : path,
+                       handle : bucket,
+                       handle : object,
+                       scalar integer : fileSize,
+                       handle  : dateCreated
+                     )
+                }
+                StringParameter versionId {
+                    Property: Input;
+                }
+                Parameter fileSize {
+                    Property: Output;
+                }
+                StringParameter bucket {
+                    Property: Output;
+                }
+                StringParameter object {
+                    Property: Output;
+                }
+                StringParameter path {
+                    Property: Output;
+                }
+                StringParameter dateCreated {
+                    Property: Output;
+                }
+            }
+        }
+        Module PRO_Publishing_Service {
+            Prefix: publishing;
+            ExternalProcedure PublishAimmsVersion {
+                Arguments: (aimmsVersionID,aimmsVersionDescription,storedID,authorization);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_PublishAimmsVersion(
+                       scalar string : aimmsVersionID,
+                       scalar string : aimmsVersionDescription,
+                       scalar string : storedID,
+                       scalar string : authorization
+                     )
+                }
+                StringParameter aimmsVersionID {
+                    Property: Input;
+                }
+                StringParameter aimmsVersionDescription {
+                    Property: Input;
+                }
+                StringParameter storedID {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure UpdateAimmsVersionInfo {
+                Arguments: (aimmsVersionID,aimmsVersionDescription,authorization);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_UpdateAimmsVersionInfo(
+                       scalar string : aimmsVersionID,
+                       scalar string : aimmsVersionDescription,
+                       scalar string : authorization
+                     )
+                }
+                StringParameter aimmsVersionID {
+                    Property: Input;
+                }
+                StringParameter aimmsVersionDescription {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure GetAimmsVersionInfo {
+                Arguments: (aimmsVersionID,aimmsVersionDescription,storedID,authorization);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_GetAimmsVersionInfo(
+                       scalar string : aimmsVersionID,
+                       handle : aimmsVersionDescription,
+                       handle : storedID,
+                       handle : authorization
+                     )
+                }
+                StringParameter aimmsVersionID {
+                    Property: Input;
+                }
+                StringParameter aimmsVersionDescription {
+                    Property: Output;
+                }
+                StringParameter storedID {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure DeleteAimmsVersion {
+                Arguments: (aimmsVersionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_DeleteAimmsVersion(
+                       scalar string : aimmsVersionID
+                     )
+                }
+                StringParameter aimmsVersionID {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure RetrieveAimmsVersionList {
+                Arguments: (publishedAimmsVersion,aimmsDescription,aimmsStorageID,authorization);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROP_RetrieveAimmsVersionListInSet(
+                       handle : publishedAimmsVersion,
+                       handle : aimmsDescription,
+                       handle : aimmsStorageID,
+                       handle : authorization
+                     )
+                }
+                Set publishedAimmsVersion {
+                    Property: Output;
+                }
+                StringParameter aimmsDescription {
+                    Property: Output;
+                }
+                StringParameter aimmsStorageID {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure PublishModel {
+                Arguments: {
+                    (modelID,modelVersion,modelDescription,aimmsVersionID,storedID,modelAttributes,authorization,
+                      replaceOldVersion,replacedVersion)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_PublishModel(
+                       scalar string : modelID,
+                       scalar string : modelVersion,
+                       scalar string : modelDescription,
+                       scalar string : storedID,
+                       scalar string : aimmsVersionID,
+                       scalar string : modelAttributes,
+                       scalar string : authorization,
+                       scalar integer : replaceOldVersion,
+                       scalar string : replacedVersion
+                     )
+                }
+                StringParameter modelID {
+                    Property: Input;
+                }
+                StringParameter modelDescription {
+                    Property: Input;
+                }
+                StringParameter storedID {
+                    Property: Input;
+                }
+                StringParameter aimmsVersionID {
+                    Property: Input;
+                }
+                StringParameter modelVersion {
+                    Property: Input;
+                }
+                StringParameter modelAttributes {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+                Parameter replaceOldVersion {
+                    Property: Input;
+                }
+                StringParameter replacedVersion {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure UpdateModelInfo {
+                Arguments: (modelID,modelVersion,modelDescription,aimmsVersionID,modelAttributes,authorization);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_UpdateModelInfo(
+                       scalar string : modelID,
+                       scalar string : modelVersion,
+                       scalar string : modelDescription,
+                       scalar string : aimmsVersionID,
+                       scalar string : modelAttributes,
+                       scalar string : authorization
+                     )
+                }
+                StringParameter modelID {
+                    Property: Input;
+                }
+                StringParameter modelDescription {
+                    Property: Input;
+                }
+                StringParameter aimmsVersionID {
+                    Property: Input;
+                }
+                StringParameter modelVersion {
+                    Property: Input;
+                }
+                StringParameter modelAttributes {
+                    Property: Input;
+                }
+                StringParameter authorization {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure GetModelInfo {
+                Arguments: {
+                    (modelID,modelVersion,modelDescription,aimmsVersionID,attributes,storedID,existing,
+                      authorization)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_GetModelInfo(
+                       scalar string : modelID,
+                       scalar string : modelVersion,
+                       handle : modelDescription,
+                       handle : aimmsVersionID,
+                       handle : attributes,
+                       handle : storedID,
+                       scalar integer : existing,
+                       handle : authorization
+                     )
+                }
+                StringParameter modelID {
+                    Property: Input;
+                }
+                StringParameter modelDescription {
+                    Property: Output;
+                }
+                StringParameter storedID {
+                    Property: Output;
+                }
+                StringParameter aimmsVersionID {
+                    Property: Output;
+                }
+                StringParameter modelVersion {
+                    Property: Input;
+                }
+                Parameter existing {
+                    Property: Output;
+                }
+                StringParameter attributes {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure DeleteModel {
+                Arguments: (modelID,modelVersion);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_DeleteModel(
+                       scalar string : modelID,
+                       scalar string : modelVersion
+                     )
+                }
+                StringParameter modelID {
+                    Property: Input;
+                }
+                StringParameter modelVersion {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure RetrieveModelList {
+                Arguments: {
+                    (publishedModel,modelName,modelVersion,modelDescription,aimmsVersion,fixedArguments,
+                      storageVersion,existing,authorization)
+                }
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                BodyCall: {
+                    PROP_RetrieveModelListInSet(
+                       handle : publishedModel,
+                       handle : modelName,
+                       handle : modelVersion,
+                       handle : modelDescription,
+                       handle : aimmsVersion,
+                       handle : fixedArguments,
+                       handle : storageVersion,
+                       handle : existing,
+                       handle : authorization
+                     )
+                }
+                Set publishedModel {
+                    Property: Output;
+                }
+                StringParameter modelDescription {
+                    Property: Output;
+                }
+                StringParameter aimmsVersion {
+                    Property: Output;
+                }
+                Parameter existing {
+                    Property: Output;
+                }
+                StringParameter modelName {
+                    Property: Output;
+                }
+                StringParameter modelVersion {
+                    Property: Output;
+                }
+                StringParameter storageVersion {
+                    Property: Output;
+                }
+                StringParameter fixedArguments {
+                    Property: Output;
+                }
+                StringParameter authorization {
+                    Property: Output;
+                }
+            }
+            ExternalProcedure GetAimmsVersionPackManifestInfo {
+                Arguments: (filePath,tempFolder,aimmsVersionID);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROP_GetAimmsVersionPackManifestInfo(
+                       scalar string : filePath,
+                       scalar string : tempFolder,
+                       handle : aimmsVersionID
+                     )
+                }
+                StringParameter filePath {
+                    Property: Input;
+                }
+                StringParameter aimmsVersionID {
+                    Property: Output;
+                }
+                StringParameter tempFolder {
+                    Property: Input;
+                }
+            }
+        }
+        Module PRO_Client_Protocol {
+            Prefix: client;
+            ExternalProcedure SendData {
+                Arguments: (queueID,identifierHandle,flags);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROC_SendData(
+                       scalar string : queueID,
+                       handle : identifierHandle,
+                       scalar integer : flags
+                     )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                Handle identifierHandle {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Range: integer;
+                    Property: Input;
+                }
+            }
+            ExternalProcedure SendDataAck {
+                Arguments: (queueID,identifierHandle,flags,referenceNumber,callBackQueue);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROC_SendDataAck(
+                       scalar string : queueID,
+                       handle : identifierHandle,
+                       scalar integer : flags,
+                       scalar integer : referenceNumber,
+                       scalar string : callBackQueue
+                     )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                Handle identifierHandle {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Range: integer;
+                    Property: Input;
+                }
+                Parameter referenceNumber {
+                    Property: Input;
+                }
+                StringParameter callBackQueue {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure SendRunProcedure {
+                Arguments: (queueID,procName,callerName,timeOut,flags);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROC_SendRunProcedure(
+                       scalar string : queueID,
+                       scalar string : procName,
+                       scalar integer : timeOut,
+                       scalar string : callerName,
+                       scalar integer : flags
+                     )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                StringParameter procName {
+                    Property: Input;
+                }
+                StringParameter callerName {
+                    Property: Input;
+                }
+                Parameter timeOut {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Range: integer;
+                    Property: Input;
+                }
+            }
+            ExternalProcedure SendRunProcedureAck {
+                Arguments: (queueID,procName,callerName,timeOut,flags,referenceNumber,callBackQueue);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROC_SendRunProcedureAck(
+                       scalar string : queueID,
+                       scalar string : procName,
+                       scalar integer : timeOut,
+                       scalar string : callerName,
+                       scalar integer : flags,
+                       scalar integer : referenceNumber,
+                       scalar string : callBackQueue
+                     )
+                }
+                StringParameter queueID {
+                    Property: Input;
+                }
+                StringParameter procName {
+                    Property: Input;
+                }
+                StringParameter callerName {
+                    Property: Input;
+                }
+                Parameter timeOut {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Range: integer;
+                    Property: Input;
+                }
+                Parameter referenceNumber {
+                    Property: Input;
+                }
+                StringParameter callBackQueue {
+                    Property: Input;
+                }
+            }
+            ExternalProcedure StopExecution {
+                Arguments: (queueID,intType,flags);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROC_StopExecution(
+                       scalar string : queueID,
+                       scalar integer : intType,
+                       scalar integer : flags
+                     )
+                }
+                Comment: "intType can be either AIMMSAPI_INTERRUPT_EXECUTE or AIMMSAPI_INTERRUPT_SOLVE";
+                StringParameter queueID {
+                    Property: Input;
+                }
+                Handle identifierHandle {
+                    Property: Input;
+                }
+                Parameter intType {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Range: integer;
+                    Default: 0;
+                    Property: Optional;
+                }
+            }
+            ExternalProcedure StopExecutionAck {
+                Arguments: (queueID,intType,referenceNumber,callBackQueue,flags);
+                DllName: ModelDLLPath;
+                ReturnType: integer;
+                Encoding: NativeUnicodeEncoding;
+                BodyCall: {
+                    PROC_StopExecutionAck(
+                       scalar string : queueID,
+                       scalar integer : intType,
+                       scalar integer : flags,
+                       scalar integer : referenceNumber,
+                       scalar string : callBackQueue
+                     )
+                }
+                Comment: "intType can be either AIMMSAPI_INTERRUPT_EXECUTE or AIMMSAPI_INTERRUPT_SOLVE";
+                StringParameter queueID {
+                    Property: Input;
+                }
+                Parameter intType {
+                    Property: Input;
+                }
+                Parameter flags {
+                    Range: integer;
+                    Default: 0;
+                    Property: Optional;
+                }
+                Parameter referenceNumber {
+                    Property: Input;
+                }
+                StringParameter callBackQueue {
+                    Property: Input;
+                }
+            }
+        }
+    }
+    Module Case_Load_and_Save {
+        Prefix: version;
+        Public: {
+            data { ManagedSessionInputCaseType, ManagedSessionInputCaseIdentifierSet, ManagedSessionOutputCaseType,
+                    ManagedSessionOutputCaseIdentifierSet, DetermineDataManagementStyle, IsNewDataManagementStyle }
+        }
+        StringParameter DataManagementStyle {
+            Property: NoSave;
+        }
+        ElementParameter ManagedSessionInputCaseType {
+            Range: AllCaseTypes;
+            Property: NoSave;
+        }
+        Set ManagedSessionInputCaseIdentifierSet {
+            SubsetOf: AllIdentifiers;
+            Property: NoSave;
+        }
+        StringParameter ManagedSessionInputCaseName {
+            Property: NoSave;
+            Definition: {
+                if (IsNewDataManagementStyle) then
+                        "pro_input.data"
+                else
+                        "pro_input.dat"
+                endif
+            }
+        }
+        ElementParameter ManagedSessionOutputCaseType {
+            Range: AllCaseTypes;
+            Property: NoSave;
+        }
+        Set ManagedSessionOutputCaseIdentifierSet {
+            SubsetOf: AllIdentifiers;
+            Property: NoSave;
+        }
+        StringParameter ManagedSessionOutputCaseName {
+            Property: NoSave;
+            Definition: {
+                if (IsNewDataManagementStyle) then
+                        "pro_output.data"
+                else
+                        "pro_output.dat"
+                endif
+            }
+        }
+        Parameter IsNewDataManagementStyle {
+            Property: NoSave;
+        }
+        Procedure DetermineDataManagementStyle {
+            Body: {
+                if (not DataManagementStyle) then OptionGetString("Data_management_style", DataManagementStyle); endif;
+                
+                if (DataManagementStyle = "Disk Files and Folders") then
+                        IsNewDataManagementStyle := 1;
+                        if (card(ManagedSessionInputCaseIdentifierSet) = 0) then
+                                ManagedSessionInputCaseIdentifierSet := AllIdentifiers;
+                                ManagedSessionOutputCaseIdentifierSet := AllIdentifiers;
+                        endif;
+                else
+                        IsNewDataManagementStyle := 0;
+                        if (not ManagedSessionInputCaseType) then
+                                ManagedSessionInputCaseType := StringToElement(AllCaseTypes, "All Identifiers");
+                                if (not ManagedSessionInputCaseType) then
+                                        ManagedSessionInputCaseType := first(AllCaseTypes);
+                                endif;
+                                ManagedSessionOutputCaseType := ManagedSessionInputCaseType;
+                        endif;
+                endif;
+            }
+        }
+        Procedure SaveInputCase {
+            Arguments: (casefile);
+            Body: {
+                if (IsNewDataManagementStyle) then
+                                        if (card(ManagedSessionInputCaseIdentifierSet) = 0) then
+                                                return 2;
+                                        endif;
+                        retval := CaseFileSave(casefile, ManagedSessionInputCaseIdentifierSet);
+                else
+                        if (not ManagedSessionInputCaseType) then
+                            return 2;
+                        endif;
+                
+                        SavedCurrentCase       := CurrentCase;
+                        SavedDirtyState        := CaseGetChangedStatus();
+                
+                        if (SavedCurrentCase) then
+                                CaseNew();
+                        endif;
+                
+                        SavedDefaultCaseType   := CurrentDefaultCaseType;
+                        CurrentDefaultCaseType := ManagedSessionInputCaseType;
+                
+                        retval := CaseWriteToSingleFile(casefile);
+                
+                        CurrentDefaultCaseType := SavedDefaultCaseType;
+                
+                        if (SavedCurrentCase) then
+                                CaseSetCurrent(SavedCurrentCase);
+                                CaseSetChangedStatus(SavedDirtyState);
+                        endif;
+                endif;
+                
+                return retval;
+            }
+            StringParameter casefile {
+                Property: Input;
+            }
+            ElementParameter SavedDefaultCaseType {
+                Range: AllCaseTypes;
+            }
+            Parameter SavedDirtyState;
+            ElementParameter SavedCurrentCase {
+                Range: AllCases;
+            }
+            Parameter retval;
+        }
+        Procedure SaveOutputCase {
+            Arguments: (casefile);
+            Body: {
+                if (IsNewDataManagementStyle) then
+                                        if (card(ManagedSessionOutputCaseIdentifierSet) = 0) then
+                                                return 2;
+                                        endif;
+                        retval := CaseFileSave(casefile, ManagedSessionOutputCaseIdentifierSet);
+                else
+                        if (not ManagedSessionOutputCaseType) then
+                            return 2;
+                        endif;
+                
+                        SavedCurrentCase       := CurrentCase;
+                        SavedDirtyState        := CaseGetChangedStatus();
+                
+                        if (SavedCurrentCase) then
+                                CaseNew();
+                        endif;
+                
+                        SavedDefaultCaseType   := CurrentDefaultCaseType;
+                        CurrentDefaultCaseType := ManagedSessionOutputCaseType;
+                
+                        retval := CaseWriteToSingleFile(casefile);
+                
+                        CurrentDefaultCaseType := SavedDefaultCaseType;
+                
+                        if (SavedCurrentCase) then
+                                CaseSetCurrent(SavedCurrentCase);
+                                CaseSetChangedStatus(SavedDirtyState);
+                        endif;
+                endif;
+                
+                return retval;
+            }
+            StringParameter casefile {
+                Property: Input;
+            }
+            ElementParameter SavedDefaultCaseType {
+                Range: AllCaseTypes;
+            }
+            Parameter SavedDirtyState;
+            ElementParameter SavedCurrentCase {
+                Range: AllCases;
+            }
+            Parameter retval;
+        }
+        Procedure LoadCaseByFile {
+            Arguments: (casefile);
+            Body: {
+                if (IsNewDataManagementStyle) then
+                        retval := CaseFileLoad(casefile);
+                else
+                        retval := CaseReadFromSingleFile(casefile);
+                endif;
+                
+                return retval;
+            }
+            StringParameter casefile {
+                Property: Input;
+            }
+            Parameter retval;
+        }
+        Procedure LoadCaseAsCurrent {
+            Arguments: (casename);
+            Body: {
+                if (IsNewDataManagementStyle) then
+                        retval := CaseFileLoad(CaseFileURL(casename));
+                        CaseFileSetCurrent(CaseFileURL(casename));
+                else
+                        retval := CaseLoadCurrent(casename,0);
+                endif;
+                
+                return retval;
+            }
+            ElementParameter casename {
+                Range: AllCases;
+                Property: Input;
+            }
+            Parameter retval;
+        }
+        Procedure GetCaseStatus {
+            Body: {
+                if (IsNewDataManagementStyle) then
+                        retval := DataChangeMonitorHasChanged(DataManagementMonitorID);
+                else
+                        retval := CaseGetChangedStatus();
+                endif;
+                
+                return retval;
+            }
+            Parameter retval;
+        }
+        Procedure ResetCaseStatus {
+            Body: {
+                if (IsNewDataManagementStyle) then
+                        retval := DataChangeMonitorReset(DataManagementMonitorID, CurrentCaseFileContentType);
+                else
+                        retval := CaseSetChangedStatus(0);
+                endif;
+                
+                return retval;
+            }
+            Parameter retval;
+        }
+        Procedure CaseFilePath {
+            Arguments: (casename,filepath);
+            Body: {
+                if (IsNewDataManagementStyle) then
+                        filepath := CaseFileURL(casename);
+                        retval := 1;
+                else
+                        retval := DataFileGetPath(casename,filepath);
+                endif;
+                
+                return retval;
+            }
+            ElementParameter casename {
+                Range: AllCases;
+                Property: Input;
+            }
+            StringParameter filepath {
+                Property: Output;
+            }
+            Parameter retval;
+        }
+        Procedure FindCase {
+            Arguments: (casepath,casename);
+            Body: {
+                if (IsNewDataManagementStyle) then
+                        retval := CaseFileURLtoElement(casepath, casename);
+                else
+                        retval := CaseFind(casepath,casename);
+                endif;
+                
+                return retval;
+            }
+            StringParameter casepath {
+                Property: Input;
+            }
+            ElementParameter casename {
+                Range: AllCases;
+                Property: Output;
+            }
+            Parameter retval;
+        }
+        Procedure NewCase {
+            Body: {
+                if (IsNewDataManagementStyle) then
+                        retval := CaseFileSetCurrent("");
+                else
+                        retval := CaseNew();
+                endif;
+                
+                return retval;
+            }
+            Parameter retval;
+        }
+    }
+}

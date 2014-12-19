@@ -1,0 +1,8 @@
+pro::LocalizedText(pro::lti,'English') := Data {
+  '1'      : "PRO Framework - Configuration",
+  '2'      : "Environment:",
+  '3'      : "Cancel",
+  '4'      : "Connect",
+  '5'      : "User Name:"
+};
+
