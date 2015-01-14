@@ -1,8 +1,8 @@
 .paletteswitch {
-	position:absolute;
-	right: 70px;
-	top:5px;
+	order: 3;
 	width: 110px;
+	margin-top: 5px;
+	margin-right: 10px;
 }
 	.paletteswitch select {
 		width: 100%;
