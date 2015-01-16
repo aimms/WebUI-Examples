@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>01 - Writing your first custom widget</title>
+	<link href='http://fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
+	<style>
+		html {
+			background-color: #ECEDEF;
+		}
+		body {
+			font-family: 'Roboto', sans-serif;
+			width: 42em;
+			margin: 0 auto;
+			padding: 6em 4em;
+			text-align: justify;
+			color: #333;
+			background-color: #FAFAFA;
+		}
+	</style>
+	<!-- highightjs - syntax highlighting -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
+	</head>
+	<body>
+		<h1>AIMMS WebUI Dev Tutorial</h1>
+		<h2>01 - Writing your first custom widget</h2>
+		<p>In this tutorial you will learn how to create your very first custom widget for AIMMS Web UI.
+			The goal is to leave out much of the technical details and underlying design and only explain the
+			essential things in order to get you up-and-running as soon as possible.
+		<h3>Before we begin - Prerequisites</h3>
+
+		<p>@TODO@
+
+		<h3>Let's start - A quick introduction to AWF</h3>
+		<p>Extending the AIMMS WebUI by writing your own widgets is not a complicated task. It is useful to have at
+			least a basic understanding of what is involved. Let's look at those key components now. For the sake of
+			simplicity we will only concentrate on the stuff that is running in the browser, which we will call
+			the <em>AIMMS WebUI Runtime</em>.
+		<p>The <em>AIMMS WebUI Runtime</em> is built in a (soon to be opensourced) framework called AWF:
+		<blockquote>
+			<em>The <strong>A</strong>IMMS <strong>W</strong>idget <strong>F</strong>ramework</em>.
+		</blockquote>
+		In its core <em>AWF</em>, is a generic framework for managing the lifecycle of widgets.
+		<p>A <em>widget</em>, here, is a small portion of generic and reusable GUI-code used to display or interact 
+			with information from a model¹. A widget has a
+			DOM element associated with it, through which the display of, or interaction with, the information of
+			such a model takes place.
+		<p>The <em>lifecycle</em> of a widget starts whenever it is instantiated by AWF and stops whenever a widget
+			is unloaded or deleted. A widget can be manipulated <em>during</em> its lifecycle through the AWF Option
+			Mechanism (we will explore options in a later tutorial). As an option value changes, the widget responds to
+			such a change by updating its associated DOM element. Likewise, if the associated DOM element changes, it
+			can update its option values and thereby make changes in a model.
+		<p>¹ <small>Here we mean model in a broad and abstract sense, but you can read it as the model and/or its
+				model data in AIMMS.</small>
+		<h3>The basic components of a widget</h3>
+		<h4>The skeleton of a widget factory</h4>
+		<h4>The skeleton of a widget</h4>
+		<h3>Your first custom widget</h3>
+		<p>We are now ready to start creating our first custom widget. We will develop this widget within a running
+		WebUI app (in development mode), as we think this is the most convenient way (but feel free to use whatever
+		works for you). The WebUI app that we will be using for this, is the NetworkData app from the WebUI-Examples
+		repository on Github.com.
+		<p>First, we will set up the NetworkDataApp. If you already have the NetworkData app on your filesystem, you
+			can skip this step. If you do not, then you will have to retrieve it from the WebUI-Examples repository
+			on Github. There are two ways to do this: by using Git, or as a zip-file. To keep it simple we'll just
+			download as zip.
+		<p>Go to <a href="https://github.com/aimms/WebUI-Examples">https://github.com/aimms/WebUI-Examples</a>, then
+			locate and press the <em>Download ZIP</em> button in the lower-right corner. Extract the .zip file somewhere
+			on your pc.
+		<p>Now start AIMMS and open de NetworkData app in AIMMS. (The app is located in
+			<tt>/NetworkTestApp/src/main/aimms/NetworkData</tt>.)
+			Start the WebUI as you would normally do from the <em>tools</em> menu.
+		<p>Open <a href="http://www.google.com/chrome/">Google Chrome</a> and go to
+			<a href="http://localhost:12001/app/home/">http://localhost:12001/app/home/</a> to see if the application
+			works fine. (You should see a map with blue dots highlighting several cities in The Netherlands.) If all
+			looks fine, then we are now ready to start creating our first custom widget.
+		<p>To actually start creating our first custom widget, go to the AIMMS project folder (the folder containing
+			<tt>NetworkData.aimms</tt> and <tt>WebUI/</tt>) and create the following folder structure and files:
+			<ul>
+				<li><tt>WebUI/resources/javascript/my-widget/</tt><br/>
+				<li><tt>WebUI/resources/javascript/my-widget/factory.js</tt><br/>
+				<li><tt>WebUI/resources/javascript/my-widget/jquery.aimms.my-widget.js</tt><br/>
+			</ul>
+		<p>First we will write the widget:
+		<pre><code class="js">// jquery.aimms.my-widget.js
+jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
+	_create: function() {
+		this.element
+			.find('.awf-dock.center')
+			.append('&lt;div>Hello AIMMS!&lt;/div>')
+		;
+	}
+}));
+		</code></pre>
+		<p>This is about as basic an AWF Widget can be. It just shows some static text: <em>Hello World</em>. Close
+			observers will also notice that an AWF Widget derives from a <a href="http://jqueryui.com/">jQuery UI</a> 
+			widget, so most of that documentation will also apply. If you do not know
+			<a href="https://jquery.org/">jQuery</a> and/or jQuery UI yet, do not worry just ignore it for now.
+		<p>After that, we create the factory:<br/>
+		<pre><code class="js">// factory.js
+AWF.Bus.subscribe({
+	onCollectTypes: function(collectedTypes, contextElQ) {
+		if(!contextElQ || contextElQ.awf.tags("placeable")) {
+			collectedTypes.push("my-widget");
+		}
+	},
+
+	onDecorateElement: function(elQ, type) {
+		if(type === "my-widget") {
+			elQ.aimms_my_widget();
+		}
+	},
+});
+		</code></pre>
+		<p>To see our new widget in action, we first create a new page to work on. Click the navigation icon in the top-left
+			of the screen and add a new page by clicking on the <strong>+</strong> button, give it a name <em>my-widget-page</em>
+			and then press &lt;enter>.
+		<p>After we have created the page, navigate to the page by clicking on it in the navigation menu. After the page
+			finishes loading (which should be rather quickly, since the page is still empty), we add a new widget to the page.
+			Open the widget manager (pencil icon) and add a new widget by clicking on the <strong>+</strong> button.
+		<p>The widget creation wizard will now open. If you have previously familiarized yourself with AIMMS WebUI usage, this
+			should be familiar. Skip the <em>Contents</em> and <em>Name</em> fields for now, and open the drop-down next to
+			<em>Type</em>. Try to locate <em>my-widget</em> in the list. Wait a minute! It's not there!
+		<p>So what just happened? When developing widgets for AIMMS WebUI, you must be aware, that we have optimized AIMMS WebUI
+			for End-user usage. When you navigate to a new page using the navigation menu, AIMMS WebUI will not reload itself
+			from disk, it will <em>only</em> load the contents of the new page. Therefore until we reload the whole browser
+			page, it will not pick up any changes in your javascript code.
+		<p>Now that we know that our new widget has not been loaded yet, press &lt;F5> (or use the reload button) so that
+			AIMMS WebUI reloads <em>with</em> our new widget.
+		<p>When we now press the <strong>+</strong> button in the widget manager and try to locate our <em>my-widget</em>
+			in the drop-down list of the <em>Type</em> field, we will see it's there.
+		<p>Let's create our new widget. Select <em>my-widget</em> as the type, <em>my-new-widget</em> as its name. Leave the
+			<em>Contents</em> empty for now. Click on the <em>Add widget</em> button.
+		<p>Success! Congratulations, you have now created your first AWF Widget! Let's dive into the code a bit to understand
+			what we have just done.
+		<p>We again look at the widget code, but this time it is annotated with comments:
+		<pre><code class="js">// jquery.aimms.my-widget.js
+
+// Create a base AWF Widget and register it as a jQuery UI widget:
+jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
+	_create: function() {                      // Every jQuery UI widget has a
+                                               // _create function that is called
+                                               // when the widget is created.
+		this.element                           // this.element is associated to
+                                               // the DOM element to which a
+                                               // widget is tied.
+			.find('.awf-dock.center')          // Every AWF Widget has a couple of
+                                               // designated anchor points to
+                                               // insert custom DOM elements.
+			.append('&lt;div>Hello AIMMS!&lt;/div>') // At the selected center anchor
+                                               // point, we insert our DOM element.
+		;
+	}
+}));
+		</code></pre>
+		<p>Then we look at the factory code. Remember, it is the factory whose responsibility it is
+			to communicate with AWF on the availability and actual construction of widgets.
+			The code, which now also has been annotated:
+		<pre><code class="js">// factory.js
+
+// AWF.Bus.subscribe is the means to hook up your widget's factory to AWF
+AWF.Bus.subscribe({
+	// This is called by AWF to figure out which widgets are available
+	// and what basic characteristics they have. Since the AIMMS WebUI
+	// itself is also built using AWF and not all of those widgets are
+	// meant to be put inside a WebUI page, we respond only if either
+	// there is no contextElQ or it has a tag called "placeable"
+	onCollectTypes: function(collectedTypes, contextElQ) {
+		if(!contextElQ || contextElQ.awf.tags("placeable")) {
+			collectedTypes.push("my-widget");
+		}
+	},
+
+	// This is called by AWF to indicate to any factory that a widget of
+	// the specified type is to be constructed on the given DOM element.
+	// Typically a factory only responds to such a request for a specific
+	// type.
+	onDecorateElement: function(elQ, type) {
+		if(type === "my-widget") {
+			elQ.aimms_my_widget();
+		}
+	},
+});
+		</code></pre>
+		<p>So there you have it, your first AWF Widget. Next time we will extend the functionality
+			of this widget with dynamic content.
+<!--
+		<h3>A simple label widget</h3>
+		link to data in aimms
+		<h3>The simple table widget</h3>
+-->
+	</body>
+</html>
