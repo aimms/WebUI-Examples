@@ -1,0 +1,10 @@
+To add a new tutorial and have it automatically published on wordpress:
+
+1) Add page to wordpress
+2) Put it under the right parent
+3) Update the permalink so that it matches parent and subfolder (the one with the index.html)
+4) Save draft
+5) Note down post_id and add the tag to the tutorial's index.html page:
+	<meta data-wp-post-id="XXXX" />
+6) To push to wordpress site use:
+	../.wordpress-tools/publish-on-aimms-wp.sh --user <wp-user> --password <wp-password>
