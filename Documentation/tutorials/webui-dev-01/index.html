@@ -47,7 +47,7 @@
 		<blockquote>
 			<em>The <strong>A</strong>IMMS <strong>W</strong>idget <strong>F</strong>ramework</em>.
 		</blockquote>
-		In its core <em>AWF</em>, is a generic framework for managing the lifecycle of widgets.
+		In its core, <em>AWF</em> is a generic framework for managing the lifecycle of widgets.
 		<p>A <em>widget</em>, here, is a small portion of generic and reusable GUI-code used to display or interact 
 			with information from a model¹. A widget has a
 			DOM element associated with it, through which the display of, or interaction with, the information of
@@ -82,8 +82,8 @@
 		<h4>The widget factory</h4>
 		<p>The widget factory is mainly responsible for starting and terminating the lifecycle of a widget whenever AWF
 		requests this. This means that it takes care of widget construction and destruction.
-		<p>It also plays a role in exposing the type of widgets that it can construct (i.e. registration of widget
-		types) and in which conditions it can do so. (For instance, a factory may indicate to AWF that it can construct
+		<p>It also plays a role in exposing the type of widgets that it can construct to AWF (i.e. registration of widget
+		types), and, in which conditions it can do so. (For instance, a factory may indicate to AWF that it can construct
 		a map widget, but that it does not support switching from a chart widget to a map widget, as this does generally
 		does not make sense.)
 		<p>Finally, a widget factory takes care of registering the primary options and option types of the to be
@@ -131,7 +131,7 @@ jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
 	}
 }));
 		</code></pre>
-		<p>This is about as basic an AWF Widget can be. It just shows some static text: <em>Hello World</em>. Close
+		<p>This is about as basic an AWF Widget can be. It just shows some static text: <em>Hello AIMMS!</em>. Close
 			observers will also notice that an AWF Widget derives from a <a href="http://jqueryui.com/">jQuery UI</a> 
 			widget, so most of that documentation will also apply. If you do not know
 			<a href="https://jquery.org/">jQuery</a> and/or jQuery UI yet, do not worry just ignore it for now.
@@ -159,7 +159,7 @@ AWF.Bus.subscribe({
 			Open the widget manager (pencil icon) and add a new widget by clicking on the <strong>+</strong> button.
 		<p>The widget creation wizard will now open. If you have previously familiarized yourself with AIMMS WebUI usage, this
 			should be familiar. Skip the <em>Contents</em> and <em>Name</em> fields for now, and open the drop-down next to
-			<em>Type</em>. Try to locate <em>my-widget</em> in the list. Wait a minute! It's not there!
+			<em>Type</em>. Try to locate <em>my-widget</em> in the list... Wait a minute! It's not there!
 		<p>So what just happened? When developing widgets for AIMMS WebUI, you must be aware, that we have optimized AIMMS WebUI
 			for End-user usage. When you navigate to a new page using the navigation menu, AIMMS WebUI will not reload itself
 			from disk, it will <em>only</em> load the contents of the new page. Therefore until we reload the whole browser
