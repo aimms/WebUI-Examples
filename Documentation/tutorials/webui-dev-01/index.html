@@ -55,8 +55,40 @@
 		<p>¹ <small>Here we mean model in a broad and abstract sense, but you can read it as the model and/or its
 				model data in AIMMS.</small>
 		<h3>The basic components of a widget</h3>
-		<h4>The skeleton of a widget factory</h4>
-		<h4>The skeleton of a widget</h4>
+		In AWF, a widget consists of two parts:
+		<ol>
+			<li>the widget <em>itself</em>, and,
+			<li>a widget <em>factory</em>.
+		</ol>
+		<h4>The widget itself</h4>
+		<p>The widget itself has the responsibility of keeping its associated DOM element synchronized with the underlying
+		model². This means that it typically creates child DOM elements under its associated DOM element. That it will
+		listen to (value) changes in the underlying model and that it will update the created DOM elements accordingly.
+		Some widgets also contain a facility to change the value(s) (i.e. the data) of the underlying model. In which
+		case this is also the responsibility of the widget itself.
+		<!-- PRO MEMORI: For tutorial 2: The widget itself
+		can be seen as the controller in a model-view-controller software pattern. In this way, the View is represented
+		by the DOM element and its children and the model can be seen as the option values. This means that it's responsibility is to
+		-->
+		<p>² <small>In software engineering this is often called a
+				<a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">model-view-controller</a>
+				(MVC) software pattern,	but, as promised, in this tutorial we will refrain from such a theoretical
+				approach.</small>
+		<h4>The widget factory</h4>
+		<p>The widget factory is mainly responsible for starting and terminating the lifecycle of a widget whenever AWF
+		requests this. This means that it takes care of widget construction and destruction.
+		<p>It also plays a role in exposing the type of widgets that it can construct (i.e. registration of widget
+		types) and in which conditions it can do so. (For instance, a factory may indicate to AWF that it can construct
+		a map widget, but that it does not support switching from a chart widget to a map widget, as this does generally
+		does not make sense.)
+		<p>Finally, a widget factory takes care of registering the primary options and option types of the to be
+			constructed widget.
+		<h4>A final note on Widgets, Factories and AWF</h4>
+		It is good to know that a widget <em>itself</em> interacts with AWF on a <em>per-widget basis</em> (for instance,
+		only a single widget is informed when its model changes), and that a widget <em>factory</em> interacts with AWF
+		on a global level (all factories will be notified when AWF requests that a widget is constructed).
+		What this means exactly, and what the implications are, will be explained in later tutorials. For now, just keep
+		this distinction in mind.
 		<h3>Your first custom widget</h3>
 		<p>We are now ready to start creating our first custom widget. We will develop this widget within a running
 		WebUI app (in development mode), as we think this is the most convenient way (but feel free to use whatever
