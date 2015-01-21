@@ -68,7 +68,7 @@
 		</ol>
 		<h4>The widget itself</h4>
 		<p>The widget itself has the responsibility of keeping its associated DOM element synchronized with the underlying
-		model². This means that it typically creates child DOM elements under its associated DOM element. That it will
+		model². This means that it typically creates child DOM elements under its associated DOM element, that it will
 		listen to (value) changes in the underlying model and that it will update the created DOM elements accordingly.
 		Some widgets also contain a facility to change the value(s) (i.e. the data) of the underlying model. In which
 		case this is also the responsibility of the widget itself.
@@ -85,10 +85,10 @@
 		requests this. This means that it takes care of widget construction and destruction.
 		<p>It also plays a role in exposing the type of widgets that it can construct to AWF (i.e. registration of widget
 		types), and, in which conditions it can do so. (For instance, a factory may indicate to AWF that it can construct
-		a map widget, but that it does not support switching from a chart widget to a map widget, as this does generally
+		a map widget, but that it does not support switching from a chart widget to a map widget, as this generally
 		does not make sense.)
-		<p>Finally, a widget factory takes care of registering the primary options and option types of the to be
-			constructed widget.
+		<p>Finally, a widget factory takes care of registering the primary options and option types of the to-be-constructed 
+		widget.
 		<h4>A final note on Widgets, Factories and AWF</h4>
 		It is good to know that a widget <em>itself</em> interacts with AWF on a <em>per-widget basis</em> (for instance,
 		only a single widget is informed when its model changes), and that a widget <em>factory</em> interacts with AWF
@@ -106,13 +106,13 @@
 			download as zip.
 		<p>Go to <a href="https://github.com/aimms/WebUI-Examples">https://github.com/aimms/WebUI-Examples</a>, then
 			locate and press the <em>Download ZIP</em> button in the lower-right corner. Extract the .zip file somewhere
-			on your pc.
+			on your computer.
 		<p>Now start AIMMS and open de NetworkData app in AIMMS. (The app is located in
 			<tt>/NetworkTestApp/src/main/aimms/NetworkData</tt>.)
 			Start the WebUI as you would normally do from the <em>tools</em> menu.
 		<p>Open <a href="http://www.google.com/chrome/">Google Chrome</a> and go to
 			<a href="http://localhost:12001/app/home/">http://localhost:12001/app/home/</a> to see if the application
-			works fine. (You should see a map with blue dots highlighting several cities in The Netherlands.) If all
+			works correctly. (You should see a map with blue dots highlighting several cities in The Netherlands.) If all
 			looks fine, then we are now ready to start creating our first custom widget.
 		<p>To actually start creating our first custom widget, go to the AIMMS project folder (the folder containing
 			<tt>NetworkData.aimms</tt> and <tt>WebUI/</tt>) and create the following folder structure and files:
@@ -157,7 +157,7 @@ AWF.Bus.subscribe({
 			and then press &lt;enter>.
 		<p>After we have created the page, navigate to the page by clicking on it in the navigation menu. After the page
 			finishes loading (which should be rather quickly, since the page is still empty), we add a new widget to the page.
-			Open the widget manager (pencil icon) and add a new widget by clicking on the <strong>+</strong> button.
+			Open the widget manager (pencil icon) and add a new widget by clicking on the <strong>+</strong> button in the bottom left.
 		<p>The widget creation wizard will now open. If you have previously familiarized yourself with AIMMS WebUI usage, this
 			should be familiar. Skip the <em>Contents</em> and <em>Name</em> fields for now, and open the drop-down next to
 			<em>Type</em>. Try to locate <em>my-widget</em> in the list... Wait a minute! It's not there!
@@ -173,7 +173,7 @@ AWF.Bus.subscribe({
 			<em>Contents</em> empty for now. Click on the <em>Add widget</em> button.
 		<p>Success! Congratulations, you have now created your first AWF Widget! Let's dive into the code a bit to understand
 			what we have just done.
-		<p>We again look at the widget code, but this time it is annotated with comments:
+		<p>We'll look at the widget code once more, but this time it is annotated with comments:
 		<pre><code class="js">// jquery.aimms.my-widget.js
 
 // Create a base AWF Widget and register it as a jQuery UI widget:
@@ -193,7 +193,7 @@ jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
 	}
 }));
 		</code></pre>
-		<p>Then we look at the factory code. Remember, it is the factory whose responsibility it is
+		<p>Then we look at the factory code. Remember, it is the factory's responsibility
 			to communicate with AWF on the availability and actual construction of widgets.
 			The code, which now also has been annotated:
 		<pre><code class="js">// factory.js
