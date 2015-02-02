@@ -579,7 +579,7 @@ Model Main_Ready_To_Eat_Meal_Production {
             Body: {
                 if ( pro::management::IsInitialized ) then
                 	display "pro::management::IsInitialized is true";
-                	if ( pro::DelegateToServer( requestDescription: webui::CurrentCaseName, completionCallback: 'pro::session::LoadResultsCallBack' )  ) then
+                	if ( pro::DelegateToServer( completionCallback: 'pro::session::LoadResultsCallBack' )  ) then
                 		display "pro::DelegateToServer is true";
                 		StartupMode := "This is the PRO client app";
                 		return 1;
