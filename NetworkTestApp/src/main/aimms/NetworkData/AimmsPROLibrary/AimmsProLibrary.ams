@@ -229,6 +229,9 @@ LibraryModule AimmsProLibrary {
                     Property: NoSave;
                     Comment: "0 = ask, 1 = delegate always, 2 = always solve locally";
                 }
+                StringParameter DefaultRequestDescription {
+                    InitialData: "";
+                }
                 Procedure DelegateToServer {
                     Arguments: {
                         (procedureName,requestDescription,requestQueue,timeOut,flags,waitForCompletion,completionCallback,
@@ -242,7 +245,8 @@ LibraryModule AimmsProLibrary {
                         
                         ! Check conditions to start a new session or send to an existing session.
                         if (requestQueue = "") then
-                            return DelegateToNewSession(procedureName,requestDescription,timeOut,waitForCompletion,completionCallback,inputCase,delegationOverride,authorization,licenseName,priorityAdjustment,scheduledAt);
+                            description := if ( requestDescription = "" ) then DefaultRequestDescription else requestDescription endif;
+                            return DelegateToNewSession(procedureName,description,timeOut,waitForCompletion,completionCallback,inputCase,delegationOverride,authorization,licenseName,priorityAdjustment,scheduledAt);
                         else
                             return DelegateToPeer(requestQueue,procedureName,flags);
                         endif;
@@ -306,6 +310,7 @@ LibraryModule AimmsProLibrary {
                     StringParameter scheduledAt {
                         Property: Optional;
                     }
+                    StringParameter description;
                 }
                 Procedure DelegateToNewSession {
                     Arguments: {
@@ -641,6 +646,16 @@ LibraryModule AimmsProLibrary {
                     StringParameter bucket;
                     StringParameter path;
                     StringParameter dateCreated;
+                }
+                Procedure SetDefaultRequestDescription {
+                    Arguments: (requestDescription);
+                    Body: {
+                        DefaultRequestDescription := requestDescription;
+                        return 1;
+                    }
+                    StringParameter requestDescription {
+                        Property: Input;
+                    }
                 }
             }
             Section Central_Storage {
@@ -2030,7 +2045,7 @@ LibraryModule AimmsProLibrary {
                         Definition: GetPROSUserBucket + "/ManagedSessions_" + ModelName + "_" + ModelVersion;
                     }
                     Parameter MaxInitTimeout {
-                        Default: 30000;
+                        Default: 60000;
                         Property: NoSave;
                     }
                     Parameter MaxCloseTimeout {
@@ -3324,9 +3339,7 @@ LibraryModule AimmsProLibrary {
                                 
                                 return numberOfVersions;
                             }
-                            StringParameter DataSessionID {
-                                Property: Input;
-                            }
+                            StringParameter DataSessionID;
                             StringParameter WebUICaseStoragePath;
                             StringParameter StoragePath;
                             StringParameter StateName;
