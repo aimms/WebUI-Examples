@@ -1,6 +1,0 @@
-"webui::CurrentCaseName" "webui::CurrentCasePath" "2014-11-27 08:14:36"
-"webui::CaseName" "webui::CasePath" "2014-11-27 08:14:43"
-"webui::GetWebUICaseStoragePath" "webui::GetCaseStorageServerPath" "2014-11-27 09:55:55"
-"webui::SetCurrentCase" "webui::RefreshCurrentCase" "2014-11-27 11:24:17"
-"webui::Copy_GetPROCasename" "webui::GetLocalCasename" "2014-11-27 11:31:41"
-"webui::GetPROCasename" "webui::GetBareCasename" "2014-11-27 12:06:34"
