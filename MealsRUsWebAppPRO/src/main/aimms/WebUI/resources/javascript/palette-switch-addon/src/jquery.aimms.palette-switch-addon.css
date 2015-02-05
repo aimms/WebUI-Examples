@@ -1,6 +1,6 @@
 .paletteswitch {
 	order: 3;
-	width: 110px;
+	max-width: 350px;
 	margin-top: 5px;
 	margin-right: 10px;
 }
