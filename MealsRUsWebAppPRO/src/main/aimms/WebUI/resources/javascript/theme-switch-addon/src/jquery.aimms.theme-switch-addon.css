@@ -1,8 +1,8 @@
 .themeswitcher {
 	order: 2;
-	width: 110px;
 	margin-top: 5px;
 	margin-right: 10px;
+	max-width:350px;
 }
 	.themeswitcher select {
 		width: 100%;
