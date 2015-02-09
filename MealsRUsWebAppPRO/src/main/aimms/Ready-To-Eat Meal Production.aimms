@@ -3,5 +3,5 @@
 	<MainProject Path="MainProject" />
 	<Library System="true" Path="AimmsPro" />
 	<Library System="true" Path="AimmsProUI" />
-	<Library System="true" Path="AimmsWebUI" />
+	<Library Path="AimmsWebUI" />
 </References>
