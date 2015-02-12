@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<UserFonts>
-	<UserFont Name="Arial12b" FaceName="Arial" PointSize="120" Bold="true" UUID="2A210F3A-8F95-4798-A888-9936B8D34599" />
-	<UserFont Name="Arial11bi" FaceName="Arial" PointSize="110" Bold="true" Italic="true" UUID="D654DECD-CEA1-4603-B74B-05FBEBBA7BA2" InternalID="1" />
-	<UserFont Name="ArialNarrow14b" FaceName="Arial Black" PointSize="180" Bold="true" UUID="944651F2-F035-4D34-8410-A871DD338E8B" InternalID="2" />
-	<UserFont Name="Arial 8" FaceName="Arial" PointSize="80" UUID="BEBC8540-218A-458E-9B49-97A8FE4E29F2" InternalID="3" />
-	<UserFont Name="Arial10bi" FaceName="Arial" PointSize="100" Bold="true" Italic="true" UUID="DEF43F2C-4C96-4193-A797-AD2C3760CE90" InternalID="4" />
-</UserFonts>
