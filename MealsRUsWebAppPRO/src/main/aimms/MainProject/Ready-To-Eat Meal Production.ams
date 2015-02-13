@@ -577,7 +577,7 @@ Model Main_Ready_To_Eat_Meal_Production {
         }
         Procedure CalculateScenarioProfit {
             Body: {
-                if ( pro::management::IsInitialized ) then
+                if ( webui::PROIsInitialized ) then
                 	display "pro::management::IsInitialized is true";
                 	if ( pro::DelegateToServer( completionCallback: 'pro::session::LoadResultsCallBack' )  ) then
                 		display "pro::DelegateToServer is true";
