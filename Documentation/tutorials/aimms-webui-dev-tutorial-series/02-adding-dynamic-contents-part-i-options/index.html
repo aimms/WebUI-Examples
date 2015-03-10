@@ -24,17 +24,20 @@
 		<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
 	</head>
 	<body>
-
-		<h2 id="02-adding-dynamic-contents-part-i-options">02 - Adding dynamic contents, part I: Options</h2>
-		<p>As already mentioned in <a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a>, a widget can be manipulated during its lifecycle through the AWF Option Mechanism.
+		<h1 class="wp-title">AIMMS WebUI Dev Tutorial</h1>
+		<h2 class="wp-title" id="02-adding-dynamic-contents-part-i-options">02 - Adding dynamic contents, part I: Options</h2>
+		<p> As already mentioned in <a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a>,
+			a widget can be manipulated during its lifecycle through the AWF Option Mechanism.
 			As an option value changes, the widget responds to such a change by updating its associated DOM element.
 			Likewise, a widget can change the value of an option and thereby make changes in a model.
-		</p>
-		<p>	We specify widget-specific options inside the factory of the widget. Currently AWF supports 6 option types number, string, boolean, array, object and datasource.    </p>
-		In this tutorial, we are going to dynamically update the contents of our "Hello AIMMS!" widget using an AWF option and be able to change its value through the widgets "option editor"</p>
+		<p>	We specify widget-specific options inside the factory of the widget. Currently AWF supports 6 option types:
+			<em>number</em>, <em>string</em>, <em>boolean</em>, <em>array</em>, <em>object</em> and <em>datasource</em>.
+			In this tutorial, we are going to dynamically update the contents of our "Hello AIMMS!" widget using an AWF
+			option and be able to change its value through the widgets "option editor"
 
 		<h3>Adding an option in our widget</h3>
-		<p>Inside the factory.js we specify the "contents" option which is of type "string". We do this inside the onInitializeOptionTypes.</p>
+		<p> Inside the factory.js we specify the "contents" option which is of type "string". We do this inside the
+			onInitializeOptionTypes.
 
 <pre><code class="js">
 // factory.js
@@ -60,7 +63,8 @@ AWF.Bus.subscribe({
 
 		<h3>Reacting on option changes</h3>
 		<p>In the widget we need to use the onResolvedOptionChanged function which reacts on option-value changes.
-			We already specified the "contents" option in the factory.js so now we are able to listen for changes and react accordingly. In our case we update the text in the widget.</p>
+			We already specified the "contents" option in the factory.js so now we are able to listen for changes and
+			react accordingly. In our case we update the text in the widget.
 
 <pre><code class="js">// jquery.aimms.my-widget.js
 jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
@@ -87,9 +91,10 @@ jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
 </code></pre>
 
 		<h3>Option editor</h3>
-		<p>Each option that we specify will automatically be added to the "option editor". We can access the "option editor" by clicking the gear icon (figure 1 - point 1).
-		All specified option values can be updated through the "option editor". By typing inside the "contents" option textfield we can see that our widgets content is updated!
-		</p>
+		<p> Each option that we specify will automatically be added to the "option editor". We can access the
+			"option editor" by clicking the gear icon (figure 1 - point 1).
+			All specified option values can be updated through the "option editor". By typing inside the "contents"
+			option textfield we can see that our widgets content is updated!
 
 		<picture>
 			<img src="../assets/img/tut02-screenshot-1.png">
