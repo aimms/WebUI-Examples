@@ -122,12 +122,6 @@ Model Main_Ready_To_Eat_Meal_Production {
                 IndexDomain: (i);
                 Range: IngredientCategories;
             }
-            Parameter MealProductionLineStart {
-                IndexDomain: (m,pl);
-            }
-            Parameter MealProductionLineDuration {
-                IndexDomain: (m,pl);
-            }
             Parameter IngredientPrice {
                 IndexDomain: (i,d);
                 Unit: $/kg;
@@ -371,20 +365,6 @@ Model Main_Ready_To_Eat_Meal_Production {
                         endif;
                         MealDescription(m) := Description;
                 endfor;
-                
-                MealProductionLineStart := data
-                { ( meal-02, beef    ) :  1,  ( meal-03, beef    ) :  2,  ( meal-04, beef    ) :  3,  ( meal-05, beef    ) :  5,
-                  ( meal-06, beef    ) :  3,  ( meal-07, beef    ) :  2,  ( meal-08, beef    ) :  1,  ( meal-10, chicken ) :  3,
-                  ( meal-11, chicken ) :  5,  ( meal-12, chicken ) :  8,  ( meal-13, chicken ) : 13,  ( meal-14, chicken ) :  8,
-                  ( meal-15, chicken ) :  5,  ( meal-17, salmon  ) :  8,  ( meal-18, salmon  ) :  5,  ( meal-19, salmon  ) :  3,
-                  ( meal-20, salmon  ) :  2 };
-                
-                MealProductionLineDuration := data
-                { ( meal-01, beef    ) :  1,  ( meal-02, beef    ) :  2,  ( meal-03, beef    ) :  3,  ( meal-04, beef    ) :  5,
-                  ( meal-05, beef    ) :  3,  ( meal-06, beef    ) :  2,  ( meal-07, beef    ) :  1,  ( meal-08, beef    ) :  8,
-                  ( meal-09, chicken ) :  3,  ( meal-10, chicken ) :  5,  ( meal-11, chicken ) :  8,  ( meal-12, chicken ) : 13,
-                  ( meal-13, chicken ) :  8,  ( meal-14, chicken ) :  5,  ( meal-15, chicken ) :  8,  ( meal-16, salmon  ) :  8,
-                  ( meal-17, salmon  ) :  5,  ( meal-18, salmon  ) :  3,  ( meal-19, salmon  ) :  2,  ( meal-20, salmon  ) :  1 }
             }
             StringParameter PatternString;
             Parameter PatternIndex;
@@ -543,7 +523,7 @@ Model Main_Ready_To_Eat_Meal_Production {
             Set AllPublicIdentifiers {
                 SubsetOf: AllIdentifiers;
                 Index: api;
-                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode, MealProductionLineDuration, MealProductionLineStart };
+                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode };
             }
             Set AllPublicProcedures {
                 SubsetOf: AllIdentifiers;
