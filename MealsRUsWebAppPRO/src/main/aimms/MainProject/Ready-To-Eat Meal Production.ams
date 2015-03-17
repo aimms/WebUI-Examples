@@ -373,18 +373,20 @@ Model Main_Ready_To_Eat_Meal_Production {
                 endfor;
                 
                 MealProductionLineStart := data
-                { ( meal-02, beef    ) :  1,  ( meal-03, beef    ) :  2,  ( meal-04, beef    ) :  3,  ( meal-05, beef    ) :  5,
-                  ( meal-06, beef    ) :  3,  ( meal-07, beef    ) :  2,  ( meal-08, beef    ) :  1,  ( meal-10, chicken ) :  3,
-                  ( meal-11, chicken ) :  5,  ( meal-12, chicken ) :  8,  ( meal-13, chicken ) : 13,  ( meal-14, chicken ) :  8,
-                  ( meal-15, chicken ) :  5,  ( meal-17, salmon  ) :  8,  ( meal-18, salmon  ) :  5,  ( meal-19, salmon  ) :  3,
-                  ( meal-20, salmon  ) :  2 };
+                { ( meal-01, beef    ) : 1.000e-005,  ( meal-02, beef    ) : 1.000e+000,  ( meal-03, beef    ) : 2.000e+000,
+                  ( meal-04, beef    ) : 3.000e+000,  ( meal-05, beef    ) : 5.000e+000,  ( meal-06, beef    ) : 3.000e+000,
+                  ( meal-07, beef    ) : 2.000e+000,  ( meal-08, beef    ) : 1.000e+000,  ( meal-09, chicken ) : 1.000e-005,
+                  ( meal-10, chicken ) : 3.000e+000,  ( meal-11, chicken ) : 5.000e+000,  ( meal-12, chicken ) : 8.000e+000,
+                  ( meal-13, chicken ) : 1.300e+001,  ( meal-14, chicken ) : 8.000e+000,  ( meal-15, chicken ) : 5.000e+000,
+                  ( meal-16, salmon  ) : 1.000e-005,  ( meal-17, salmon  ) : 8.000e+000,  ( meal-18, salmon  ) : 5.000e+000,
+                  ( meal-19, salmon  ) : 3.000e+000,  ( meal-20, salmon  ) : 2.000e+000 }
                 
-                MealProductionLineDuration := data
+                MealProductionLineDuration(m, pl) := data
                 { ( meal-01, beef    ) :  1,  ( meal-02, beef    ) :  2,  ( meal-03, beef    ) :  3,  ( meal-04, beef    ) :  5,
                   ( meal-05, beef    ) :  3,  ( meal-06, beef    ) :  2,  ( meal-07, beef    ) :  1,  ( meal-08, beef    ) :  8,
                   ( meal-09, chicken ) :  3,  ( meal-10, chicken ) :  5,  ( meal-11, chicken ) :  8,  ( meal-12, chicken ) : 13,
                   ( meal-13, chicken ) :  8,  ( meal-14, chicken ) :  5,  ( meal-15, chicken ) :  8,  ( meal-16, salmon  ) :  8,
-                  ( meal-17, salmon  ) :  5,  ( meal-18, salmon  ) :  3,  ( meal-19, salmon  ) :  2,  ( meal-20, salmon  ) :  1 }
+                  ( meal-17, salmon  ) :  5,  ( meal-18, salmon  ) :  3,  ( meal-19, salmon  ) :  2,  ( meal-20, salmon  ) :  1 };
             }
             StringParameter PatternString;
             Parameter PatternIndex;
