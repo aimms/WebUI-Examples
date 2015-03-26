@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   width="1280"
+   height="3856"
+   sodipodi:docname="Anatomy of a webui dev tutorial.svg"
+   inkscape:export-filename="./Anatomy of a webui dev tutorial-generated.png"
+   inkscape:export-xdpi="150"
+   inkscape:export-ydpi="150">
+  <metadata
+     id="metadata8">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs6" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1680"
+     inkscape:window-height="960"
+     id="namedview4"
+     showgrid="false"
+     inkscape:zoom="0.64156027"
+     inkscape:cx="305.17747"
+     inkscape:cy="3432.1235"
+     inkscape:window-x="1278"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Background"
+     style="display:inline"
+     transform="translate(0,200)"
+     sodipodi:insensitive="true">
+    <image
+       sodipodi:absref="/home/mtoele/GitRepositories/web-gui-demos/github/Documentation/tutorials/./Anatomy of a webui dev tutorial.png"
+       xlink:href="./Anatomy of a webui dev tutorial.png"
+       y="0"
+       x="0"
+       id="image10"
+       height="3656"
+       width="800" />
+    <rect
+       style="color:#000000;fill:#e4e4e4;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2982"
+       width="480"
+       height="3656"
+       x="800"
+       y="-0.00013375282" />
+    <rect
+       style="color:#000000;fill:#e4e4e4;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2982-4"
+       width="1280"
+       height="200"
+       x="0"
+       y="-200" />
+    <text
+       xml:space="preserve"
+       style="font-size:56px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="120.75586"
+       y="-81.762627"
+       id="text3074"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3076"
+         x="120.75586"
+         y="-81.762627">The anatomy of a WebUI Dev Tutorial</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="Annotations"
+     transform="translate(0,200)">
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#808080;fill-opacity:1;stroke:#808080;stroke-opacity:1;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="836.54236"
+       y="107.4726"
+       id="text3756"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3758"
+         x="836.54236"
+         y="107.4726" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="814.43982"
+       y="123.04017"
+       id="text3764"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3766"
+         x="814.43982"
+         y="123.04017"
+         style="font-weight:bold;-inkscape-font-specification:DejaVu Sans Bold">Title</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="813.06287"
+       y="174.8156"
+       id="text3768"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3770"
+         x="813.06287"
+         y="174.8156"
+         style="font-weight:bold;-inkscape-font-specification:DejaVu Sans Bold">Subtitle</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="814.38123"
+       y="213.54442"
+       id="text3772"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="213.54442"
+         id="tspan3794"><tspan
+           style="font-weight:bold;-inkscape-font-specification:DejaVu Sans Bold"
+           id="tspan3054">Prologue</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="233.54442"
+         id="tspan3792">  * Introduction; What this tutorial be about; what can</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="253.54442"
+         id="tspan3780">     people expect to learn from this tutorial? General</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="273.54443"
+         id="tspan3920">     assumptions.</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="293.54443"
+         id="tspan3800">  * We welcome the reader, so we use a more colloquial</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="313.54443"
+         id="tspan3898">     language, e.g. prefer <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3922">you, me, we, our</tspan> over <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3924">it, the</tspan>, </tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="333.54443"
+         id="tspan3926">     etc.</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="353.54443"
+         id="tspan3802" /><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="373.54443"
+         id="tspan3798" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="812.9281"
+       y="371.03168"
+       id="text3786"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3788"
+         x="812.9281"
+         y="371.03168"
+         style="font-weight:bold;-inkscape-font-specification:DejaVu Sans Bold">Prerequisites</tspan><tspan
+         sodipodi:role="line"
+         x="812.9281"
+         y="391.03168"
+         id="tspan3790">  * What do we expect from the user to have already</tspan><tspan
+         sodipodi:role="line"
+         x="812.9281"
+         y="411.03168"
+         id="tspan3904">     learnt before starting this tutorial</tspan><tspan
+         sodipodi:role="line"
+         x="812.9281"
+         y="431.03168"
+         id="tspan3906">  * We are still addressing the reader, so we still use a</tspan><tspan
+         sodipodi:role="line"
+         x="812.9281"
+         y="451.03168"
+         id="tspan3908">     more colloquial language, e.g. prefer you, me, we, </tspan><tspan
+         sodipodi:role="line"
+         x="812.9281"
+         y="471.03168"
+         id="tspan3914">     our over it, the, etc.</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="814.4281"
+       y="625.03802"
+       id="text3804"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3806"
+         x="814.4281"
+         y="625.03802"
+         style="font-weight:bold;-inkscape-font-specification:DejaVu Sans Bold">Theoretical section</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="645.03802"
+         id="tspan3810">  * Explains the new concepts that are introduced</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="665.03802"
+         id="tspan3812">     in this tutorial</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="685.03802"
+         id="tspan3844">  * Use words and diagrams, avoid using code (that</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="705.03802"
+         id="tspan3854">     should go into practical section, see below)</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="725.03802"
+         id="tspan3814">  * Use a more formal language (i.e. use:</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="745.03802"
+         id="tspan3832">         do not use: <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3878">you</tspan>, <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3880">me</tspan>, <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3882">we</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="765.03802"
+         id="tspan3818">         use: <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3884">it</tspan>, <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3886">the</tspan>, <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3888">there are</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="785.03802"
+         id="tspan3820">  * Explain concepts or definition from a singular</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="805.03802"
+         id="tspan3822">     stand point, i.e:</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="825.03802"
+         id="tspan3824">          do not use: FOOs have BARs</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="845.03802"
+         id="tspan3826">          use: a FOO has a BAR; a FOO can have one</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="865.03802"
+         id="tspan3838">                  or more BARs.</tspan><tspan
+         sodipodi:role="line"
+         x="814.4281"
+         y="885.03802"
+         id="tspan3808" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="814.38123"
+       y="1985.3876"
+       id="text3834"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3836"
+         x="814.38123"
+         y="1985.3876"
+         style="font-weight:bold;-inkscape-font-specification:DejaVu Sans Bold">Practical section</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="2005.3876"
+         id="tspan3846">  * Puts the theory introduced in the previous section</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="2025.3876"
+         id="tspan3848">     into practise</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="2045.3876"
+         id="tspan3850">  * Use words and code, avoid using diagrams (those</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="2065.3877"
+         id="tspan3856">     should go into the theoretical section, see above)</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="2085.3877"
+         id="tspan3860">  * Use a more colloquial language (we are taking the</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="2105.3877"
+         id="tspan3864">     reader by the hand, guiding him through this tutorial,</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="2125.3877"
+         id="tspan3866">     so prefer <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3868">you</tspan>, <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3870">me</tspan>, <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3872">we, our</tspan> over <tspan
+   style="font-style:oblique;-inkscape-font-specification:DejaVu Sans Oblique"
+   id="tspan3874">it, the</tspan>, etc.</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="814.38123"
+       y="3496.0962"
+       id="text3890"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3892"
+         x="814.38123"
+         y="3496.0962"
+         style="font-weight:bold;-inkscape-font-specification:DejaVu Sans Bold">Epilogue</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="3516.0962"
+         id="tspan3894">  * Recap of what was done in the tutorial</tspan><tspan
+         sodipodi:role="line"
+         x="814.38123"
+         y="3536.0962"
+         id="tspan3896">  * Bridge to the next tutorial</tspan></text>
+    <path
+       style="fill:none;stroke:#333333;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3, 3;stroke-dashoffset:0"
+       d="M 34.167188,141.18835 1256.4708,141.18835"
+       id="path3928"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#333333;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3, 3;stroke-dashoffset:0"
+       d="M 30.860686,192.99022 1255.3686,192.99022"
+       id="path3930"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#333333;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3, 3;stroke-dashoffset:0"
+       d="M 28.656351,287.77661 723.02178,287.77661 824.01633,346.08584 1253.1643,346.08584"
+       id="path3932"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#333333;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3, 3;stroke-dashoffset:0"
+       d="M 30.860686,602.99647 1267.4924,602.99647"
+       id="path3934"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#333333;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3, 3;stroke-dashoffset:0"
+       d="M 39.678024,1931.1081 1247.6534,1931.1081"
+       id="path3936"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#333333;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3, 3;stroke-dashoffset:0"
+       d="M 28.0566,3476.7495 1246.96,3476.7495"
+       id="path3938"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>
