@@ -20,3 +20,6 @@ Information for Plugin/Widget Developers
 
 If you are a HTML5/Javascript developer wishing to extend the AWF framework, please have a look at 
 our (work-in-progress) [AIMMS WebUI Dev Tutorial Series](http://rawgit.com/aimms/WebUI-Examples/master/Documentation/tutorials/aimms-webui-dev-tutorial-series/index.html)
+
+If you are interested in the (meta-)structure of a AIMMS WebUI Dev Tutorial Series have a look at the
+[Anatomy of a webui dev tutorial](http://rawgit.com/aimms/WebUI-Examples/master/Documentation/tutorials/Anatomy of a webui dev tutorial-generated.png)
