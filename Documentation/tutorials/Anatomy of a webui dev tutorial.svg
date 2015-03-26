@@ -27,7 +27,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -63,11 +63,11 @@
     <image
        sodipodi:absref="/home/mtoele/GitRepositories/web-gui-demos/github/Documentation/tutorials/./Anatomy of a webui dev tutorial.png"
        xlink:href="./Anatomy of a webui dev tutorial.png"
-       y="0"
-       x="0"
-       id="image10"
+       width="800"
        height="3656"
-       width="800" />
+       id="image10"
+       x="0"
+       y="0" />
     <rect
        style="color:#000000;fill:#e4e4e4;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect2982"
@@ -150,15 +150,15 @@
          sodipodi:role="line"
          x="814.38123"
          y="233.54442"
-         id="tspan3792">  * Introduction; What this tutorial be about; what can</tspan><tspan
+         id="tspan3792">  * Introduction; What this tutorial will be about; what</tspan><tspan
          sodipodi:role="line"
          x="814.38123"
          y="253.54442"
-         id="tspan3780">     people expect to learn from this tutorial? General</tspan><tspan
+         id="tspan3780">     can people expect to learn from this tutorial?</tspan><tspan
          sodipodi:role="line"
          x="814.38123"
          y="273.54443"
-         id="tspan3920">     assumptions.</tspan><tspan
+         id="tspan3920">     General assumptions.</tspan><tspan
          sodipodi:role="line"
          x="814.38123"
          y="293.54443"
