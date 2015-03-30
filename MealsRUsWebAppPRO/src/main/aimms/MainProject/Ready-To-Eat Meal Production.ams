@@ -379,7 +379,7 @@ Model Main_Ready_To_Eat_Meal_Production {
                   ( meal-10, chicken ) : 3.000e+000,  ( meal-11, chicken ) : 5.000e+000,  ( meal-12, chicken ) : 8.000e+000,
                   ( meal-13, chicken ) : 1.300e+001,  ( meal-14, chicken ) : 8.000e+000,  ( meal-15, chicken ) : 5.000e+000,
                   ( meal-16, salmon  ) : 1.000e-005,  ( meal-17, salmon  ) : 8.000e+000,  ( meal-18, salmon  ) : 5.000e+000,
-                  ( meal-19, salmon  ) : 3.000e+000,  ( meal-20, salmon  ) : 2.000e+000 }
+                  ( meal-19, salmon  ) : 3.000e+000,  ( meal-20, salmon  ) : 2.000e+000 };
                 
                 MealProductionLineDuration(m, pl) := data
                 { ( meal-01, beef    ) :  1,  ( meal-02, beef    ) :  2,  ( meal-03, beef    ) :  3,  ( meal-04, beef    ) :  5,
