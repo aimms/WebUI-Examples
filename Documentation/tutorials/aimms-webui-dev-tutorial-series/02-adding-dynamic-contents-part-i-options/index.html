@@ -5,18 +5,23 @@
 		<meta data-wp-post-id="9979" />
 		<link href='http://fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
 		<style>
-			html {
-				background-color: #ECEDEF;
-			}
-			body {
-				font-family: 'Roboto', sans-serif;
-				width: 42em;
-				margin: 0 auto;
-				padding: 6em 4em;
-				text-align: justify;
-				color: #333;
-				background-color: #FAFAFA;
-			}
+		html {
+			background-color: #ECEDEF;
+		}
+		body {
+			font-family: 'Roboto', sans-serif;
+			max-width: 42em;
+			margin: 0 auto;
+			padding: 6em 4em;
+			text-align: justify;
+			color: #333;
+			background-color: #FAFAFA;
+		}
+		@media screen and (max-width:560px) {
+			html, body{ padding:0;background:#fff}
+			.wp-title{display:none;}
+			img {max-width:100%}
+		}
 		</style>
 		<!-- highightjs - syntax highlighting -->
 		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">

@@ -10,12 +10,17 @@
 		}
 		body {
 			font-family: 'Roboto', sans-serif;
-			width: 42em;
+			max-width: 42em;
 			margin: 0 auto;
 			padding: 6em 4em;
 			text-align: justify;
 			color: #333;
 			background-color: #FAFAFA;
+		}
+		@media screen and (max-width:560px) {
+			html, body{ padding:0;background:#fff}
+			.wp-title{display:none;}
+			img {max-width:100%}
 		}
 	</style>
 	<!-- highightjs - syntax highlighting -->
