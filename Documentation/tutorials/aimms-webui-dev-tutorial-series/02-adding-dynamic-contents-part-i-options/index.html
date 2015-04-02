@@ -117,7 +117,7 @@ AWF.Bus.subscribe({
 	},
 	onInitializeOptionTypes: function(elQ, type) {
 		if (type === "my-widget") {
-			elQ.awf.optionTypes("contents", AWF.OptionUtil.createOptionType("string"));
+			elQ.awf.optionTypes("contents", "string");
 		}
 	},
 });
