@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>03 - Adding dynamic contents, part II: Simple data from AIMMS</title>
+		<meta data-wp-post-id="9979" />
+		<link rel="stylesheet" href="../css/icomoon.css">
+		<link href='http://fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
+		<script>document.registerElement('awf-icon', {prototype: Object.create(HTMLElement.prototype)})</script>
+		<style>
+			html {
+				background-color: #ECEDEF;
+			}
+			body {
+				font-family: 'Roboto', sans-serif;
+				width: 42em;
+				margin: 0 auto;
+				padding: 6em 4em;
+				text-align: justify;
+				color: #333;
+				background-color: #FAFAFA;
+			}
+
+			table {
+				/*width: 100%;*/
+				border-collapse: collapse;
+				margin: auto;
+			}
+			th, td {
+				text-align: left;
+				vertical-align: top;
+				padding: 0.3em 1em;
+			}
+			th {
+				text-align: center;
+				background: #F2F2F7;
+				border-bottom: 1px solid #CCCCCC;
+			}
+
+			awf-icon {
+				font-family: icomoon-ultimate;
+				border-radius: 50%;
+				border: 1px solid #333;
+				padding: 4px;
+				text-align: center;
+				font-size: 60%;
+			}
+		</style>
+		<!-- highightjs - syntax highlighting -->
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
+	</head>
+	<body>
+		<h1 class="wp-title">AIMMS WebUI Dev Tutorial</h1>
+		<h2 class="wp-title" id="03-adding-dynamic-contents-part-ii-aimms-scalar-options">03 - Adding dynamic contents, part II: Simple data from AIMMS</h2>
+		<p> In this tutorial you will learn how to update the widget that we created in
+			<a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a> and extended with dynamic contents in 
+			<a href="../02-adding-dynamic-contents-part-i-options/index.html">tutorial-02</a> such that you can change 
+			its contents from within an AIMMS model. We will go into a little more details on the
+			<em>AWF Option Mechanism</em> that was previously introduced. Like in the previous tutorials, we will
+			leave out much of the technical details and underlying design and only explain the essential things
+			in order to get you up-and-running as soon as possible. But this tutorial will be longer and will go
+			into more details than the previous tutorials.
+		<h3>Before we begin - Prerequisites</h3>
+		<p>To make the most out of this tutorial, it is important that you meet a couple of prerequisites.
+		<p>First of all, we are going to assume that you already familiarized yourself a bit with the AIMMS WebUI.
+			Both with the end-usage and the app-development. That you have a recent AIMMS and that you have it
+			running in your set-up.
+		<p>Since this is a (software) development tutorial, we are also assuming that you have experience in writing
+			software in a generic programming language, and, that you have a basic knowledge on HTML5 technologies
+			(HTML5 DOM, CSS, Javascript, and the likes). It is also beneficial, however not required, if you are
+			familiar with <a href="http://jquery.org">jQuery</a> and, to lesser extent,
+			<a href="http://jquery-ui.org">jQuery UI</a>, as AIMMS WebUI is built on top of these technologies.
+		<p> Finally, since this tutorial builds on the previous tutorial, we expect that you have done that tutorial
+			first. If you have not done so yet, here is a link to <a href="../02-adding-dynamic-contents-part-i-options/index.html">tutorial-02</a>.
+		<h3>Dynamic contents in AWF - revisited</h3>
+		<p> Previously, it was stated that there are two ways of having dynamic contents in an AWF widget. The easiest
+			method being through the use of options and the other method is to use data from the AIMMS model.
+			The distinction between option or not, however, was made for the sake of simplicity. In reality, both methods
+			use the AWF Option Mechanism, though in a slightly different way. To understand the subtle differences, it is
+			important to understand how an option, in AWF, gets a value, and, what actually that value in AWF encompasses.
+		<p> Model¹ data is bound to an AWF option through a process called <em>data binding</em>.
+		<p> <q><em>Data binding</em> is the process that establishes a connection between the application UI (User Interface)
+			and business logic. If the settings and notifications are correctly set, the data reflects changes when made.
+			It can also mean that when the UI is changed, the underlying data will reflect that change.²</q>
+		<p> Currently in AWF, an option can be bound to two sources of data:
+		<ol>
+			<li>a (local) <em>literal</em> value, and
+			<li>a (remote) <em>aimms</em> value.
+		</ol>
+		How to bind data to an option will be explained in the next section.
+		<p> ¹ <small>Here we, as in tutorial-01, mean model in a broad and abstract sense, but you can read it as the model and/or
+					 its model data in AIMMS.</small><br/>
+			² <small>Please see <a href="http://en.wikipedia.org/w/index.php?title=Data_binding&oldid=650718924">WikipediA</a>
+					 for more information.</small>
+		<h3>The basic components of an option (repeat)</h3>
+		<p> Recall from <a href="../02-adding-dynamic-contents-part-i-options/index.html">tutorial-02</a> that an option in AWF consists of:
+		<ol>
+			<li>a <em>name</em>,
+			<li>a <em>type</em>, and
+			<li>a <em>value</em>.
+		</ol>
+		<h3>Three states of an option value</h3>
+		<p> In addition to this, an option value can have three different states:
+		<ol>
+			<li><em>specified</em>,
+			<li><em>parsed</em>, and
+			<li><em>resolved</em>.
+		</ol>
+		<p> The <em>specified</em> value of an option is the option value in its serialized form. It is either <tt>null</tt>¹, or,
+			a (JSON/JavaScript) string literal. It has the following syntax:
+		<blockquote>
+			<tt>&lt;data-provider&gt;<b>:</b>&lt;JSON&gt;</tt><br/><br/>
+			<small>Where:</small>
+			<ul>
+				<li><tt>data-provider</tt> <small>is the name of the provider for the data. Currently in AWF there are two data-providers
+					available: <em>literal</em>² and <em>aimms</em></small>.
+				<li><tt>JSON</tt> <small>is the object, serialized as JSON, that, together with the option <em>type</em>, is used by
+					AWF data-binding to resolve the final value</small>.
+			</ul>
+			<small>Notes:</small>
+			<ul>
+				<li><small>Examples of specified values:</small>
+				<ul>
+					<li><small><tt>literal:123</tt></small>
+					<li><small><tt>literal:"Hello AIMMS!"</tt></small>
+					<li><small><tt>aimms:{"contents": ["MyIdentifierA", "MyIdentifierB"]}</tt></small>
+				</ul>
+				<li><small>In AWF databinding, small simple type-coercion³ is performed when possible. This means that a number will
+						be resolved to a string if the option <em>type</em> is a string, even when the input is a numerical value, and,
+						vice versa (restrictions apply).</small></li>
+				<li><small>For the literal data-provider, the resolved value typically is the same as the specified value.</small>
+			</ul>
+		</blockquote>
+		<p> The <em>parsed</em> value of an option is an intermediate value state between <em>specified</em> and <em>resolved</em> and is used
+			to aid in the transition between the two.
+		<p> The <em>resolved</em> value of an option is the actual option value which a widget typically uses to update its
+			associated DOM element.
+		<p> ¹ <small>Recall from tutorial-02 that <tt>null</tt> denotes that the widget should use a default value that is
+					 intrinsic to the specific widget.</small><br/>
+			² <small>In tutorial-02 the literal data-provider was used.</small><br/>
+			³ <small>The term <em>type coercion</em> is typically used to denote an automatic or implicit form of type casting (see
+					<a href="http://en.wikipedia.org/w/index.php?title=Type_conversion&oldid=652722792">WikipediA</a>).</small><br/>
+		<h3>Option editors - revisited</h3>
+		<p> Recall from <a href="../02-adding-dynamic-contents-part-i-options/index.html">tutorial-02</a> that an option editor
+			provides a means to change the value of an option from the UI. To put this more precise, an option editor typically
+			uses the <em>resolved value</em> to draw itself (i.e. its DOM tree), and, when a value is changed by the user using that
+			option editor, the option editor subsequently uses the <em>parsed value</em> to update the <em>specified value</em> of
+			the option¹. AWF data-binding then picks up the change, potentially causing a new value to resolve and -hence- the
+			widget to be updated.
+		<p> ¹ <small>We will go into these details later, when we show how to write your own option editor in a future tutorial.</small>
+
+		<h3>Binding AIMMS data to our widget's option</h3>
+		<p>	Now that we know a little more about the AWF Option Mechanism and its underlying data-binding mechanism, we can update
+			our widget such that it gets its value from AIMMS. But first let's have a quick look at the current state of our widget
+			and see the theory from the previous sections in action.
+		<p> We start by opening the option dialog again:
+
+		<p><picture>
+			<img src="../assets/img/simple-option-editor-of-new-literal-option.png">
+			<div><strong>figure 1</strong></div>
+		</picture>
+
+		<p> Now click on the tool icon <awf-icon>&#xe1d9;</awf-icon>. This will show the <em>advanced option editor</em> (figure 2).
+			This option editor acts as a fall-back option editor. You can use it to directly manipulate the <em>specified value</em>
+			of an option, even when a normal option editor fails.
+
+		<p><picture>
+			<img src="../assets/img/advanced-option-editor-of-new-literal-option.png">
+			<div><strong>figure 2</strong></div>
+		</picture>
+
+		<p> Please observe the specified value for the <em>contents</em> option. If we recall from the theoretical section that
+			the specified value of an option has the form: <tt>&lt;data-provider&gt;<b>:</b>&lt;JSON&gt;</tt>, we can see that
+			the current version of our widget is using the <em>literal</em> data provider:
+
+		<table>
+			<thead><th><tt>data-provider</tt></th><th><tt>JSON</th></thead>
+			<tbody><td><tt>literal</tt></td><td><tt>"This is updated realtime"</tt></td></tbody>
+		</table>
+
+		<p> Now let's see how easy it is to hook up an identifier from the AIMMS model to our widget. For that, we switch to
+			the <em>AIMMS</em> data provider and tell it to resolve the value to that of the <tt>TotalTransportCost</tt> variable from
+			the model:
+
+		<table>
+			<thead><th><tt>data-provider</tt></th><th><tt>JSON</th></thead>
+			<tbody><td><tt>aimms</tt></td><td><tt>{"contents":["TotalTransportCost"]}</tt></td></tbody>
+		</table>
+
+		<p> In other words, change the specified value of the contents option using the advanced option editor to:
+			<tt>aimms<b>:</b>{"contents":["TotalTransportCost"]}</tt>, like so¹ (do not press enter yet):
+
+		<p><picture>
+			<img src="../assets/img/advanced-option-editor-with-aimms-option.png">
+			<div><strong>figure 3</strong></div>
+		</picture>
+
+		<p>¹ <small>Please note that the specified value here gets truncated due to limited space in the optiondialog</small>
+
+		<p> Then, when you press enter, the contents of the widget updates:
+
+		<p><picture>
+			<img src="../assets/img/advanced-option-editor-with-aimms-option-and-resolved.png">
+			<div><strong>figure 4</strong></div>
+		</picture>
+
+		<p> <tt>0,00</tt>! That may not seem much, but this value is coming from AIMMS! (You can check it if you wish.) And,
+			because we specified the option type to be a <tt>string</tt> while the underlying data in the model is a numerical
+			value, AWF even coerced the type for us to a nicely formatted string!
+		<p> If you're not convinced yet, let's let AIMMS update the model. For this, we add a button to our page. Click the
+			pencil icon in the top toolbar <awf-icon>&#xe00d;</awf-icon> and click the plus icon <awf-icon>&#xe376;</awf-icon>
+			on the side bar that opens. Fill in the fields of the widget wizard that pops up like so:
+
+		<p><picture>
+			<img src="../assets/img/adding-optimize-button.png">
+			<div><strong>figure 5</strong></div>
+		</picture>
+
+		<p> By default the title of the button is the same as the name of the procedure, but let's use a more inspiring name:
+
+		<p><picture>
+			<img src="../assets/img/change-title-of-button-to-optimize.png">
+			<div><strong>figure 6</strong></div>
+		</picture>
+
+		<p> After adding and configuring our new button, the page should look like this:
+
+		<p><picture>
+			<img src="../assets/img/before-pressing-optimize.png">
+			<div><strong>figure 7</strong></div>
+		</picture>
+
+		<p> Now, when we press the new <em>Optimize!</em> button, we instruct AIMMS to calculate the optimal solution and update
+			the <em>TotalTransportCost</em> variable that we show in our widget. Let's see what happens...
+
+		<p><picture>
+			<img src="../assets/img/after-pressing-optimize.png">
+			<div><strong>figure 8</strong></div>
+		</picture>
+		
+		<p> Et voilà! After pressing the button, our widget updates as expected. And there you have it, your first widget with
+			data from AIMMS!
+
+		<h3>Recap</h3>
+		<p> This was quite a big tutorial. Let's do a small recap of what we've learnt today. AWF allows you to <em>bind</em> data
+			to your widget through the use of <em>options</em>. Two <em>data-providers</em> are readily available in AWF, one for
+			<em>literal</em> values and one for values coming from <em>aimms</em>.
+		<p> An option value has three states (or forms), <em>specified</em>, <em>parsed</em> and <em>resolved</em>. In this tutorial,
+			we did not have to change any code of our widget, we only changed the <em>specified</em> value of our option and changed
+			the data-provider from <em>literal</em> to <em>aimms</em>.
+		<p> Next time, we will continue on this path and show you how to retrieve <em>multi-dimensional</em> data from AIMMS.
+		
+<!--And there you have it,
+		<p> Inside the factory.js we specify the <em>contents</em> option which is of type <tt>string</tt>. We do this inside the
+			<tt>onInitializeOptionTypes</tt>.
+
+<pre><code class="js">
+// factory.js
+AWF.Bus.subscribe({
+	onCollectTypes: function(collectedTypes, contextElQ) {
+		if (!contextElQ || contextElQ.awf.tags("placeable")) {
+			collectedTypes.push("my-widget");
+		}
+	},
+	onDecorateElement: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.aimms_my_widget();
+		}
+	},
+	onInitializeOptionTypes: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.awf.optionTypes("contents", AWF.OptionUtil.createOptionType("string"));
+		}
+	},
+});
+</code></pre>
+
+		<h3>Reacting to option changes</h3>
+		<p>In the widget we need to use the <tt>onResolvedOptionChanged</tt> function which is automatically invoked by AWF
+			whenever an option value of the widget changes.
+			Because we specified the <em>contents</em> option in the factory we are now able to listen for changes and
+			react accordingly. In our case we update the text in the widget.
+
+<pre><code class="js">// jquery.aimms.my-widget.js
+jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
+	_create: function() {
+		var widget = this;
+		widget.contentElQ = $('&lt;div&gt;Hello AIMMS!&lt;/div&gt;');
+
+		widget.element
+				.find('.awf-dock.center')
+				.append(widget.contentElQ);
+	},
+	onResolvedOptionChanged: function(optionName, optionValue) {
+		var widget = this;
+
+		if (optionName === "contents") {
+			if (optionValue) {
+				widget.contentElQ.text(optionValue);
+			} else {
+				widget.contentElQ.text("Empty contents!");
+			}
+		}
+	},
+}));
+</code></pre>
+
+		<h3>Changing the value</h3>
+		<p> After reloading the browser-tab, if we now open the widget's option dialog and navigate to the miscellaneous
+			option editor (for historical reasons the icon is still denoted by a <tt>T</tt>), we will see that a new
+			option editor has become available for the <em>contents</em> option. By typing inside the contents
+			option's textfield, we can see that our widgets content is updated! (See figure 2)
+
+		<p><picture>
+			<img src="../assets/img/tut02-screenshot-2.png">
+			<div><strong>figure 2</strong></div>
+		</picture>
+
+		<p>And there you have it, your first steps into the world of dynamic widgets in AWF using options. Next tutorial
+			we will show you how to have dynamic widgets in AWF using data that comes from an AIMMS model.
+-->
+
+	</body>
+</html>
