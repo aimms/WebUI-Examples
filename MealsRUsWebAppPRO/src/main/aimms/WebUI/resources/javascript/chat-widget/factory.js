@@ -5,4 +5,9 @@ AWF.Bus.subscribe({
 			elQ.aimms_chat_widget();
 		}
 	},
+		onCollectTypes: function(collectedTypes, contextElQ) {
+		if (!contextElQ || contextElQ.awf.tags("placeable")) {
+			collectedTypes.push("chat");
+		}
+	},
 });
