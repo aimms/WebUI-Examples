@@ -82,14 +82,14 @@
 		<h3>Dynamic contents in AWF - revisited</h3>
 		<p> Previously, it was stated that there are two ways of having dynamic contents in an AWF widget. The easiest
 			method being through the use of options and the other method is to use data from the AIMMS model.
-			The distinction between option or not, however, was made for the sake of simplicity. In reality, both methods
+			The distinction between these two methods was made for the sake of simplicity. In reality, both methods
 			use the AWF Option Mechanism, though in a slightly different way. To understand the subtle differences, it is
 			important to understand how an option, in AWF, gets a value, and, what actually that value in AWF encompasses.
 		<p> Model¹ data is bound to an AWF option through a process called <em>data binding</em>.
 		<p> <q><em>Data binding</em> is the process that establishes a connection between the application UI (User Interface)
 			and business logic. If the settings and notifications are correctly set, the data reflects changes when made.
 			It can also mean that when the UI is changed, the underlying data will reflect that change.²</q>
-		<p> Currently in AWF, an option can be bound to two sources of data:
+		<p> Currently in AWF, an option can be bound to one of the following two sources of data:
 		<ol>
 			<li>a (local) <em>literal</em> value, and
 			<li>a (remote) <em>aimms</em> value.
@@ -135,7 +135,8 @@
 				<li><small>In AWF databinding, small simple type-coercion³ is performed when possible. This means that a number will
 						be resolved to a string if the option <em>type</em> is a string, even when the input is a numerical value, and,
 						vice versa (restrictions apply).</small></li>
-				<li><small>For the literal data-provider, the resolved value typically is the same as the specified value.</small>
+				<li><small>For the literal data-provider, the resolved value is typically obtained by stripping the <em>literal</em>
+						prefix from the specified value.</small>
 			</ul>
 		</blockquote>
 		<p> The <em>parsed</em> value of an option is an intermediate value state between <em>specified</em> and <em>resolved</em> and is used
@@ -146,7 +147,7 @@
 					 intrinsic to the specific widget.</small><br/>
 			² <small>In tutorial-02 the literal data-provider was used.</small><br/>
 			³ <small>The term <em>type coercion</em> is typically used to denote an automatic or implicit form of type casting (see
-					<a href="http://en.wikipedia.org/w/index.php?title=Type_conversion&oldid=652722792">WikipediA</a>).</small><br/>
+					<a href="http://en.wikipedia.org/w/index.php?title=Type_conversion&oldid=652722792">Wikipedia</a>).</small><br/>
 		<h3>Option editors - revisited</h3>
 		<p> Recall from <a href="../02-adding-dynamic-contents-part-i-options/index.html">tutorial-02</a> that an option editor
 			provides a means to change the value of an option from the UI. To put this more precise, an option editor typically
@@ -169,7 +170,7 @@
 
 		<p> Now click on the tool icon <awf-icon>&#xe1d9;</awf-icon>. This will show the <em>advanced option editor</em> (figure 2).
 			This option editor acts as a fall-back option editor. You can use it to directly manipulate the <em>specified value</em>
-			of an option, even when a normal option editor fails.
+			of an option, when a normal option editor is not (yet) present or even when a normal option editor fails.
 
 		<p><picture>
 			<img src="../assets/img/advanced-option-editor-of-new-literal-option.png">
