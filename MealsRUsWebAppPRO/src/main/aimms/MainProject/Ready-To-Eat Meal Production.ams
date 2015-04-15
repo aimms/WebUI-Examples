@@ -545,7 +545,7 @@ Model Main_Ready_To_Eat_Meal_Production {
             Set AllPublicIdentifiers {
                 SubsetOf: AllIdentifiers;
                 Index: api;
-                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode, MealProductionLineDuration, MealProductionLineStart };
+                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, Dummy , StartupMode, MealProductionLineDuration, MealProductionLineStart, webui_selection_TestSelectionWidget_Ingredients, SelectBeef, UnselectBeef, SelectionTestSetup };
             }
             Set AllPublicProcedures {
                 SubsetOf: AllIdentifiers;
@@ -671,6 +671,26 @@ Model Main_Ready_To_Eat_Meal_Production {
             }
             ElementParameter aScenario {
                 Range: Scenarios;
+            }
+        }
+    }
+    Section Testing_Declarations {
+        Parameter webui_selection_TestSelectionWidget_Ingredients {
+            IndexDomain: i;
+        }
+        Procedure SelectionTestSetup {
+            Body: {
+                empty webui_selection_TestSelectionWidget_Ingredients(i);
+            }
+        }
+        Procedure SelectBeef {
+            Body: {
+                webui_selection_TestSelectionWidget_Ingredients('beef') := 1;
+            }
+        }
+        Procedure UnselectBeef {
+            Body: {
+                webui_selection_TestSelectionWidget_Ingredients('beef') := 0;
             }
         }
     }

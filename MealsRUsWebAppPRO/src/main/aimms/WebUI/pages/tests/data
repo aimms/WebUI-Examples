@@ -1,0 +1,21 @@
+{
+	"slot0": "",
+	"------------------------------------------------------------------<<<<-aimms.widget.type-": "",
+	"aimms.widget.type": "literal:\"page\"",
+	"------------------------------------------------------------------>>>>-aimms.widget.type-": "",
+	"slot1": "",
+	"slot2": "",
+	"------------------------------------------------------------------<<<<-awf.persistence.version-": "",
+	"awf.persistence.version": "1.1",
+	"------------------------------------------------------------------>>>>-awf.persistence.version-": "",
+	"slot3": "",
+	"slot4": "",
+	"slot5": "",
+	"slot6": "",
+	"slot7": "",
+	"------------------------------------------------------------------<<<<-widgets-": "",
+	"widgets": "literal:[{\"uri\":\"SelectionTestSetup\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"1\"}},{\"uri\":\"SelectBeef\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"1\"}},{\"uri\":\"UnSelectBeef\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"1\"}},{\"uri\":\"TestSelectionWidget\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"3\"}},{\"uri\":\"SelectionTable\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"2\",\"customPosition\":\"\"}},{\"uri\":\"TestIngredientPriceUI\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"2\",\"customPosition\":\"\"}}]",
+	"------------------------------------------------------------------>>>>-widgets-": "",
+	"slot8": "",
+	"slot9": ""
+}

@@ -1,19 +1,6 @@
 <?xml version="1.0"?>
 <ExportSettings>
 	<ExcludedFile>backup</ExcludedFile>
-	<ExcludedFile>ErrorReports</ExcludedFile>
 	<ExcludedFile>log</ExcludedFile>
 	<ExcludedFile>PROTemp</ExcludedFile>
-	<ExcludedFile>WebUI</ExcludedFile>
-	<ExcludedFile>debug.log</ExcludedFile>
-	<ExcludedFile>memory.log</ExcludedFile>
-	<IncludedFile>AimmsPROGUI\AimmsPROGUI.aim</IncludedFile>
-	<IncludedFile>AimmsPROGUI\AimmsPROGUI.libprj</IncludedFile>
-	<IncludedFile>AimmsPROLibrary\AimmsPRO-%AIMMSVERSION%.aim</IncludedFile>
-	<IncludedFile>AimmsPROLibrary\AimmsPRO-3.11.aim</IncludedFile>
-	<IncludedFile>AimmsPROLibrary\AimmsPRO-3.12.aim</IncludedFile>
-	<IncludedFile>AimmsPROLibrary\AimmsPRO-3.13.aim</IncludedFile>
-	<IncludedFile>AimmsPROLibrary\AimmsPRO-3.14.aim</IncludedFile>
-	<IncludedFile>AimmsPROLibrary\AimmsPROLibrary.aim</IncludedFile>
-	<IncludedFile>AimmsPROLibrary\AimmsPROLibrary.libprj</IncludedFile>
 </ExportSettings>
