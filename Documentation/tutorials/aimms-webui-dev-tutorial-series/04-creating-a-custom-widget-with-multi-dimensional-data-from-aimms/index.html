@@ -98,48 +98,48 @@
 			values, this topic will <b>not</b> be discussed in this tutorial. This tutorial will focus on the freedom of the user 
 			to position	the <em>element</em> labels where he wants to see them. 
 		<p> The following example further illustrates the concept of the pivoting. Consider the following 
-			3 dimensional identifier² that contains population numbers per sex, age group and year.
-<pre><code>Population('0-20', M,2013) = 1.980.278
-Population('0-20', F,2013) = 1.890.495
-Population('20-65',M,2013) = 5.063.525
-Population('20-65',F,2013) = 5.020.932
-Population('65-',  M,2013) = 1.263.536
-Population('65-',  F,2013) = 1.560.809
-Population('0-20', M,2014) = 1.968.124
-Population('0-20', F,2014) = 1.877.916
-Population('20-65',M,2014) = 5.051.381
-Population('20-65',F,2014) = 5.012.844
-Population('65-',  M,2014) = 1.314.880
-Population('65-',  F,2014) = 1.604.144
+			3-dimensional data² that contains population numbers per sex, age group and year.
+<pre><code>Population('0-20', M,2013) = 1,980,278
+Population('0-20', F,2013) = 1,890,495
+Population('20-65',M,2013) = 5,063,525
+Population('20-65',F,2013) = 5,020,932
+Population('65-',  M,2013) = 1,263,536
+Population('65-',  F,2013) = 1,560,809
+Population('0-20', M,2014) = 1,968,124
+Population('0-20', F,2014) = 1,877,916
+Population('20-65',M,2014) = 5,051,381
+Population('20-65',F,2014) = 5,012,844
+Population('65-',  M,2014) = 1,314,880
+Population('65-',  F,2014) = 1,604,144
 </code></pre>
 		<p> When positioning the <em>age group</em> and <em>sex</em> indices in the rows and the <em>year</em> index in the columns,
 			the table will look like:
 <pre><code>		 |   2013      2014 
----------------------------------------------			
- 0-20 M  | 1.980.278 1.968.124
-      F  | 1.890.495 1.877.916
-20-65 M  | 5.063.525 5.051.381
-      F  | 5.020.932 5.012.844
-65-   M  | 1.263.536 1.314.880
-      F	 | 1.560.809 1.604.144
+------------------------------			
+ 0-20 M  | 1,980,278 1,968,124
+      F  | 1,890,495 1,877,916
+20-65 M  | 5,063,525 5,051,381
+      F  | 5,020,932 5,012,844
+65-   M  | 1,263,536 1,314,880
+      F	 | 1,560,809 1,604,144
 </code></pre>
 		<p> However, when positioning the <em>sex</em> and <em>year</em> indices in the rows and the <em>age group</em> index
 			in the columns, the same data will now look like:
 <pre><code>       |   0-20      20-65     65-
-------------------------------------------------
-M 2013 | 1.980.278 5.063.525 1.263.536
-  2014 | 1.968.124 5.051.381 1.314.880
-F 2013 | 1.890.495 5.020.932 1.560.809
-  2014 | 1.877.916 5.012.844 1.604.144
+--------------------------------------
+M 2013 | 1,980,278 5,063,525 1,263,536
+  2014 | 1,968,124 5,051,381 1,314,880
+F 2013 | 1,890,495 5,020,932 1,560,809
+  2014 | 1,877,916 5,012,844 1,604,144
 </code></pre>
 		<p> Also note that the order of the indices may influence the appearance of the table. For example, changing the order of
 			the <em>sex</em> and <em>year</em> indices in the above table will yield the following table:
 <pre><code>       |   0-20      20-65     65-
-------------------------------------------------
-2013 M | 1.980.278 5.063.525 1.263.536
-     F | 1.890.495 5.020.932 1.560.809
-2014 M | 1.968.124 5.051.381 1.314.880
-     F | 1.877.916 5.012.844 1.604.144
+--------------------------------------
+2013 M | 1,980,278 5,063,525 1,263,536
+     F | 1,890,495 5,020,932 1,560,809
+2014 M | 1,968,124 5,051,381 1,314,880
+     F | 1,877,916 5,012,844 1,604,144
 </code></pre>
 		<h4>Partitioning the indices</h4>
 		<p> In the above example every one of the three indices needs to asssigned to either the <em>rows</em> or the <em>columns</em>.
@@ -198,8 +198,10 @@ F 2013 | 1.890.495 5.020.932 1.560.809
 );	
 </code></pre>
 		<h3>Simple table factory</h3>
+		<p> As mention in <a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a> you typically start
+			with creating a widget factory. The widget factory for the simple table looks like:
 <pre><code>(function($) {
-
+// factory.js
 var OptionTypeTable = 
 {
 	type : "datasource",
@@ -237,6 +239,39 @@ AWF.installListenerToMethodBridges(AWF, {
 
 })(jQuery);
 </code></pre>
+		<h3>Creating the widget source file</h3>
+		<p> To create the source file fle the widget, you should create a JavaScript source file in the same
+			folder as the factory file with the following structure
+<pre><code>(function($) {
+
+var TutorialTableWidget = AWF.Widget.create({
+
+	_create: function _create() {
+		// TODO
+	},
+	
+	_createHtmlTable: function _createHtmlTable(rowHeaderDimension,colHeaderDimension) {
+		// TODO
+	},
+
+	_fillTable: function _fillTable(dataSource) {
+		// TODO
+	},
+
+	_refresh: function(dataSource) {
+		// TODOD
+	},
+	
+	onResolvedOptionChanged: function(optionName, value) {
+		// TODO
+	},
+});
+// The jQuery-UI way of registering/creating a new widget:
+$.widget('ui.aimms_tutorial_table', TutorialTableWidget);
+
+})(jQuery);
+</code></pre>	
+		<p> The individual methods in this file will be discussed in the remainder of this tutorial.
 		<h3>Creating the widget container</h3>
 <pre><code>_create: function _create() {
 	var widget = this;
@@ -269,6 +304,12 @@ AWF.installListenerToMethodBridges(AWF, {
 }
 </code></pre>	
 		<h3>Refreshing the table</h3>
+		<p> In this tutorial, we will refresh the table by
+		<ol>
+			<li> redrawing the Html from scratch
+			<li> requesting <b>all</b> data from the dataSource 
+			<li> upon retrieval of the data, the empty table will be filled with the data
+		</ol>
 <pre><code>_refresh: function(dataSource) {
 	var widget = this;
 	
@@ -294,13 +335,13 @@ AWF.installListenerToMethodBridges(AWF, {
 	var numRowsInColHeader = colHeaderDimension.numRows
 	var numColsInColHeader = colHeaderDimension.numCols;
 	
-	// Helper function to create table cell DOM element 
-	// createTdOrTh('th', 'foo', 3, 4)  ==>  '<th class="foo row3 col4"></th>'
+	// Helper function to create table cell 'th' or 'td' element with extra classes
+	// For example, createCellElQ('th', 'foo', 3, 4)  ==>  '<th class="foo row3 col4"></th>'
 	function createCellElQ(type, name, row, col) {
 		return $(['<', type, ' class="', name, ' row'+row, ' col'+col, '"></', type, '>'].join(''));
 	}
 
-	// 1a. Create the column header
+	// Step 1: Create the column header
 	var theadElQ = $('<thead>');
 	numRowsInColHeader.times(function(col) {
 		var trElQ = $('<tr>');
@@ -310,10 +351,10 @@ AWF.installListenerToMethodBridges(AWF, {
 		theadElQ.append(trElQ);
 	});
 
-	// 1b. Add the pivot area, i.e. the 'empty' block in the upper-left corner of the table
+	// Step 2: Add the pivot area, i.e. the 'empty' block in the upper-left corner of the table
 	theadElQ.find('tr:first').prepend('<th colspan="'+numColsInRowHeader+'" rowspan="'+numRowsInColHeader+'"></th>');
 
-	// 1c. Create the row header and grid
+	// Step 3: Create the row header and grid
 	var numColsInGrid = numColsInColHeader;
 	var tbodyElQ = $('<tbody>');
 	numRowsInRowHeader.times(function(row) {
@@ -327,7 +368,7 @@ AWF.installListenerToMethodBridges(AWF, {
 		tbodyElQ.append(trElQ);
 	});
 
-	// 1d. Construct the table
+	// Step 4: Construct the table
 	var widget = this;
 	widget.tableElQ.empty();
 	widget.tableElQ.append(theadElQ);
