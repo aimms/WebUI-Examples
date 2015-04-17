@@ -1,0 +1,343 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>04 - Creating a custom widget with multi-dimensional data from AIMMS</title>
+		<meta data-wp-post-id="????" />
+		<link rel="stylesheet" href="../css/icomoon.css">
+		<link href='http://fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
+		<script>document.registerElement('awf-icon', {prototype: Object.create(HTMLElement.prototype)})</script>
+		<style>
+			html {
+				background-color: #ECEDEF;
+			}
+			body {
+				font-family: 'Roboto', sans-serif;
+				max-width: 42em;
+				margin: 0 auto;
+				padding: 6em 4em;
+				text-align: justify;
+				color: #333;
+				background-color: #FAFAFA;
+			}
+			@media screen and (max-width:560px) {
+				html, body{ padding:0;background:#fff;font-family: Verdana, sans-serif;text-align: left;font-size:12px;}
+				h1, h2, h3, h4, h5, h6, h7, #carousel ul, #carousel h3 {
+					font-family: 'Cabin Condensed';
+				}
+				h1, h2, h3, h4, h5, h6, h7 {
+					font-size: 2em;
+					font-weight: 500;
+				}
+				body {padding-right:10px;}
+				.wp-title{display:none;}
+				img {max-width:100%}
+			}
+
+			table {
+				/*width: 100%;*/
+				border-collapse: collapse;
+				margin: auto;
+			}
+			th, td {
+				text-align: left;
+				vertical-align: top;
+				padding: 0.3em 1em;
+			}
+			th {
+				text-align: center;
+				background: #F2F2F7;
+				border-bottom: 1px solid #CCCCCC;
+			}
+
+			awf-icon {
+				font-family: icomoon-ultimate;
+				border-radius: 50%;
+				border: 1px solid #333;
+				padding: 4px;
+				text-align: center;
+				font-size: 60%;
+			}
+		</style>
+		<!-- highightjs - syntax highlighting -->
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
+	</head>
+	<body>
+		<h1 class="wp-title">AIMMS WebUI Dev Tutorial</h1>
+		<h2 class="wp-title" id="04-creating-a-custom-widget-with-multi-dimensional-data-from-aimms">04 - Creating a custom widget with multi-dimensional data from AIMMS</h2>
+		<p> In the previous 
+			<a href="../03-adding-dynamic-contents-part-ii-aimms-scalar-options/index.html">tutorial</a> we discussed how to 
+			create a widget that shows scalar data from AIMMS. In this tutorial we will explain  how to create
+			a widget that is populated with multi-dimensional data from AIMMS. To do so, we will first explain the
+			concept of pivoting. Pivoting is essential in multi-dimensional widgets because it allows the user to specify 
+			how the widget should deal with the individual domain indices. Next topic is the handling of the asynchronous
+			data requests. As an example, we will build we will build a simple table widget that will display data from a 
+			high dimensional identifier in AIMMS.
+		<h3>Before we begin - Prerequisites</h3>
+		<p> To make the most out of this tutorial, it is important that you meet a couple of prerequisites.
+		<p> First of all, we are going to assume that you already familiarized yourself a bit with the AIMMS WebUI.
+			Both with the end-usage and the app-development. That you have a recent AIMMS and that you have it
+			running in your set-up.
+		<p> Since this is a (software) development tutorial, we are also assuming that you have experience in writing
+			software in a generic programming language, and, that you have a basic knowledge on HTML5 technologies
+			(HTML5 DOM, CSS, Javascript, and the likes). It is also beneficial, however not required, if you are
+			familiar with <a href="http://jquery.org">jQuery</a> and, to lesser extent,
+			<a href="http://jquery-ui.org">jQuery UI</a>, as AIMMS WebUI is built on top of these technologies.
+		<p> More specificly, since we will be creating an HTML table widget, we assume that you are familiar with
+			the basics to create an <a href="http://www.w3.org/wiki/HTML_tables">HTML table</a>.
+		<p> Finally, since this tutorial uses the concepts that have been introduced in the previous tutorials, we expect that 
+			you have completed the previous tutorials 
+			(<a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a>,
+			<a href="../02-adding-dynamic-contents-part-i-options/index.html">tutorial-02</a>, and
+			<a href="../03-adding-dynamic-contents-part-ii-aimms-scalar-options/index.html">tutorial-03</a>) first.
+		<h3>Pivoting</h3>
+		<p> A pivot table¹ usually consists of row, columns and data fields in which the user has freedom to position the labels
+			in the rows or in the columns creating an overview that provides him the most insight. In addition, most pivot tables
+			do support some kind of automatic aggregation of data. Although AWF does have support for automatic aggregation of
+			values, this topic will <b>not</b> be discussed in this tutorial. This tutorial will focus on the freedom of the user 
+			to position	the <em>element</em> labels where he wants to see them. 
+		<p> The following example further illustrates the concept of the pivoting. Consider the following 
+			3 dimensional identifier² that contains population numbers per sex, age group and year.
+<pre><code>Population('0-20', M,2013) = 1.980.278
+Population('0-20', F,2013) = 1.890.495
+Population('20-65',M,2013) = 5.063.525
+Population('20-65',F,2013) = 5.020.932
+Population('65-',  M,2013) = 1.263.536
+Population('65-',  F,2013) = 1.560.809
+Population('0-20', M,2014) = 1.968.124
+Population('0-20', F,2014) = 1.877.916
+Population('20-65',M,2014) = 5.051.381
+Population('20-65',F,2014) = 5.012.844
+Population('65-',  M,2014) = 1.314.880
+Population('65-',  F,2014) = 1.604.144
+</code></pre>
+		<p> When positioning the <em>age group</em> and <em>sex</em> indices in the rows and the <em>year</em> index in the columns,
+			the table will look like:
+<pre><code>		 |   2013      2014 
+---------------------------------------------			
+ 0-20 M  | 1.980.278 1.968.124
+      F  | 1.890.495 1.877.916
+20-65 M  | 5.063.525 5.051.381
+      F  | 5.020.932 5.012.844
+65-   M  | 1.263.536 1.314.880
+      F	 | 1.560.809 1.604.144
+</code></pre>
+		<p> However, when positioning the <em>sex</em> and <em>year</em> indices in the rows and the <em>age group</em> index
+			in the columns, the same data will now look like:
+<pre><code>       |   0-20      20-65     65-
+------------------------------------------------
+M 2013 | 1.980.278 5.063.525 1.263.536
+  2014 | 1.968.124 5.051.381 1.314.880
+F 2013 | 1.890.495 5.020.932 1.560.809
+  2014 | 1.877.916 5.012.844 1.604.144
+</code></pre>
+		<p> Also note that the order of the indices may influence the appearance of the table. For example, changing the order of
+			the <em>sex</em> and <em>year</em> indices in the above table will yield the following table:
+<pre><code>       |   0-20      20-65     65-
+------------------------------------------------
+2013 M | 1.980.278 5.063.525 1.263.536
+     F | 1.890.495 5.020.932 1.560.809
+2014 M | 1.968.124 5.051.381 1.314.880
+     F | 1.877.916 5.012.844 1.604.144
+</code></pre>
+		<h4>Partitioning the indices</h4>
+		<p> In the above example every one of the three indices needs to asssigned to either the <em>rows</em> or the <em>columns</em>.
+			In case of a table, the <em>rows</em> and <em>columns</em> can be viewed as the parts. In a gantt chart, parts like <em>resources</em> 
+			(to specify the resource rows to be rendered) and <em>jobs</em> (to specify what indices to be used to color the bars) would 
+			probably make more sense.
+		<p> In general, an <em>index partition</em> can be defined as a partition of <em>m</em> indices into <em>n</em> parts. <em>Pivoting</em> is the 
+			process that results in an index partition.
+		<p> Pivoting support has been implemented as a generic AWF option editor that is available for widget developers. Pivot support is
+			automatically added to a widget whenever the <em>pivotable contents property</em> tag has been specified in the widget's factory.
+			The simple table widget that will be created later in this tutorial will illustrate this.
+		<p> In addition to using the <em>pivotable contents property</em> tag, 
+		<p> ¹ <small>See <a href="http://en.wikipedia.org/wiki/Pivot_table">Wikipedia</a> for more info pivot tables</a></small> 
+		<p> ² <small>
+			<a href="http://statline.cbs.nl/Statweb/publication/?DM=SLEN&PA=37325eng&D1=0&D2=1-2&D3=131-133&D4=0&D5=0&D6=17-18&LA=EN&HDR=G4,T,G5&STB=G2,G3,G1&VW=T">
+			Population data</a> as provided by Statistics Netherlands.
+			</small> 
+		<h3>Datasources, parts and values</h3>
+		<p> By selecting a single row in each part of the datasource, all indices will have a fixed value, which uniquely identifies a single value
+			in the datasource. 
+		<p> The data that is associated with a datasource can be divided into two groups:
+			<ul> 
+			<li>Data that represents the labels of the indices in the parts. For every part, a 2-dimensional <em>datablock</em> is available that provides
+			these labels though a <code>get(r,c)</code> interface. The number of columns in this structure is equal to the number of indices
+			assigned to the part. The number of rows in this structure is determined by the combination of labels (for the indices that play a 
+			role) for which the identifier in the AIMMS model contains data. The row header in the table widget can be viewed as mental
+			representation of the 2-dimensional structure associated with the <em>rows</em> part.</li>
+			<li>Data that represents the actual values of the identifier. To access these data, an <em>n</em> (where <em>n</em> is the number
+			of parts) dimensional <em>datablock</em> is available that provides the values through a <code>get(r1,r2,...,rn)</code> interface (where 
+			<em>r1</em> refers to row number <em>r1</em> in the first part, etc.</li>
+			</ul>
+		<h3>Asynchronous data retrieval</h3>
+		<p> Whenever the option type of the <em>contents</em> has the JavaScript <em>type</em> property "datasource", its resolved value will
+			be an AWF datasource object. The AWF datasource object is decorated with a <em>requestDataBlocks</em> method that should be used to request
+			data in an asynchronous manner. The 3rd arguments of this function is a callback function that will be called when the requested
+			data is available. For example, consider a datasource with two parts named <em>rowHeader</em> and <em>colHeader</em>. To retrieve
+			the data for both parts as well as for the resulting <em>grid</em> area, the following JavaScript statement can be used:
+<pre><code>dataSource.requestDataBlocks(
+	[
+		{start: 0, end: dataSource.values.getNumRows()},
+		{start: 0, end: dataSource.values.getNumCols()},
+	],
+	["values"],
+	function onReady(dataBlocks) {
+		['rowHeader', 'colHeader', 'values'].forEach(function(type) {
+			var partDataSource = dataSource[type];
+			partDataSource.getNumRows().times(function(row) {
+				partDataSource.getNumCols().times(function(col) {
+					console.log('The value in cell ( '+ row + ',' + col +
+								') of the ' + type + ' part is '+
+								dataBlocks[type].getLayer("values").get(row, col));
+				});
+			});
+		});
+	}
+);	
+</code></pre>
+		<h3>Simple table factory</h3>
+<pre><code>(function($) {
+
+var OptionTypeTable = 
+{
+	type : "datasource",
+	parts : [ {name: "rowHeader"}, {name: "colHeader"} ],
+};
+
+var widgetType = 'tutorial-table';
+
+AWF.installListenerToMethodBridges(AWF, {
+
+	onCollectTypes: function(collectedTypes, contextElQ) {
+		if(!contextElQ || contextElQ.awf.tags("contents property") || contextElQ.awf.tags("placeable")) {
+			collectedTypes.push(widgetType);
+		}
+	},
+
+	onInitializeTags: function(elQ, type) {
+		if(type === widgetType) {
+			elQ.awf.tags(["complex widget", "pivotable contents property", "table-widget"], 'add');
+		}
+	},
+
+	onInitializeOptionTypes: function(elQ, type) {
+		if(type === widgetType) {
+			AWF.OptionTypeCollector.addOptionType(elQ, "contents", OptionTypeTable);
+		}
+	},
+
+	onDecorateElement: function(elQ, type) {
+		if(type === widgetType) {
+			elQ.aimms_tutorial_table();
+		}
+	},
+});
+
+})(jQuery);
+</code></pre>
+		<h3>Creating the widget container</h3>
+<pre><code>_create: function _create() {
+	var widget = this;
+
+	widget.tableContainerElQ = $('&lt;div&gt;&lt;/div&gt;');
+	widget.tableElQ = $('&lt;table&gt;');
+
+	widget.tableContainerElQ
+		.append(widget.tableElQ);
+
+	widget.element.find('.awf-dock.center')
+		.append(widget.tableContainerElQ);
+}
+</code></pre>	
+		<h3>Handling content option changes changes</h3>
+		<p> Content option changes are triggered by AWF whenever the user changes the specified value of the option at hand 
+			(e.g. by selecting an identifier using the option editor), and/or whenever the data of the underlying AIMMS identifier
+			changes. Depending on the widget this may require a complete redraw of the widget.
+		<p> Because a data change may require a change in the dimensions of the table, it is easier to recreate the HTML from
+			scratch ever time, instead of trying to figure out whether the data change is a structural change (i.e. a change
+			that involves a change in the dimensions of the table), or just the change of a simple number.
+		<p> Whenever the user empties the contents option, the widget will receive a <em>resolved option change</em> with
+			value <em>undefined</em>. For this reason, you should make sure the <em>refresh</em> function will be able
+			to deal with this situation.
+<pre><code>onResolvedOptionChanged: function(optionName, value) {
+	var widget = this;
+	if(optionName === "contents") {
+		widget._refresh(value);
+	}
+}
+</code></pre>	
+		<h3>Refreshing the table</h3>
+<pre><code>_refresh: function(dataSource) {
+	var widget = this;
+	
+	var rowHeaderDimension = { numRows:0, numCols: 0 };
+	var colHeaderDimension = { numRows:0, numCols: 0 };
+
+	if(dataSource) {
+		rowHeaderDimension = { numRows:dataSource.rowHeader.getNumRows(), 
+							   numCols:dataSource.rowHeader.getNumCols() };
+		colHeaderDimension = { numRows:dataSource.colHeader.getNumCols(), 
+		                       numCols:dataSource.colHeader.getNumRows() };
+	}
+	
+	widget._createHtmlTable(rowHeaderDimension, colHeaderDimension);
+	widget._fillTable(dataSource);
+}
+</code></pre>	
+		<h3>Creating the HTML table</h3>
+<pre><code>_createHtmlTable: function _createHtmlTable(rowHeaderDimension,colHeaderDimension) {
+
+	var numRowsInRowHeader = rowHeaderDimension.numRows;
+	var numColsInRowHeader = rowHeaderDimension.numCols;
+	var numRowsInColHeader = colHeaderDimension.numRows
+	var numColsInColHeader = colHeaderDimension.numCols;
+	
+	// Helper function to create table cell DOM element 
+	// createTdOrTh('th', 'foo', 3, 4)  ==>  '<th class="foo row3 col4"></th>'
+	function createCellElQ(type, name, row, col) {
+		return $(['<', type, ' class="', name, ' row'+row, ' col'+col, '"></', type, '>'].join(''));
+	}
+
+	// 1a. Create the column header
+	var theadElQ = $('<thead>');
+	numRowsInColHeader.times(function(col) {
+		var trElQ = $('<tr>');
+		numColsInColHeader.times(function(row) {
+			trElQ.append(createCellElQ('th', 'colHeader', row, col));
+		});
+		theadElQ.append(trElQ);
+	});
+
+	// 1b. Add the pivot area, i.e. the 'empty' block in the upper-left corner of the table
+	theadElQ.find('tr:first').prepend('<th colspan="'+numColsInRowHeader+'" rowspan="'+numRowsInColHeader+'"></th>');
+
+	// 1c. Create the row header and grid
+	var numColsInGrid = numColsInColHeader;
+	var tbodyElQ = $('<tbody>');
+	numRowsInRowHeader.times(function(row) {
+		var trElQ = $('<tr>');
+		numColsInRowHeader.times(function(col) {
+			trElQ.append(createCellElQ('th', 'rowHeader', row, col));
+		});
+		numColsInGrid.times(function(col) {
+			trElQ.append(createCellElQ('td', 'values', row, col));
+		});
+		tbodyElQ.append(trElQ);
+	});
+
+	// 1d. Construct the table
+	var widget = this;
+	widget.tableElQ.empty();
+	widget.tableElQ.append(theadElQ);
+	widget.tableElQ.append(tbodyElQ);
+}
+</code></pre>	
+		<h3>Recap</h3>
+		<p> Note this the simple table widget in this tutorial retrieves all identifier data in one go.
+			For this reason, the widget in this tutorial is not usefull for very large AIMMS identifiers.
+			For these AIMMS identifiers, you would probably need to implement some kind of paging/scrolling
+			in your widget.
+	</body>
+</html>
