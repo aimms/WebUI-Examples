@@ -71,8 +71,8 @@
 			create a widget that shows scalar data from AIMMS. In this tutorial we will explain  how to create
 			a widget that is populated with multi-dimensional data from AIMMS. To do so, we will first explain the
 			concept of pivoting. Pivoting is essential in multi-dimensional widgets because it allows the user to specify 
-			how the widget should deal with the individual domain indices. Next topic is the handling of the asynchronous
-			data requests. As an example, we will build we will build a simple table widget that will display data from a 
+			how the widget should deal with the individual domain indices. After that, we explain the handling of the asynchronous
+			data requests. As an example, we will build a simple table widget that will display data from a 
 			high dimensional identifier in AIMMS.
 		<h3>Before we begin - Prerequisites</h3>
 		<p> To make the most out of this tutorial, it is important that you meet a couple of prerequisites.
@@ -92,57 +92,57 @@
 			<a href="../02-adding-dynamic-contents-part-i-options/index.html">tutorial-02</a>, and
 			<a href="../03-adding-dynamic-contents-part-ii-aimms-scalar-options/index.html">tutorial-03</a>) first.
 		<h3>Pivoting</h3>
-		<p> A pivot table¹ usually consists of row, columns and data fields in which the user has freedom to position the labels
+		<p> A pivot table<a href="#footnote-1" id="footnote-1-link">¹</a> usually consists of row, columns and data fields in which the user has freedom to position the labels
 			in the rows or in the columns creating an overview that provides him the most insight. In addition, most pivot tables
 			do support some kind of automatic aggregation of data. Although AWF does have support for automatic aggregation of
 			values, this topic will <b>not</b> be discussed in this tutorial. This tutorial will focus on the freedom of the user 
 			to position	the <em>element</em> labels where he wants to see them. 
 		<p> The following example further illustrates the concept of the pivoting. Consider the following 
-			3-dimensional data² that contains population numbers per sex, age group and year.
+			3-dimensional data<a href="#footnote-2" id="footnote-2-link">²</a> that contains population numbers per sex, age group and year.
 <pre><code>Population('0-20', M,2013) = 1,980,278
 Population('0-20', F,2013) = 1,890,495
 Population('20-65',M,2013) = 5,063,525
 Population('20-65',F,2013) = 5,020,932
-Population('65-',  M,2013) = 1,263,536
-Population('65-',  F,2013) = 1,560,809
+Population('65+',  M,2013) = 1,263,536
+Population('65+',  F,2013) = 1,560,809
 Population('0-20', M,2014) = 1,968,124
 Population('0-20', F,2014) = 1,877,916
 Population('20-65',M,2014) = 5,051,381
 Population('20-65',F,2014) = 5,012,844
-Population('65-',  M,2014) = 1,314,880
-Population('65-',  F,2014) = 1,604,144
+Population('65+',  M,2014) = 1,314,880
+Population('65+',  F,2014) = 1,604,144
 </code></pre>
 		<p> When positioning the <em>age group</em> and <em>sex</em> indices in the rows and the <em>year</em> index in the columns,
 			the table will look like:
-<pre><code>		 |   2013      2014 
-------------------------------			
- 0-20 M  | 1,980,278 1,968,124
-      F  | 1,890,495 1,877,916
-20-65 M  | 5,063,525 5,051,381
-      F  | 5,020,932 5,012,844
-65-   M  | 1,263,536 1,314,880
-      F	 | 1,560,809 1,604,144
+<pre><code>		 | 2013        2014 
+--------------------------------			
+0-20  M  | 1,980,278   1,968,124
+      F  | 1,890,495   1,877,916
+20-65 M  | 5,063,525   5,051,381
+      F  | 5,020,932   5,012,844
+65+   M  | 1,263,536   1,314,880
+      F	 | 1,560,809   1,604,144
 </code></pre>
 		<p> However, when positioning the <em>sex</em> and <em>year</em> indices in the rows and the <em>age group</em> index
 			in the columns, the same data will now look like:
-<pre><code>       |   0-20      20-65     65-
---------------------------------------
-M 2013 | 1,980,278 5,063,525 1,263,536
-  2014 | 1,968,124 5,051,381 1,314,880
-F 2013 | 1,890,495 5,020,932 1,560,809
-  2014 | 1,877,916 5,012,844 1,604,144
+<pre><code>       | 0-20        20-65       65+
+------------------------------------------
+M 2013 | 1,980,278   5,063,525   1,263,536
+  2014 | 1,968,124   5,051,381   1,314,880
+F 2013 | 1,890,495   5,020,932   1,560,809
+  2014 | 1,877,916   5,012,844   1,604,144
 </code></pre>
 		<p> Also note that the order of the indices may influence the appearance of the table. For example, changing the order of
 			the <em>sex</em> and <em>year</em> indices in the above table will yield the following table:
-<pre><code>       |   0-20      20-65     65-
---------------------------------------
-2013 M | 1,980,278 5,063,525 1,263,536
-     F | 1,890,495 5,020,932 1,560,809
-2014 M | 1,968,124 5,051,381 1,314,880
-     F | 1,877,916 5,012,844 1,604,144
+<pre><code>       | 0-20        20-65       65+
+------------------------------------------
+2013 M | 1,980,278   5,063,525   1,263,536
+     F | 1,890,495   5,020,932   1,560,809
+2014 M | 1,968,124   5,051,381   1,314,880
+     F | 1,877,916   5,012,844   1,604,144
 </code></pre>
 		<h4>Partitioning the indices</h4>
-		<p> In the above example every one of the three indices needs to asssigned to either the <em>rows</em> or the <em>columns</em>.
+		<p> In the above example every one of the three indices needs to be assigned to either the <em>rows</em> or the <em>columns</em>.
 			In case of a table, the <em>rows</em> and <em>columns</em> can be viewed as the parts. In a gantt chart, parts like <em>resources</em> 
 			(to specify the resource rows to be rendered) and <em>jobs</em> (to specify what indices to be used to color the bars) would 
 			probably make more sense.
@@ -152,8 +152,8 @@ F 2013 | 1,890,495 5,020,932 1,560,809
 			automatically added to a widget whenever the <em>pivotable contents property</em> tag has been specified in the widget's factory.
 			The simple table widget that will be created later in this tutorial will illustrate this.
 		<p> In addition to using the <em>pivotable contents property</em> tag, 
-		<p> ¹ <small>See <a href="http://en.wikipedia.org/wiki/Pivot_table">Wikipedia</a> for more info pivot tables</a></small> 
-		<p> ² <small>
+		<p> <a href="#footnote-1-link" id="footnote-1">¹</a> <small>See <a href="http://en.wikipedia.org/wiki/Pivot_table">Wikipedia</a> for more info pivot tables</a></small> 
+		<p> <a href="#footnote-2-link" id="footnote-2">²</a> <small>
 			<a href="http://statline.cbs.nl/Statweb/publication/?DM=SLEN&PA=37325eng&D1=0&D2=1-2&D3=131-133&D4=0&D5=0&D6=17-18&LA=EN&HDR=G4,T,G5&STB=G2,G3,G1&VW=T">
 			Population data</a> as provided by Statistics Netherlands.
 			</small> 
@@ -186,7 +186,7 @@ F 2013 | 1,890,495 5,020,932 1,560,809
 			</ul>
 		<h3>Asynchronous data retrieval</h3>
 		<p> Whenever the option type of the <em>contents</em> has the JavaScript <em>type</em> property "datasource", its resolved value will
-			be an AWF datasource object. The AWF datasource object is decorated with a <em>requestDataBlocks</em> method that should be used to request
+			be an AWF datasource object. The AWF datasource object has a <em>requestDataBlocks</em> method that should be used to request
 			data in an asynchronous manner. The 3rd arguments of this function is a callback function that will be called when the requested
 			data is available. For example, consider a datasource with two parts named <em>rowHeader</em> and <em>colHeader</em>. To retrieve
 			the data for both parts as well as for the resulting <em>grid</em> area, the following JavaScript statement can be used:
@@ -274,7 +274,7 @@ AWF.installListenerToMethodBridges(AWF, {
 		</li>
 		</ul>
 		<h3>Creating the widget source file</h3>
-		<p> To create the source file fle the widget, you should create a JavaScript source file in the same
+		<p> To create the source file for the widget, you should create a JavaScript source file in the same
 			folder as the factory file with the following structure
 <pre><code>(function($) {
 
@@ -324,7 +324,7 @@ $.widget('ui.aimms_my_table', MyTableWidget);
 			the widget's element that has already been created by AWF. The empty container object is used
 			later on to fill it with addition DOM elements that will render the actual table widget. This cannot
 			be accomplished during creation of the widget, because, at that time, the option values and
-			data is not yet available. USing a humble <em>_create</em> that just creates an empty container element
+			data is not yet available. Using a humble <em>_create</em> that just creates an empty container element
 			to be used later on, is a typical pattern that is often used when creating AWF widgets.
 		<h3>Handling content option changes changes</h3>
 		<p> Content option changes are triggered by AWF whenever the user changes the specified value of the option at hand 
@@ -346,7 +346,7 @@ $.widget('ui.aimms_my_table', MyTableWidget);
 		<h3>Refreshing the table</h3>
 		<p> In this tutorial, we will refresh the table by
 		<ol>
-			<li> redrawing the Html from scratch
+			<li> redrawing the HTML from scratch
 			<li> requesting <b>all</b> data from the dataSource 
 			<li> upon retrieval of the data, the empty table will be filled with the data
 		</ol>
@@ -369,9 +369,9 @@ $.widget('ui.aimms_my_table', MyTableWidget);
 }
 </code></pre>	
 		<h3>Creating the HTML table</h3>
-		<p> The <em>_createHtmlTable</em> function below creates an empty Html gives the table dimensions
-			that are provided as the arguments. The function uses standard JavaScript and jQuery functions
-			to create an Html table. Every cell in the table will be decorated with some extra CSS classes to indicate
+		<p> The <em>_createHtmlTable</em> function below creates an empty HTML that gives the table the dimensions
+			that are provided in the arguments. The function uses standard JavaScript and jQuery functions
+			to create an HTML table. Every cell in the table will be decorated with some extra CSS classes to indicate
 			the part (<em>rowHeader</em>, <em>colHeader</em> or <em>values</em>) and the position of the cell within
 			the part (for example <em>row3</em> and <em>col2</em>). These CSS classes can be used later on to style
 			the table to your liking.
