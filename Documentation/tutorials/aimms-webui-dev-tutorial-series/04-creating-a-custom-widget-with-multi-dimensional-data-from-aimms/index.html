@@ -157,6 +157,19 @@ F 2013 | 1,890,495 5,020,932 1,560,809
 			<a href="http://statline.cbs.nl/Statweb/publication/?DM=SLEN&PA=37325eng&D1=0&D2=1-2&D3=131-133&D4=0&D5=0&D6=17-18&LA=EN&HDR=G4,T,G5&STB=G2,G3,G1&VW=T">
 			Population data</a> as provided by Statistics Netherlands.
 			</small> 
+		<h4>Extending a widget with pivoting support</h4>
+		<p> AWF has built-in pivoting support that can be added to a widget by adding the <em>pivotable contents property</em>
+			to a widget. Doing so, the widget will be extended with a pivot option editor that helps the user specify the partition.
+		<p><picture>
+			<img src="../assets/img/pivot-option-editor.png">
+			<div><strong>figure 1</strong></div>
+			</picture>
+		<p> The pivot editor in figure 1 shows four indices. In addition to the domain indices of the identifier (which, in
+			figure 1 are the <em>a</em> (age-groups), <em>s</em> (sex) and <em>y</em> (year) indices, the pivot option
+			editor also shows the <em>&lt;IDENTIFIER-SET&gt;</em> index which allows the user to control the position of
+			the identifier title in the widget. This index is always added by AWF and is specially useful in case the widget
+			displays data of more than one identifier (with potential different index domains). In this tutorial we will
+			only display a single identifier in a widget.
 		<h3>Datasources, parts and values</h3>
 		<p> By selecting a single row in each part of the datasource, all indices will have a fixed value, which uniquely identifies a single value
 			in the datasource. 
@@ -202,49 +215,70 @@ F 2013 | 1,890,495 5,020,932 1,560,809
 			with creating a widget factory. The widget factory for the simple table looks like:
 <pre><code>(function($) {
 // factory.js
-var OptionTypeTable = 
+var OptionTypeTable =
 {
 	type : "datasource",
-	parts : [ {name: "rowHeader"}, {name: "colHeader"} ],
+	parts : [ {name : "rowHeader"}, {name : "colHeader"} ],
 };
-
-var widgetType = 'tutorial-table';
 
 AWF.installListenerToMethodBridges(AWF, {
 
 	onCollectTypes: function(collectedTypes, contextElQ) {
-		if(!contextElQ || contextElQ.awf.tags("contents property") || contextElQ.awf.tags("placeable")) {
-			collectedTypes.push(widgetType);
+		if(!contextElQ || contextElQ.awf.tags("placeable")) {
+			collectedTypes.push('my-table-widget');
 		}
 	},
 
 	onInitializeTags: function(elQ, type) {
-		if(type === widgetType) {
-			elQ.awf.tags(["complex widget", "pivotable contents property", "table-widget"], 'add');
+		if(type === 'my-table-widget') {
+			elQ.awf.tags(["pivotable contents property", "my-table-widget"], 'add');
 		}
 	},
 
 	onInitializeOptionTypes: function(elQ, type) {
-		if(type === widgetType) {
+		if(type === 'my-table-widget') {
 			AWF.OptionTypeCollector.addOptionType(elQ, "contents", OptionTypeTable);
 		}
 	},
 
 	onDecorateElement: function(elQ, type) {
-		if(type === widgetType) {
-			elQ.aimms_tutorial_table();
+		if(type === 'my-table-widget') {
+			elQ.aimms_my_table();
 		}
 	},
 });
 
 })(jQuery);
 </code></pre>
+		<p> When using the widget factory, AWF will contribute several option editor to the widget that
+			help the user specifying the option values. In addition to the <em>Miscellaneous</em> option
+			editor and the <em>Advanced</em> option editor that have been discussed in previous tutorials,
+			the table widget in this tutorial will be extended with three more option editor:
+		<ul>
+		<li>A contents editor, indicated by the <img src="../assets/img/contents-option-editor-icon.png"> icon,
+			that will provide the user of the widget with an alternative and convenient way to select the
+			identifier to be shown in the widget. The contents option editor in figure 2 shows the contents
+			of a widget that shows data of the <em>Population</em> identifier.
+			<p><picture>
+				<img src="../assets/img/contents-option-editor.png">
+				<div><strong>figure 2</strong></div>
+				</picture>
+		<p>
+		</li>
+		<li>A totals editor, indicated by the <img src="../assets/img/totals-option-editor-icon.png"> icon,
+			that is automatically added by AWF whenever you create a widget that has a contents option of
+			type <em>datasource</em>. The totals editor however will not be discussed in this tutorial.</li>
+		<li>A pivoting option editor, indicated by the <img src="../assets/img/pivot-option-editor-icon.png"> icon,
+			that is added as a result of using the <em>pivotable contents property</em> tag. The pivot option
+			editor was already shown in figure 1.
+		</li>
+		</ul>
 		<h3>Creating the widget source file</h3>
 		<p> To create the source file fle the widget, you should create a JavaScript source file in the same
 			folder as the factory file with the following structure
 <pre><code>(function($) {
 
-var TutorialTableWidget = AWF.Widget.create({
+var MyTableWidget = AWF.Widget.create({
 
 	_create: function _create() {
 		// TODO
@@ -259,7 +293,7 @@ var TutorialTableWidget = AWF.Widget.create({
 	},
 
 	_refresh: function(dataSource) {
-		// TODOD
+		// TODO
 	},
 	
 	onResolvedOptionChanged: function(optionName, value) {
@@ -267,7 +301,7 @@ var TutorialTableWidget = AWF.Widget.create({
 	},
 });
 // The jQuery-UI way of registering/creating a new widget:
-$.widget('ui.aimms_tutorial_table', TutorialTableWidget);
+$.widget('ui.aimms_my_table', MyTableWidget);
 
 })(jQuery);
 </code></pre>	
@@ -285,7 +319,13 @@ $.widget('ui.aimms_tutorial_table', TutorialTableWidget);
 	widget.element.find('.awf-dock.center')
 		.append(widget.tableContainerElQ);
 }
-</code></pre>	
+</code></pre>
+		<p> The above <em>_create</em> function creates an empty DOM container element, that is appended to
+			the widget's element that has already been created by AWF. The empty container object is used
+			later on to fill it with addition DOM elements that will render the actual table widget. This cannot
+			be accomplished during creation of the widget, because, at that time, the option values and
+			data is not yet available. USing a humble <em>_create</em> that just creates an empty container element
+			to be used later on, is a typical pattern that is often used when creating AWF widgets.
 		<h3>Handling content option changes changes</h3>
 		<p> Content option changes are triggered by AWF whenever the user changes the specified value of the option at hand 
 			(e.g. by selecting an identifier using the option editor), and/or whenever the data of the underlying AIMMS identifier
@@ -310,6 +350,7 @@ $.widget('ui.aimms_tutorial_table', TutorialTableWidget);
 			<li> requesting <b>all</b> data from the dataSource 
 			<li> upon retrieval of the data, the empty table will be filled with the data
 		</ol>
+		<p> The <em>_refresh</em> function below takes care of this.
 <pre><code>_refresh: function(dataSource) {
 	var widget = this;
 	
@@ -328,6 +369,12 @@ $.widget('ui.aimms_tutorial_table', TutorialTableWidget);
 }
 </code></pre>	
 		<h3>Creating the HTML table</h3>
+		<p> The <em>_createHtmlTable</em> function below creates an empty Html gives the table dimensions
+			that are provided as the arguments. The function uses standard JavaScript and jQuery functions
+			to create an Html table. Every cell in the table will be decorated with some extra CSS classes to indicate
+			the part (<em>rowHeader</em>, <em>colHeader</em> or <em>values</em>) and the position of the cell within
+			the part (for example <em>row3</em> and <em>col2</em>). These CSS classes can be used later on to style
+			the table to your liking.
 <pre><code>_createHtmlTable: function _createHtmlTable(rowHeaderDimension,colHeaderDimension) {
 
 	var numRowsInRowHeader = rowHeaderDimension.numRows;
@@ -336,15 +383,15 @@ $.widget('ui.aimms_tutorial_table', TutorialTableWidget);
 	var numColsInColHeader = colHeaderDimension.numCols;
 	
 	// Helper function to create table cell 'th' or 'td' element with extra classes
-	// For example, createCellElQ('th', 'foo', 3, 4)  ==>  '<th class="foo row3 col4"></th>'
+	// For example, createCellElQ('th', 'foo', 3, 4) ==> '&lt;th class="foo row3 col4"&gt;&lt;/th&gt;'
 	function createCellElQ(type, name, row, col) {
 		return $(['<', type, ' class="', name, ' row'+row, ' col'+col, '"></', type, '>'].join(''));
 	}
 
 	// Step 1: Create the column header
-	var theadElQ = $('<thead>');
+	var theadElQ = $('&lt;thead&gt;');
 	numRowsInColHeader.times(function(col) {
-		var trElQ = $('<tr>');
+		var trElQ = $('&lt;tr&gt;');
 		numColsInColHeader.times(function(row) {
 			trElQ.append(createCellElQ('th', 'colHeader', row, col));
 		});
@@ -352,13 +399,13 @@ $.widget('ui.aimms_tutorial_table', TutorialTableWidget);
 	});
 
 	// Step 2: Add the pivot area, i.e. the 'empty' block in the upper-left corner of the table
-	theadElQ.find('tr:first').prepend('<th colspan="'+numColsInRowHeader+'" rowspan="'+numRowsInColHeader+'"></th>');
+	theadElQ.find('tr:first').prepend('&lt;th colspan="'+numColsInRowHeader+'" rowspan="'+numRowsInColHeader+'"&gt;&lt;/th&gt;');
 
 	// Step 3: Create the row header and grid
 	var numColsInGrid = numColsInColHeader;
-	var tbodyElQ = $('<tbody>');
+	var tbodyElQ = $('&lt;tbody&gt;');
 	numRowsInRowHeader.times(function(row) {
-		var trElQ = $('<tr>');
+		var trElQ = $('&lt;tr&gt;');
 		numColsInRowHeader.times(function(col) {
 			trElQ.append(createCellElQ('th', 'rowHeader', row, col));
 		});
@@ -374,11 +421,28 @@ $.widget('ui.aimms_tutorial_table', TutorialTableWidget);
 	widget.tableElQ.append(theadElQ);
 	widget.tableElQ.append(tbodyElQ);
 }
-</code></pre>	
-		<h3>Recap</h3>
-		<p> Note this the simple table widget in this tutorial retrieves all identifier data in one go.
-			For this reason, the widget in this tutorial is not usefull for very large AIMMS identifiers.
-			For these AIMMS identifiers, you would probably need to implement some kind of paging/scrolling
+</code></pre>
+		<p> After hooking up the simple table widget to an AIMMS model that provides data similar to the
+			<em>Population</em> data example from the introduction the simple table widget will look as
+			shown in figure 3.
+		<p><picture>
+			<img src="../assets/img/my-table-widget.png">
+			<div><strong>figure 3</strong></div>
+			</picture>
+		<p> Please keep in mind that the widget code as is presented in this tutorial will extend the widget
+			area when the number of rows and/or column in the table gets too large. This can be resolved using
+			the proper CSS classes or even better only determining the number of cells to be displayed based
+			on the available width and height of the widget. Both approaches fall outside the scope of this
+			tutorial
+		<p> Also note that the simple table widget in this tutorial retrieves all identifier data in one go.
+			For this reason, the widget in this tutorial is not useful for very large AIMMS identifiers.
+			For large AIMMS identifiers, you would probably need to implement some kind of paging/scrolling
 			in your widget.
+		<h3>Recap</h3>
+		<p> The main topics that were discussed in this tutorial were
+			<ol>
+			<li>how to use AWF <em>datasources</em> to fill you widget with multi-dimensional data from AIMMS.</li>
+			<li>the concept of <em>pivoting</em> and how to extend your widget with pivoting support.</li>
+			</ol>
 	</body>
 </html>
