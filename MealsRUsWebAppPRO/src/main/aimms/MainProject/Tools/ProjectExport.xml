@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <ExportSettings>
+	<ExcludedFile>AimmsPROLibrary</ExcludedFile>
 	<ExcludedFile>backup</ExcludedFile>
 	<ExcludedFile>log</ExcludedFile>
 	<ExcludedFile>PROTemp</ExcludedFile>

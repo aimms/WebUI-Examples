@@ -1,6 +1,6 @@
 {
 	"------------------------------------------------------------------<<<<-contents-": "",
-	"contents": "aimms:{\"contents\":[\"webui_selection_TestSelectionWidget_Ingredients\"]}",
+	"contents": "aimms:{\"contents\":[\"SelectedIngredients\"]}",
 	"------------------------------------------------------------------>>>>-contents-": "",
 	"slot0": "",
 	"------------------------------------------------------------------<<<<-awf.persistence.version-": "",
