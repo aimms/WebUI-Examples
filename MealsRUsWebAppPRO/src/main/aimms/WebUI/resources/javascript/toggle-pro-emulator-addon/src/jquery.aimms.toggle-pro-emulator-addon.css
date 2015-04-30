@@ -1,0 +1,20 @@
+.toggle-pro-emulator {
+	order: 5;
+	width: 30px;
+	margin-top: 5px;
+	margin-right: 10px;
+	line-height: 95%;
+	background: #E6E6E6;
+	border-radius: 3px;
+	padding: 3px;
+	margin-bottom: 5px;
+	color: #fff;
+	-webkit-transition: background .3s ease;
+	-moz-transition: background .3s ease;
+	cursor: pointer;
+}
+
+.toggle-pro-emulator.enabled {
+	background: #17B;
+	font-weight: bold;
+}
