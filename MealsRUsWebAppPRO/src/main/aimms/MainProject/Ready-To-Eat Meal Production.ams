@@ -678,7 +678,6 @@ Model Main_Ready_To_Eat_Meal_Production {
         Parameter SelectedIngredients {
             IndexDomain: i;
             Default: -2;
-            Definition: 4;
         }
         Procedure CreateSharedCase {
             Body: {
@@ -689,17 +688,17 @@ Model Main_Ready_To_Eat_Meal_Production {
         }
         Procedure UnselectAllIngredients {
             Body: {
-                !SelectedIngredients(i) := 0;
+                SelectedIngredients(i) := 0;
             }
         }
         Procedure SelectBeef {
             Body: {
-                !SelectedIngredients('beef') := 1;
+                SelectedIngredients('beef') := 1;
             }
         }
         Procedure UnselectBeef {
             Body: {
-                !SelectedIngredients('beef') := 0;
+                SelectedIngredients('beef') := 0;
             }
         }
     }
