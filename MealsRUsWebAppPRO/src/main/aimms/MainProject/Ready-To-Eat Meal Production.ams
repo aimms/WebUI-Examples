@@ -545,7 +545,7 @@ Model Main_Ready_To_Eat_Meal_Production {
             Set AllPublicIdentifiers {
                 SubsetOf: AllIdentifiers;
                 Index: api;
-                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode, MealProductionLineDuration, MealProductionLineStart, SelectBeef, UnselectBeef, SelectedIngredients, UnselectAllIngredients };
+                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode, MealProductionLineDuration, MealProductionLineStart, SelectBeef, UnselectBeef, SelectedIngredients, UnselectAllIngredients, CreateSharedCase };
             }
             Set AllPublicProcedures {
                 SubsetOf: AllIdentifiers;
@@ -679,6 +679,13 @@ Model Main_Ready_To_Eat_Meal_Production {
             IndexDomain: i;
             Default: -2;
             Definition: 4;
+        }
+        Procedure CreateSharedCase {
+            Body: {
+                caseUrl := FormatString("PRO:/PublicData/Cases/%s/test_shared.data",pro::ModelName);
+                CaseFileSave(caseUrl,AllIdentifiers);
+            }
+            StringParameter caseUrl;
         }
         Procedure UnselectAllIngredients {
             Body: {
