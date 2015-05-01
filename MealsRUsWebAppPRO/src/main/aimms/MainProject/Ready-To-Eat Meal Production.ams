@@ -682,7 +682,7 @@ Model Main_Ready_To_Eat_Meal_Production {
         }
         Procedure CreateSharedCase {
             Body: {
-                caseUrl := FormatString("PRO:/PublicData/Cases/%s/test_shared.data",pro::ModelName);
+                caseUrl := FormatString("PRO:/PublicData/Cases/%s/shared-case1.data",pro::ModelName);
                 CaseFileSave(caseUrl,AllIdentifiers);
             }
             StringParameter caseUrl;
