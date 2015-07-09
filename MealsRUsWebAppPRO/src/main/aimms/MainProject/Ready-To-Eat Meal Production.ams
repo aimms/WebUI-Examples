@@ -674,6 +674,62 @@ Model Main_Ready_To_Eat_Meal_Production {
             }
         }
     }
+    Section DataChangeMonitor_Testing_Declarations {
+        Set AllMonitorsRegisteredByUs {
+            SubsetOf: webui::RegisteredDataChangeMonitors;
+        }
+        Procedure RegisterDataChangeMonitor {
+            Body: {
+                monitoredIdentifiers := { 'IngredientPriceUI' };
+                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'TestDataChangeMonitor', aMonitor);
+
+                AllMonitorsRegisteredByUs += aMonitor;
+
+                monitoredIdentifiers := { 'MealProductionLineStart' };
+                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'TestDataChangeMonitor2', aMonitor);
+
+                AllMonitorsRegisteredByUs += aMonitor;
+            }
+            ElementParameter aMonitor {
+                Range: webui::RegisteredDataChangeMonitors;
+            }
+            ElementParameter aCallbackProcedure {
+                Range: AllProcedures;
+                Default: 'TestDataChangeMonitor';
+            }
+            Set monitoredIdentifiers {
+                SubsetOf: AllIdentifiers;
+                InitialData: {
+                    { 'IngredientPriceUI' }
+                }
+            }
+        }
+        Procedure UnregisterAllOurDataChangeMonitors {
+            Body: {
+
+                ! PRO MEMORI: This does not work because of the super set of allOurMonitors gets updated as
+                !             we unregister stuff:
+
+                !for (allOurMonitors) do
+                !	webui::DataChangeMonitorUnregisterCallback(allOurMonitors);
+                !endfor;
+
+                while Card(AllMonitorsRegisteredByUs) > 0 do
+                	webui::DataChangeMonitorUnregisterCallback(First(AllMonitorsRegisteredByUs));
+                endwhile;
+            }
+        }
+        Procedure TestDataChangeMonitor {
+            Body: {
+                DialogMessage("Hello");
+            }
+        }
+        Procedure TestDataChangeMonitor2 {
+            Body: {
+                DialogMessage("Hello2");
+            }
+        }
+    }
     Procedure MainInitialization {
         Body: {
             AddUserColors;
