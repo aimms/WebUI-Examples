@@ -16,6 +16,9 @@ Model Main_AddressBook {
             Default: 'webui::NoOp';
         }
     }
+    StringParameter Form_PersonName_annotations {
+        Definition: "validation-error-min-length" onlyif ( StringLength(Form_PersonName) lt 2 );
+    }
     ElementParameter theSelectedPerson {
         Range: Persons;
         Definition: {
