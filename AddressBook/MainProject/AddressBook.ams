@@ -8,8 +8,10 @@ Model Main_AddressBook {
             RegisterDataChangeMonitors();
             
             initializeAllPublicIdentifiersProcedure := StringToElement(AllIdentifiers, "webui_runtime::InitializeAllPublicIdentifiers");
-            me::Compile(initializeAllPublicIdentifiersProcedure);
-            Apply(initializeAllPublicIdentifiersProcedure);
+            if (initializeAllPublicIdentifiersProcedure) then
+            	me::Compile(initializeAllPublicIdentifiersProcedure);
+            	Apply(initializeAllPublicIdentifiersProcedure);
+            endif ;
         }
         ElementParameter initializeAllPublicIdentifiersProcedure {
             Range: AllProcedures;
