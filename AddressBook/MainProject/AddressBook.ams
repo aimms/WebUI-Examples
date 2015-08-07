@@ -85,9 +85,14 @@ Model Main_AddressBook {
         }
         Procedure InitializeAddressBook {
             Body: {
+                
                 Persons := data { Raymond, Marcel };
                 SelectedPersons(p) := data { Raymond : 0,  Marcel : 0 };
                 PhoneNumbers(p) := data { Raymond : "+31620340347",  Marcel : "+31624273820" };
+                
+                empty Form_PersonName;
+                empty Form_PhoneNumber;
+                IsDirty := 0;
             }
         }
         Procedure NewPerson {
@@ -110,6 +115,8 @@ Model Main_AddressBook {
                 endif ;
                 
                 UpdatePerson(theSelectedPerson, personName: Form_PersonName, phoneNumber: Form_PhoneNumber);
+                
+                IsDirty := 0;
             }
             ElementParameter aPerson {
                 Range: Persons;
@@ -117,20 +124,21 @@ Model Main_AddressBook {
         }
     }
     Section DataChangeMonitor_Declarations {
+        Parameter IsDirty {
+            Default: 0;
+        }
         Set AllMonitorsRegisteredByUs {
             SubsetOf: webui::RegisteredDataChangeMonitors;
+        }
+        ElementParameter formMonitor {
+            Range: webui::RegisteredDataChangeMonitors;
         }
         Procedure RegisterDataChangeMonitors {
             Body: {
                 monitoredIdentifiers := { 'SelectedPersons' };
-                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'UpdateFormUponSelectedPersonsChange', aMonitor);
+                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'HandleSelectedPersonsChange', aMonitor);
                 
                 AllMonitorsRegisteredByUs += aMonitor;
-                
-                !monitoredIdentifiers := { 'MealProductionLineStart' };
-                !webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'TestDataChangeMonitor2', aMonitor);
-                
-                !AllMonitorsRegisteredByUs += aMonitor;
             }
             ElementParameter aMonitor {
                 Range: webui::RegisteredDataChangeMonitors;
@@ -158,10 +166,36 @@ Model Main_AddressBook {
                                 endwhile;
             }
         }
-        Procedure UpdateFormUponSelectedPersonsChange {
+        Procedure MarkFormAsDirty {
             Body: {
+                IsDirty := 1;
+            }
+        }
+        Procedure HandleSelectedPersonsChange {
+            Body: {
+                if not IsDirty then
+                	UpdateFormWithSelectedPersonInfo;
+                endif;
+            }
+        }
+        Procedure UpdateFormWithSelectedPersonInfo {
+            Body: {
+                if(formMonitor) then
+                	webui::DataChangeMonitorUnregisterCallback(formMonitor);
+                	AllMonitorsRegisteredByUs -= formMonitor;
+                	empty formMonitor;
+                endif;
+                
                 Form_PersonName := FormatString("%e", theSelectedPerson);
                 Form_PhoneNumber := PhoneNumbers(theSelectedPerson);
+                
+                monitoredIdentifiers := { 'Form_PersonName', 'Form_PhoneNumber' };
+                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'MarkFormAsDirty', formMonitor);
+                
+                AllMonitorsRegisteredByUs += formMonitor;
+            }
+            Set monitoredIdentifiers {
+                SubsetOf: AllIdentifiers;
             }
         }
     }
