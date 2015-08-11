@@ -12,12 +12,16 @@ Model Main_AddressBook {
             	me::Compile(initializeAllPublicIdentifiersProcedure);
             	Apply(initializeAllPublicIdentifiersProcedure);
             endif ;
+            
+            empty Requests;
+            empty RequestQueue;
         }
         ElementParameter initializeAllPublicIdentifiersProcedure {
             Range: AllProcedures;
             Default: 'webui::NoOp';
         }
     }
+    Set Foo;
     StringParameter Form_PersonName_annotations {
         Definition: "validation-error-min-length" onlyif ( StringLength(Form_PersonName) lt 2 );
     }
@@ -42,6 +46,12 @@ Model Main_AddressBook {
     }
     StringParameter Form_PhoneNumber {
         Default: "no person selected";
+    }
+    ElementParameter Form_Person {
+        Range: Persons;
+    }
+    StringParameter LocalRQ {
+        IndexDomain: (rq,df);
     }
     Section AddressBook_Operations {
         Procedure UpdatePerson {
@@ -173,9 +183,37 @@ Model Main_AddressBook {
         }
         Procedure HandleSelectedPersonsChange {
             Body: {
-                if not IsDirty then
+                if IsDirty then
+                	! Prevents double dialog requests caused by the single select's unselect (which is also a datachange)
+                	! @TODO remove if when requestSetValues is implemented.
+                	if (theSelectedPerson and theSelectedPerson <> Form_Person) then
+                		dialogActions := {'apply and continue','discard and continue','cancel'};
+                		requestPerformWebUIDialog("title", "message", dialogActions, 'HandleFormIsDirtyDialogResult');
+                	endif;
+                else
                 	UpdateFormWithSelectedPersonInfo;
                 endif;
+            }
+            Set dialogActions;
+        }
+        Procedure HandleFormIsDirtyDialogResult {
+            Arguments: (selectedAction);
+            Body: {
+                Display "HandleFormIsDirtyDialogResult", selectedAction;
+                
+                if ( selectedAction = "apply and continue" ) then
+                	webui::NoOp;
+                elseif ( selectedAction = "discard and continue" ) then
+                	webui::NoOp;
+                elseif ( selectedAction = "cancel" ) then
+                	SelectedPersons(p) := 0;
+                	SelectedPersons(Form_Person) := 1;
+                else
+                	raise error "Unsupported action";
+                endif;
+            }
+            StringParameter selectedAction {
+                Property: Input;
             }
         }
         Procedure UpdateFormWithSelectedPersonInfo {
@@ -186,6 +224,7 @@ Model Main_AddressBook {
                 	empty formMonitor;
                 endif;
                 
+                Form_Person := theSelectedPerson;
                 Form_PersonName := FormatString("%e", theSelectedPerson);
                 Form_PhoneNumber := PhoneNumbers(theSelectedPerson);
                 
@@ -204,6 +243,168 @@ Model Main_AddressBook {
     Procedure MainTermination {
         Body: {
             return DataManagementExit();
+        }
+    }
+    Section Model_WebUI_Interaction {
+        Procedure NoOp1 {
+            Arguments: (arg1);
+            Body: {
+                !Does nothing
+            }
+            StringParameter arg1 {
+                Property: Input;
+            }
+        }
+        Function toJsonString {
+            Arguments: (str);
+            Range: string;
+            Body: {
+                str := FormatString("\"%s\"", str);
+                toJsonString := str;
+            }
+            StringParameter str {
+                Property: Input;
+            }
+        }
+        Function SettoJsonList {
+            Arguments: (aSet);
+            Range: string;
+            Body: {
+                tmpString += "[";
+                
+                for(s) do
+                	tmpString += toJsonString(FormatString("%e", s));
+                
+                	if (s <> Last(aSet)) then
+                		tmpString += ",";
+                	endif;
+                endfor;
+                
+                tmpString += "]";
+                
+                SettoJsonList := tmpString;
+            }
+            StringParameter tmpString;
+            Set aSet {
+                Index: s;
+                Property: Input;
+            }
+        }
+        ElementParameter requestQueueMonitor {
+            Range: webui::RegisteredDataChangeMonitors;
+        }
+        Set Requests {
+            SubsetOf: Integers;
+            Index: rq;
+        }
+        Parameter RequestCounter;
+        StringParameter RequestQueue {
+            IndexDomain: (rq,df);
+        }
+        StringParameter RequestPerformDialogInfo {
+            IndexDomain: df;
+        }
+        Set DialogFields {
+            Index: df;
+            InitialData: data { title, message, actions, onDone, result };
+        }
+        Procedure HandleCompletedDialogRequests {
+            Body: {
+                CompletedRequests := { rq | RequestQueue(rq, 'result') <> "<empty>" };
+                !DialogMessage("HandleCompletedDialogRequests, continue?");
+                
+                !Requests | RequestQueue(completedRequest, 'result') <> "<empty>";
+                while Card(CompletedRequests) > 0 do
+                	completedRequest := First(CompletedRequests);
+                	Display  RequestQueue(completedRequest,'onDone');
+                	onDone := StringToElement(AllProcedures, RequestQueue(completedRequest,'onDone'));
+                	resultValue := RequestQueue(completedRequest, 'result');
+                	Apply(onDone, resultValue);
+                	empty RequestQueue(completedRequest,df);
+                	Requests -= completedRequest;
+                endwhile;
+            }
+            ElementParameter completedRequest {
+                Range: Requests;
+            }
+            Set CompletedRequests {
+                SubsetOf: Requests;
+                Index: crq;
+            }
+            ElementParameter onDone {
+                Range: AllProcedures;
+                Default: 'NoOp1';
+            }
+            StringParameter resultValue;
+        }
+        Procedure requestPerformWebUIDialog {
+            Arguments: (title,message,actions,onDone);
+            Body: {
+                if(not requestQueueMonitor) then
+                	monitoredIdentifiers := { 'RequestQueue' };
+                	webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'HandleCompletedDialogRequests', requestQueueMonitor);
+                endif;
+                
+                RequestCounter += 1;
+                Requests += RequestCounter;
+                RequestQueue(RequestCounter, 'title') := title;
+                RequestQueue(RequestCounter, 'message') := message;
+                for(a) do
+                	actionsString += FormatString("%e", a);
+                endfor;
+                !RequestQueue(RequestCounter, 'actions') := actionsString;
+                RequestQueue(RequestCounter, 'actions') := SettoJsonList(actions);
+                RequestQueue(RequestCounter, 'onDone') := onDone;
+                RequestQueue(RequestCounter, 'result') := "<empty>";
+            }
+            Set monitoredIdentifiers {
+                SubsetOf: AllIdentifiers;
+            }
+            StringParameter actionsString;
+            Set actions {
+                Index: a;
+                Property: Input;
+            }
+            StringParameter title {
+                Property: Input;
+            }
+            StringParameter message {
+                Property: Input;
+            }
+            ElementParameter onDone {
+                Range: AllProcedures;
+                Default: 'NoOp1';
+                Property: Input;
+            }
+        }
+    }
+    Section DEBUG {
+        Procedure DEBUG_init {
+            Body: {
+                DataChangeMonitorDelete("DEBUG");
+                DataChangeMonitorCreate("DEBUG",DEBUG_Set);
+                LocalRQ(rq, df) := RequestQueue(rq, df);
+            }
+        }
+        Set DEBUG_Set {
+            SubsetOf: AllIdentifiers;
+            Definition: data { 'LocalRQ' };
+        }
+        Procedure MonitoredDataChangedProcedure_for_DataChangeMonitor003_Set {
+            Body: {
+                switch ( DataChangeMonitorHasChanged("DEBUG") ) do
+                       1:
+                               DataChangeMonitorReset("DEBUG",DEBUG_Set);
+                               DialogMessage("data has changed");
+                               return 1;
+                       0:
+                       		DialogMessage("data has not changed");
+                               return 0;
+                       -1:
+                               Display CurrentErrorMessage;
+                               raise error "Something bad happened";
+                endswitch;
+            }
         }
     }
 }
