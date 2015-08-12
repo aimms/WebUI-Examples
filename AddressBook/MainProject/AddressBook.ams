@@ -21,10 +21,6 @@ Model Main_AddressBook {
             Default: 'webui::NoOp';
         }
     }
-    Set Foo;
-    StringParameter Form_PersonName_annotations {
-        Definition: "validation-error-min-length" onlyif ( StringLength(Form_PersonName) lt 2 );
-    }
     ElementParameter theSelectedPerson {
         Range: Persons;
         Definition: {
@@ -41,18 +37,59 @@ Model Main_AddressBook {
     StringParameter PhoneNumbers {
         IndexDomain: p;
     }
-    StringParameter Form_PersonName {
-        Default: "no person selected";
+    DeclarationSection Form_Data {
+        ElementParameter Form_Person {
+            Range: Persons;
+        }
+        StringParameter Form_PersonName_annotations;
+        StringParameter Form_PersonName {
+            Default: "form-no-person-selected";
+        }
+        StringParameter Form_PhoneNumber_annotations;
+        StringParameter Form_PhoneNumber {
+            Default: "form-no-person-selected";
+        }
     }
-    StringParameter Form_PhoneNumber {
-        Default: "no person selected";
+    DeclarationSection Form_State {
+        Parameter IsPersonSelected {
+            Definition: 1 onlyif exists[ p | SelectedPersons(p) ];
+        }
+        Parameter IsNewPerson;
+        Parameter IsDirty {
+            Default: 0;
+        }
+        Parameter IsValid;
     }
-    ElementParameter Form_Person {
-        Range: Persons;
+    Section Form_Validation {
+        Procedure ValidateForm {
+            Body: {
+                ValidNameLength := 1 onlyif ( StringLength(Form_PersonName) >= 2 );
+                NameAlreadyExists := 1 onlyif StringToElement(Persons, Form_PersonName) and (FormatString("%e", Form_Person) <> Form_PersonName);
+                
+                Form_PersonName_annotations := "validation-error-min-length" onlyif ( not ValidNameLength );
+                Form_PersonName_annotations += " validation-error-name-already-exists" onlyif NameAlreadyExists;
+                
+                
+                ValidPhoneNumber := 1 onlyif ( StringLength(Form_PhoneNumber) >= 10 );
+                
+                Form_PhoneNumber_annotations := "validation-error-not-a-valid-phonenumber" onlyif ( not ValidPhoneNumber );
+                
+                
+                IsValid := 1 onlyif ( ValidNameLength and ValidPhoneNumber and not NameAlreadyExists);
+            }
+            Parameter NameAlreadyExists;
+            Parameter ValidNameLength;
+            Parameter ValidPhoneNumber;
+        }
+        Procedure HandleFormDataChange {
+            Body: {
+                Display "HandleFormDataChange";
+                MarkFormAsDirty;
+                ValidateForm;
+            }
+        }
     }
-    StringParameter LocalRQ {
-        IndexDomain: (rq,df);
-    }
+    Section Form_Selection;
     Section AddressBook_Operations {
         Procedure UpdatePerson {
             Arguments: (aPerson,personName,phoneNumber);
@@ -100,14 +137,17 @@ Model Main_AddressBook {
                 SelectedPersons(p) := data { Raymond : 0,  Marcel : 0 };
                 PhoneNumbers(p) := data { Raymond : "+31620340347",  Marcel : "+31624273820" };
                 
-                empty Form_PersonName;
-                empty Form_PhoneNumber;
+                empty Form_Data;
                 IsDirty := 0;
+                IsNewPerson := 0;
             }
         }
         Procedure NewPerson {
             Body: {
+                IsNewPerson := 1;
                 SelectedPersons(p) := 0;
+                DataChangeMonitorReset(FormatString("%e", selectedPersonsMonitor), selectedPersonsIdentifier);
+                UpdateFormWithSelectedPersonInfo;
             }
         }
         Procedure DeletePerson {
@@ -115,40 +155,70 @@ Model Main_AddressBook {
                 empty PhoneNumbers(theSelectedPerson);
                 empty SelectedPersons(theSelectedPerson);
                 Persons -= theSelectedPerson;
+                IsNewPerson := 0;
             }
         }
         Procedure SaveChanges {
             Body: {
-                if ( not theSelectedPerson ) then
-                	AddPerson(Form_PersonName, aPerson);
-                	SelectedPersons(aPerson) := 1;
-                endif ;
-                
-                UpdatePerson(theSelectedPerson, personName: Form_PersonName, phoneNumber: Form_PhoneNumber);
-                
-                IsDirty := 0;
+                SaveChangesWithoutUpdatingSelection();
+                SelectedPersons(Form_Person) := 1;
             }
-            ElementParameter aPerson {
-                Range: Persons;
+        }
+        Procedure SaveChangesWithoutUpdatingSelection {
+            Body: {
+                if (not IsValid) then
+                	dialogActions := {'ok'};
+                	requestPerformWebUIDialog("person-form-not-valid-title", "person-form-not-valid-message", dialogActions, '');
+                else
+                
+                	if ( not Form_Person ) then
+                		AddPerson(Form_PersonName, Form_Person);
+                	endif ;
+                
+                	UpdatePerson(Form_Person, personName: Form_PersonName, phoneNumber: Form_PhoneNumber);
+                
+                	IsDirty := 0;
+                	IsNewPerson := 0;
+                endif;
+            }
+            Set dialogActions {
+                OrderBy: user;
             }
         }
     }
     Section DataChangeMonitor_Declarations {
-        Parameter IsDirty {
-            Default: 0;
-        }
         Set AllMonitorsRegisteredByUs {
             SubsetOf: webui::RegisteredDataChangeMonitors;
         }
+        Set formIdentifiers {
+            SubsetOf: AllIdentifiers;
+            Definition: {
+                Data { 'Form_PersonName', 'Form_PhoneNumber' };
+            }
+        }
         ElementParameter formMonitor {
+            Range: webui::RegisteredDataChangeMonitors;
+        }
+        Set selectedPersonsIdentifier {
+            SubsetOf: AllIdentifiers;
+            Definition: {
+                Data { 'SelectedPersons' };
+            }
+        }
+        ElementParameter selectedPersonsMonitor {
             Range: webui::RegisteredDataChangeMonitors;
         }
         Procedure RegisterDataChangeMonitors {
             Body: {
                 monitoredIdentifiers := { 'SelectedPersons' };
-                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'HandleSelectedPersonsChange', aMonitor);
+                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'HandleSelectedPersonsChange', selectedPersonsMonitor);
                 
-                AllMonitorsRegisteredByUs += aMonitor;
+                AllMonitorsRegisteredByUs += selectedPersonsMonitor;
+                
+                monitoredIdentifiers := { 'Form_PersonName', 'Form_PhoneNumber' };
+                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'HandleFormDataChange', formMonitor);
+                
+                AllMonitorsRegisteredByUs += formMonitor;
             }
             ElementParameter aMonitor {
                 Range: webui::RegisteredDataChangeMonitors;
@@ -183,28 +253,42 @@ Model Main_AddressBook {
         }
         Procedure HandleSelectedPersonsChange {
             Body: {
+                Display "HandleSelectedPersonsChange", IsNewPerson;
+                
                 if IsDirty then
                 	! Prevents double dialog requests caused by the single select's unselect (which is also a datachange)
                 	! @TODO remove if when requestSetValues is implemented.
                 	if (theSelectedPerson and theSelectedPerson <> Form_Person) then
-                		dialogActions := {'apply and continue','discard and continue','cancel'};
-                		requestPerformWebUIDialog("title", "message", dialogActions, 'HandleFormIsDirtyDialogResult');
+                		dialogActions := {'apply-and-continue','discard-and-continue','cancel'};
+                		if (not isValid) then
+                			dialogActions -= 'apply-and-continue';
+                		endif;
+                		requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResult');
                 	endif;
+                !elseif ( not IsNewPerson ) then
                 else
+                	IsNewPerson := 0;
                 	UpdateFormWithSelectedPersonInfo;
                 endif;
             }
-            Set dialogActions;
+            Set monitoredIdentifiers {
+                SubsetOf: AllIdentifiers;
+            }
+            Set dialogActions {
+                OrderBy: user;
+            }
         }
         Procedure HandleFormIsDirtyDialogResult {
             Arguments: (selectedAction);
             Body: {
                 Display "HandleFormIsDirtyDialogResult", selectedAction;
                 
-                if ( selectedAction = "apply and continue" ) then
-                	webui::NoOp;
-                elseif ( selectedAction = "discard and continue" ) then
-                	webui::NoOp;
+                if ( selectedAction = "apply-and-continue" ) then
+                	SaveChanges;
+                	UpdateFormWithSelectedPersonInfo;
+                elseif ( selectedAction = "discard-and-continue" ) then
+                	IsNewPerson := 0;
+                	UpdateFormWithSelectedPersonInfo;
                 elseif ( selectedAction = "cancel" ) then
                 	SelectedPersons(p) := 0;
                 	SelectedPersons(Form_Person) := 1;
@@ -218,23 +302,25 @@ Model Main_AddressBook {
         }
         Procedure UpdateFormWithSelectedPersonInfo {
             Body: {
-                if(formMonitor) then
-                	webui::DataChangeMonitorUnregisterCallback(formMonitor);
-                	AllMonitorsRegisteredByUs -= formMonitor;
-                	empty formMonitor;
-                endif;
+                Display "UpdateFormWithSelectedPersonInfo", IsNewPerson;
                 
                 Form_Person := theSelectedPerson;
-                Form_PersonName := FormatString("%e", theSelectedPerson);
-                Form_PhoneNumber := PhoneNumbers(theSelectedPerson);
+                if ( IsNewPerson ) then
+                	Form_PersonName := "form-enter-name";
+                	Form_PhoneNumber := "form-enter-phonenumber";
+                elseif ( not Form_Person ) then
+                	empty Form_Data;
+                else
+                	Form_PersonName := FormatString("%e", Form_Person);
+                	Form_PhoneNumber := PhoneNumbers(Form_Person);
+                endif;
                 
-                monitoredIdentifiers := { 'Form_PersonName', 'Form_PhoneNumber' };
-                webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'MarkFormAsDirty', formMonitor);
+                empty Form_PersonName_annotations;
+                empty Form_PhoneNumber_annotations;
                 
-                AllMonitorsRegisteredByUs += formMonitor;
-            }
-            Set monitoredIdentifiers {
-                SubsetOf: AllIdentifiers;
+                !webui::DataChangeMonitorReset(formMonitor); @TODO
+                DataChangeMonitorReset(FormatString("%e", formMonitor), formIdentifiers);
+                IsDirty := 0;
             }
         }
     }
@@ -274,7 +360,7 @@ Model Main_AddressBook {
                 
                 for(s) do
                 	tmpString += toJsonString(FormatString("%e", s));
-                
+                Display tmpString;
                 	if (s <> Last(aSet)) then
                 		tmpString += ",";
                 	endif;
@@ -311,15 +397,15 @@ Model Main_AddressBook {
         Procedure HandleCompletedDialogRequests {
             Body: {
                 CompletedRequests := { rq | RequestQueue(rq, 'result') <> "<empty>" };
-                !DialogMessage("HandleCompletedDialogRequests, continue?");
                 
-                !Requests | RequestQueue(completedRequest, 'result') <> "<empty>";
                 while Card(CompletedRequests) > 0 do
                 	completedRequest := First(CompletedRequests);
                 	Display  RequestQueue(completedRequest,'onDone');
                 	onDone := StringToElement(AllProcedures, RequestQueue(completedRequest,'onDone'));
                 	resultValue := RequestQueue(completedRequest, 'result');
-                	Apply(onDone, resultValue);
+                	if (onDone) then
+                		Apply(onDone, resultValue);
+                	endif;
                 	empty RequestQueue(completedRequest,df);
                 	Requests -= completedRequest;
                 endwhile;
@@ -375,35 +461,6 @@ Model Main_AddressBook {
                 Range: AllProcedures;
                 Default: 'NoOp1';
                 Property: Input;
-            }
-        }
-    }
-    Section DEBUG {
-        Procedure DEBUG_init {
-            Body: {
-                DataChangeMonitorDelete("DEBUG");
-                DataChangeMonitorCreate("DEBUG",DEBUG_Set);
-                LocalRQ(rq, df) := RequestQueue(rq, df);
-            }
-        }
-        Set DEBUG_Set {
-            SubsetOf: AllIdentifiers;
-            Definition: data { 'LocalRQ' };
-        }
-        Procedure MonitoredDataChangedProcedure_for_DataChangeMonitor003_Set {
-            Body: {
-                switch ( DataChangeMonitorHasChanged("DEBUG") ) do
-                       1:
-                               DataChangeMonitorReset("DEBUG",DEBUG_Set);
-                               DialogMessage("data has changed");
-                               return 1;
-                       0:
-                       		DialogMessage("data has not changed");
-                               return 0;
-                       -1:
-                               Display CurrentErrorMessage;
-                               raise error "Something bad happened";
-                endswitch;
             }
         }
     }
