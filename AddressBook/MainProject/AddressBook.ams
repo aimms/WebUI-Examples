@@ -37,6 +37,9 @@ Model Main_AddressBook {
     StringParameter PhoneNumbers {
         IndexDomain: p;
     }
+    StringParameter PhoneNumbers_flags {
+        Definition: "readonly";
+    }
     DeclarationSection Form_Data {
         ElementParameter Form_Person {
             Range: Persons;
