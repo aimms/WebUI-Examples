@@ -2,38 +2,66 @@
 <html>
 	<head>
 	<title>05 - Changing data</title>
-	<link href='//fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
-	<style>
-		html {
-			background-color: #ECEDEF;
-		}
-		body {
-			font-family: 'Roboto', sans-serif;
-			max-width: 42em;
-			margin: 0 auto;
-			padding: 6em 4em;
-			text-align: justify;
-			color: #333;
-			background-color: #FAFAFA;
-		}
-		@media screen and (max-width:560px) {
-			html, body{ padding:0;background:#fff;font-family: Verdana, sans-serif;text-align: left;font-size:12px;}
-			h1, h2, h3, h4, h5, h6, h7, #carousel ul, #carousel h3 {
-				font-family: 'Cabin Condensed';
+		<meta data-wp-post-id="????" />
+		<link rel="stylesheet" href="../css/icomoon.css">
+		<link href='http://fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
+		<script>document.registerElement('awf-icon', {prototype: Object.create(HTMLElement.prototype)})</script>
+		<style>
+			html {
+				background-color: #ECEDEF;
 			}
-			h1, h2, h3, h4, h5, h6, h7 {
-				font-size: 2em;
-				font-weight: 500;
+			body {
+				font-family: 'Roboto', sans-serif;
+				max-width: 42em;
+				margin: 0 auto;
+				padding: 6em 4em;
+				text-align: justify;
+				color: #333;
+				background-color: #FAFAFA;
 			}
-			body {padding-right:10px;}
-			.wp-title{display:none;}
-			img {max-width:100%}
-		}
-	</style>
-	<!-- highightjs - syntax highlighting -->
-	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
-	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
-	<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
+			@media screen and (max-width:560px) {
+				html, body{ padding:0;background:#fff;font-family: Verdana, sans-serif;text-align: left;font-size:12px;}
+				h1, h2, h3, h4, h5, h6, h7, #carousel ul, #carousel h3 {
+					font-family: 'Cabin Condensed';
+				}
+				h1, h2, h3, h4, h5, h6, h7 {
+					font-size: 2em;
+					font-weight: 500;
+				}
+				body {padding-right:10px;}
+				.wp-title{display:none;}
+				img {max-width:100%}
+			}
+
+			table {
+				/*width: 100%;*/
+				border-collapse: collapse;
+				margin: auto;
+			}
+			th, td {
+				text-align: left;
+				vertical-align: top;
+				padding: 0.3em 1em;
+			}
+			th {
+				text-align: center;
+				background: #F2F2F7;
+				border-bottom: 1px solid #CCCCCC;
+			}
+
+			awf-icon {
+				font-family: icomoon-ultimate;
+				border-radius: 50%;
+				border: 1px solid #333;
+				padding: 4px;
+				text-align: center;
+				font-size: 60%;
+			}
+		</style>
+		<!-- highightjs - syntax highlighting -->
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
 	</head>
 	<body>
 		<h1 class="wp-title">AIMMS WebUI Dev Tutorial</h1>
