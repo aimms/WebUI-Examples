@@ -51,7 +51,7 @@
 			(HTML5 DOM, CSS, Javascript, and the likes). It is also beneficial, however not required, if you are
 			familiar with <a href="http://jquery.org">jQuery</a> and, to lesser extent,
 			<a href="http://jquery-ui.org">jQuery UI</a>, as AIMMS WebUI is built on top of these technologies.
-		<p> More specificly, since we will be creating an HTML table widget, we assume that you are familiar with
+		<p> More specifically, since we will be creating an HTML table widget, we assume that you are familiar with
 			the basics to create an <a href="http://www.w3.org/wiki/HTML_tables">HTML table</a>.
 		<p> Finally, since this tutorial uses the concepts that have been introduced in the previous tutorials and in particular
 			'tutorial-4', we expect that 
@@ -63,7 +63,7 @@
 		<h3>Sending data changes to AIMMS</h3>
 		<p> Whenever the option type of the <em>contents</em> has the JavaScript <em>type</em> property "datasource", its resolved value will
 			be an AWF datasource object. As mentioned in the previous tutorial, data that represents the actual values of the identifier is 
-			accessed through the <em>values</em> part of the dataSource. To change identifier data the AWF datasource.values object has a 
+			accessed through the <em>values</em> part of the datasource. To change identifier data the AWF datasource.values object has a 
 			<em>requestSetValues</em> method that should be used to send data changes to the model. For example, to change the value in cell
 			(0,1) of a table to 1234, the following JavaScript statement can be used:
 <pre><code>dataSource.values.requestSetValues([{
@@ -77,7 +77,7 @@
 		<p> The <em>requestSetValues</em> method can only be used a datasource that is <em>up-to-date</em>. An because a datasource
 			is invalidated by a data change itself, the datasource reference needs to be refreshed by obtaining the value from the
 			<em>contents</em>option. Typically, this this can be taken care of automatically as, after a data change, the widget will 
-			recieve a <em>resolved option change</em> for the <em>contents</em> option with the up-to-date datasource as its value. 
+			receive a <em>resolved option change</em> for the <em>contents</em> option with the up-to-date datasource as its value. 
 			This is the approach we will take in this tutorial.
 		<h3>Creating the input elements</h3>
 		<p> To make sure that the user of the widget can provide input, we will update the table that has been created in the
@@ -202,7 +202,7 @@ numRowsInRowHeader.times(function(row) {
 			from being editable. This however falls outside the scope of this tutorial.
 		<p> When writing a widget that should be able to deal with large amounts of data, creating an <code>&lt;input&gt;</code>
 			with a handler for every cell in the table might not be the best way to go. Instead you migth consider to have
-			one global table handler that is able to deal with genertic cell changes instead.
+			one global table handler that is able to deal with generic cell changes instead.
 		<p> The data change handler that is used in this widget sends a number to AIMMS whenever the input can be parsed as
 			a number. You migth get into troubles when you want to send a string that contains just numbers to AIMMS
 			(for example the string "4321"). To cover for this case you need to build in more intelligence into your
