@@ -37,10 +37,182 @@
 	</head>
 	<body>
 		<h1 class="wp-title">AIMMS WebUI Dev Tutorial</h1>
-		<h2>05 - Changing data</h2>
+		<h2>05 - Changing data in AIMMS</h2>
 		<p>In this tutorial you will extend the table widget that has been built in the previous tutorial with
 			<em>edit support</em>. This will allow the end user to change model data by changing values in the
 			widget.
 		<h3>Before we begin - Prerequisites</h3>
+		<p> To make the most out of this tutorial, it is important that you meet a couple of prerequisites.
+		<p> First of all, we are going to assume that you already familiarized yourself a bit with the AIMMS WebUI.
+			Both with the end-usage and the app-development. That you have a recent AIMMS and that you have it
+			running in your set-up.
+		<p> Since this is a (software) development tutorial, we are also assuming that you have experience in writing
+			software in a generic programming language, and, that you have a basic knowledge on HTML5 technologies
+			(HTML5 DOM, CSS, Javascript, and the likes). It is also beneficial, however not required, if you are
+			familiar with <a href="http://jquery.org">jQuery</a> and, to lesser extent,
+			<a href="http://jquery-ui.org">jQuery UI</a>, as AIMMS WebUI is built on top of these technologies.
+		<p> More specificly, since we will be creating an HTML table widget, we assume that you are familiar with
+			the basics to create an <a href="http://www.w3.org/wiki/HTML_tables">HTML table</a>.
+		<p> Finally, since this tutorial uses the concepts that have been introduced in the previous tutorials and in particular
+			'tutorial-4', we expect that 
+			you have completed the previous tutorials 
+			(<a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a>,
+			<a href="../02-adding-dynamic-contents-part-i-options/index.html">tutorial-02</a>,
+			<a href="../03-adding-dynamic-contents-part-ii-aimms-scalar-options/index.html">tutorial-03</a>,
+			<a href="../04-creating-a-custom-widget-with-multi-dimensional-data-from-aimms/index.html">tutorial-04</a>) first.
+		<h3>Sending data changes to AIMMS</h3>
+		<p> Whenever the option type of the <em>contents</em> has the JavaScript <em>type</em> property "datasource", its resolved value will
+			be an AWF datasource object. As mentioned in the previous tutorial, data that represents the actual values of the identifier is 
+			accessed through the <em>values</em> part of the dataSource. To change identifier data the AWF datasource.values object has a 
+			<em>requestSetValues</em> method that should be used to send data changes to the model. For example, to change the value in cell
+			(0,1) of a table to 1234, the following JavaScript statement can be used:
+<pre><code>dataSource.values.requestSetValues([{
+	ranges: [{start:0,end:1},{start:1,end:2}],
+	layerName: "values",
+	value: 1234
+}], function onDone(status) {
+	// handle model feedback
+});
+</code></pre>
+		<p> The <em>requestSetValues</em> method can only be used a datasource that is <em>up-to-date</em>. An because a datasource
+			is invalidated by a data change itself, the datasource reference needs to be refreshed by obtaining the value from the
+			<em>contents</em>option. Typically, this this can be taken care of automatically as, after a data change, the widget will 
+			recieve a <em>resolved option change</em> for the <em>contents</em> option with the up-to-date datasource as its value. 
+			This is the approach we will take in this tutorial.
+		<h3>Creating the input elements</h3>
+		<p> To make sure that the user of the widget can provide input, we will update the table that has been created in the
+			previous tutorial. For this purpose, every <code>&lt;td&gt;</code> HTML element will be populated with an extra
+			<code>&lt;input&gt;</code> element.
+		<p> First, we will add a function <em>createInputElQ</em> (in the function <em>_createHtmlTable</em> from the previous
+			tutorial, just beneath the function <em>createCellElQ</em>):
+<pre><code>function createInputElQ(name, row, col) {
+	return $(['&lt;td&gt;&lt;input type="text" class="', name, ' row'+row, ' col'+col, '"&gt;&lt;/input&gt;&lt;/td&gt;'].join(''));
+}
+</code></pre>
+			In addition, we change the code that build the row header and grid area to
+<pre><code>var numColsInGrid = numColsInColHeader;
+var tbodyElQ = $('&lt;tbody&gt;');
+numRowsInRowHeader.times(function(row) {
+	var trElQ = $('&lt;tr&gt;');
+	numColsInRowHeader.times(function(col) {
+		trElQ.append(createCellElQ('th', 'rowHeader', row, col));
+	});
+	numColsInGrid.times(function(col) {
+	var gridElQ = 
+		trElQ.append(createInputElQ('values', row, col));
+	});
+	tbodyElQ.append(trElQ);
+});
+</code></pre>
+		<p> In addition, we need to update the <em>updateTableCell</em> function (inside the <em>_fillTable</em> function) because, 
+		for an <code>&lt;input&gt;</code> element, we now need to set the <em>value</em> attribute to initialize the cell with a value.
+		The function should be updated as follows:
+<code><pre>function updateTableCell(type, row, col, text) {
+	var cellElQ = widget.tableElQ.find('.'+type+'.row'+row+'.col'+col);
+	if ( type == "values" ) {
+		cellElQ.attr('value',text);
+	} else {
+		cellElQ.text(text);
+	}
+}
+</code></pre>
+		<p> <picture>
+			<img src="../assets/img/my-table-widget-with-inputs.png">
+			<div><strong>figure 1</strong></div>
+			</picture>
+		<p> As shown in Figure 1 the <code>&lt;input&gt;</code> elements do show the value but do not yet nicely fit into the 
+			<code>&lt;td&gt;</code> elements. To resolve this we will remove all CSS styling from the <code>&lt;input&gt;</code> 
+			elements through project specific CSS. To do so, create a CSS file	(next to the JavaScript file that contains the 
+			widget code) and fill it with the following CSS rules:
+<pre><code>.tag-my-table-widget input {
+	padding: 0;
+	margin: 0;
+	border-style: none;
+}
+</code></pre>
+		<p> which will render the table as it was rendered in the previous tutorial but with extra <code>&lt;input&gt;</code> elements.
+		<h3>Handling the new input in the table</h3>
+		<p> It is now possible to edit the value in a cell of the table. However, the change is not yet send to the AIMMS model.
+			To make this happen, we will extend the <code>&lt;input&gt;</code> elements with a <em>change</em>handler. To do so,
+			we extend the function <em>updateTableCell</em> as follows:
+<pre><code>function updateTableCell(type, row, col, text) {
+	var cellElQ = widget.tableElQ.find('.'+type+'.row'+row+'.col'+col);
+	if ( type == "values" ) {
+		cellElQ.attr('value',text);
+		cellElQ.on('change',function(event){
+			// TODO send data change to model
+		});
+	} else {
+		cellElQ.text(text);
+	}
+}
+</code></pre>
+		<p> As documented  in the jQuery API, the jQuery <a href="https://api.jquery.com/change/"><em>change</em></a>
+			handler is called with an <a href="http://api.jquery.com/category/events/event-object/"><em>event object</em></a> 
+			as its argument that contains a reference to the <em>target</em> element that initiated the event. 
+			In our case, the <code>&lt;input&gt;</code>	element. The new value that is specified by the user is accessible 
+			through the <code>event.target.value</code> object. Because the <code>&lt;input&gt;</code> element has been initialized
+			with <em>type</em> attribute set to <em>text</em>, all input values are retrieved as strings. The
+			<em>requestSetValues</em> method however expects a number whenever the underlying AIMMS identifier is numerical.
+			We will use the JavaScript function <em>parseFloat</em> to check whether the input is a number or not. Whenever
+			the <em>parseFloat</em> return the JavaScript value <em>NaN</em> (i.e. not-a-number), we will pass the new value as
+			a string.
+		<p> The data change handler in this tutorial is implemented as follows:
+<pre><code>function(event){
+	var newValue = parseFloat(event.target.value);
+	if ( _.isNaN(newValue) ) { 
+		// newValue is not-a-number, it will be passed as a string
+		newValue = event.target.value;
+	}
+	dataSource.values.requestSetValues([{
+		ranges: [{start:row,end:row+1},{start:col,end:col+1}],
+		layerName : "values",
+		value: newValue
+	}],function onDone(status) {
+		// TODO handle error
+	});
+});
+</code></pre>
+		<h3>Error handling</h3>
+		<p> The <em>onDone</em> method has a <em>status</em> object as its argument. Any <em>status code</em> other than
+			the number 200 indicates an error. In case of an error, the <em>status description</em> contains a description
+			of the error. The following <em>onDone</em> handler will, in case of an error, show a dialog box with the error code 
+			and description. In addition, the <em>value</em> attribute of the cell will be restored to its original value
+			(which is still in scope) and the jQuery <em>blur</em> method will be called to remove the focus from the
+			cell element.
+<pre><code>function onDone(status) {
+	if ( status.code !== 200 ) {
+		alert('Error '+status.code+': '+status.description);
+		// revert value
+		cellElQ.attr('value',text);
+		cellElQ.blur();
+	}
+});
+</code></pre>
+		<p> Having added the above <em>onDone</em> handler, the widget will come up with an popup whenever you try to enter
+			the string "A" as a new value.
+		<p> <picture>
+			<img src="../assets/img/error-400.png">
+			<div><strong>figure 1</strong></div>
+			</picture>
+		<h3>Disclaimer</h3>
+		<p> When working with model data, not all data may be editable in the first place. Please note, that the table we
+			built in this tutorial does not take this into account. AWF is able to provide whether a certain cell is
+			<em>readOnly</em>. Based on this information, you should adjust your widget to prevent <em>readOnly</em> cells
+			from being editable. This however falls outside the scope of this tutorial.
+		<p> When writing a widget that should be able to deal with large amounts of data, creating an <code>&lt;input&gt;</code>
+			with a handler for every cell in the table might not be the best way to go. Instead you migth consider to have
+			one global table handler that is able to deal with genertic cell changes instead.
+		<p> The data change handler that is used in this widget sends a number to AIMMS whenever the input can be parsed as
+			a number. You migth get into troubles when you want to send a string that contains just numbers to AIMMS
+			(for example the string "4321"). To cover for this case you need to build in more intelligence into your
+			widget code.
+		<h3>Recap</h3>
+		<p> The main topics that were discussed in this tutorial were
+			<ol>
+			<li>how to extend your widget with input fields.
+			<li>how to communicate input changes in the widget to your model.
+			</ol>
+		
 	</body>
 </html>
