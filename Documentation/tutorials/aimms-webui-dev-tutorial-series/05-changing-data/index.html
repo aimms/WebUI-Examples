@@ -66,7 +66,7 @@
 	<body>
 		<h1 class="wp-title">AIMMS WebUI Dev Tutorial</h1>
 		<h2>05 - Changing data in AIMMS</h2>
-		<p>In this tutorial you will extend the table widget that has been built in the previous tutorial with
+		<p>In this tutorial you will extend the table widget that has been built in <a href="../04-creating-a-custom-widget-with-multi-dimensional-data-from-aimms/index.html">the previous tutorial</a> with
 			<em>edit support</em>. This will allow the end user to change model data by changing values in the
 			widget.
 		<h3>Before we begin - Prerequisites</h3>
@@ -75,10 +75,10 @@
 			Both with the end-usage and the app-development. That you have a recent AIMMS and that you have it
 			running in your set-up.
 		<p> Since this is a (software) development tutorial, we are also assuming that you have experience in writing
-			software in a generic programming language, and, that you have a basic knowledge on HTML5 technologies
+			software in a generic programming language and that you have a basic knowledge of HTML5 technologies
 			(HTML5 DOM, CSS, Javascript, and the likes). It is also beneficial, however not required, if you are
-			familiar with <a href="http://jquery.org">jQuery</a> and, to lesser extent,
-			<a href="http://jquery-ui.org">jQuery UI</a>, as AIMMS WebUI is built on top of these technologies.
+			familiar with <a href="http://jquery.org">jQuery</a> and to a lesser extent
+			<a href="http://jquery-ui.org">jQuery UI</a> as AIMMS WebUI is built on top of these technologies.
 		<p> More specifically, since we will be creating an HTML table widget, we assume that you are familiar with
 			the basics to create an <a href="http://www.w3.org/wiki/HTML_tables">HTML table</a>.
 		<p> Finally, since this tutorial uses the concepts that have been introduced in the previous tutorials and in particular
@@ -102,9 +102,9 @@
 	// handle model feedback
 });
 </code></pre>
-		<p> The <em>requestSetValues</em> method can only be used a datasource that is <em>up-to-date</em>. An because a datasource
+		<p> The <em>requestSetValues</em> method can only be used on a datasource that is <em>up-to-date</em>. An because a datasource
 			is invalidated by a data change itself, the datasource reference needs to be refreshed by obtaining the value from the
-			<em>contents</em>option. Typically, this this can be taken care of automatically as, after a data change, the widget will 
+			<em>contents</em> option. Typically, this can be taken care of automatically as, after a data change, the widget will 
 			receive a <em>resolved option change</em> for the <em>contents</em> option with the up-to-date datasource as its value. 
 			This is the approach we will take in this tutorial.
 		<h3>Creating the input elements</h3>
@@ -161,7 +161,7 @@ numRowsInRowHeader.times(function(row) {
 		<p> which will render the table as it was rendered in the previous tutorial but with extra <code>&lt;input&gt;</code> elements.
 		<h3>Handling the new input in the table</h3>
 		<p> It is now possible to edit the value in a cell of the table. However, the change is not yet send to the AIMMS model.
-			To make this happen, we will extend the <code>&lt;input&gt;</code> elements with a <em>change</em>handler. To do so,
+			To make this happen, we will extend the <code>&lt;input&gt;</code> elements with a <em>change</em> handler. To do so,
 			we extend the function <em>updateTableCell</em> as follows:
 <pre><code>function updateTableCell(type, row, col, text) {
 	var cellElQ = widget.tableElQ.find('.'+type+'.row'+row+'.col'+col);
@@ -184,8 +184,10 @@ numRowsInRowHeader.times(function(row) {
 			<em>requestSetValues</em> method however expects a number whenever the underlying AIMMS identifier is numerical.
 			We will use the JavaScript function <em>parseFloat</em> to check whether the input is a number or not. Whenever
 			the <em>parseFloat</em> return the JavaScript value <em>NaN</em> (i.e. not-a-number), we will pass the new value as
-			a string.
-		<p> The data change handler in this tutorial is implemented as follows:
+			a string. To check for the JavaScript <em>NaN</em> value, we use the <em>isNaN</em> function from the Lodash library, which 
+			is bundled with the WebUI.</p>
+			
+		<p> The data change handler in this tutorial is implemented as follows:</p>
 <pre><code>function(event){
 	var newValue = parseFloat(event.target.value);
 	if ( _.isNaN(newValue) ) { 
@@ -218,13 +220,13 @@ numRowsInRowHeader.times(function(row) {
 });
 </code></pre>
 		<p> Having added the above <em>onDone</em> handler, the widget will come up with an popup whenever you try to enter
-			the string "A" as a new value.
+			the string "A" as a new value (figure 2).
 		<p> <picture>
 			<img src="../assets/img/error-400.png">
-			<div><strong>figure 1</strong></div>
+			<div><strong>figure 2</strong></div>
 			</picture>
 		<h3>Disclaimer</h3>
-		<p> When working with model data, not all data may be editable in the first place. Please note, that the table we
+		<p> When working with model data, not all data may be editable in the first place. Please note that the table we
 			built in this tutorial does not take this into account. AWF is able to provide whether a certain cell is
 			<em>readOnly</em>. Based on this information, you should adjust your widget to prevent <em>readOnly</em> cells
 			from being editable. This however falls outside the scope of this tutorial.
