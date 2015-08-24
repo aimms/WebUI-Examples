@@ -184,8 +184,8 @@ numRowsInRowHeader.times(function(row) {
 			<em>requestSetValues</em> method however expects a number whenever the underlying AIMMS identifier is numerical.
 			We will use the JavaScript function <em>parseFloat</em> to check whether the input is a number or not. Whenever
 			the <em>parseFloat</em> return the JavaScript value <em>NaN</em> (i.e. not-a-number), we will pass the new value as
-			a string. To check for the JavaScript <em>NaN</em> value, we use the <em>isNaN</em> function from the Lodash library, which 
-			is bundled with the WebUI.</p>
+			a string. To check for the JavaScript <em>NaN</em> value, we use the <em>isNaN</em> function from the 
+			<a href="https://lodash.com/">lodash</a> library, which is bundled with the WebUI.</p>
 			
 		<p> The data change handler in this tutorial is implemented as follows:</p>
 <pre><code>function(event){
