@@ -18,8 +18,8 @@ AWF.Bus.subscribe({
 			};
 
 			// Register the list-of-cases option
-			AWF.OptionTypeCollector.addOptionType(elQ, "contents2", DialogRequestListOptionType);
-			elQ.awf.specifiedOptions("contents2.partition",
+			AWF.OptionTypeCollector.addOptionType(elQ, "contents", DialogRequestListOptionType);
+			elQ.awf.specifiedOptions("contents.partition",
 				AWF.OptionUtil.createSpecifiedOption({requests: ["<IDENTIFIER-SET>", "webui::rq"], properties: ["webui::df"]})
 			);
 		}
@@ -27,17 +27,16 @@ AWF.Bus.subscribe({
 
 	onDecorateElement: function(elQ, type) {
 		if (type === "model-dialog-request-handler") {
-		// if (type ===  "application") {
 			elQ.aimms_model_dialog_request_handler();
 		}
 	},
 
 	postDecorateElement: function(elQ, type) {
 		if (type === "model-dialog-request-handler") {
-		// if (type ===  "application") {
-		window.setTimeout(function() {
-			elQ.awf.specifiedOptions("contents2", AWF.OptionUtil.createSpecifiedOption({contents: ["webui::RequestQueue"]}, "aimms"));
-		}, 1000);
+			// @TODO get rid of this setTimeout
+			window.setTimeout(function() {
+				elQ.awf.specifiedOptions("contents", AWF.OptionUtil.createSpecifiedOption({contents: ["webui::RequestQueue"]}, "aimms"));
+			}, 1000);
 		}
 	},
 });
