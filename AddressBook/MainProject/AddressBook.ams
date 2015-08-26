@@ -62,6 +62,9 @@ Model Main_AddressBook {
             Default: 0;
         }
         Parameter IsValid;
+        Parameter IsCompleted {
+            Definition: (Form_PersonName <> "form-enter-name" ) and ( Form_PhoneNumber <> "form-enter-phonenumber" );
+        }
     }
     Section Form_Validation {
         Procedure ValidateForm {
@@ -177,7 +180,7 @@ Model Main_AddressBook {
         }
         Procedure SaveChanges {
             Body: {
-                if IsDirty then
+                if IsDirty and IsCompleted then
                 	SaveChangesWithoutUpdatingSelection();
                 	SelectedPersons(Form_Person) := 1;
                 endif;
