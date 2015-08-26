@@ -174,8 +174,10 @@ Model Main_AddressBook {
         }
         Procedure SaveChanges {
             Body: {
-                SaveChangesWithoutUpdatingSelection();
-                SelectedPersons(Form_Person) := 1;
+                if IsDirty then
+                	SaveChangesWithoutUpdatingSelection();
+                	SelectedPersons(Form_Person) := 1;
+                endif;
             }
         }
         Procedure SaveChangesWithoutUpdatingSelection {
