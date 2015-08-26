@@ -147,10 +147,21 @@ Model Main_AddressBook {
         }
         Procedure NewPerson {
             Body: {
-                IsNewPerson := 1;
-                SelectedPersons(p) := 0;
-                DataChangeMonitorReset(FormatString("%e", selectedPersonsMonitor), selectedPersonsIdentifier);
-                UpdateFormWithSelectedPersonInfo;
+                if IsDirty then
+                	dialogActions := {'apply-and-continue','discard-and-continue','cancel'};
+                	if (not isValid) then
+                		dialogActions -= 'apply-and-continue';
+                	endif;
+                		requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResultFromNewPerson');
+                else
+                	IsNewPerson := 1;
+                	SelectedPersons(p) := 0;
+                	DataChangeMonitorReset(FormatString("%e", selectedPersonsMonitor), selectedPersonsIdentifier);
+                	UpdateFormWithSelectedPersonInfo;
+                endif;
+            }
+            Set dialogActions {
+                OrderBy: user;
             }
         }
         Procedure DeletePerson {
@@ -267,8 +278,7 @@ Model Main_AddressBook {
                 			dialogActions -= 'apply-and-continue';
                 		endif;
                 		requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResult');
-                	endif;
-                !elseif ( not IsNewPerson ) then
+                	endif;!elseif ( not IsNewPerson ) then
                 else
                 	IsNewPerson := 0;
                 	UpdateFormWithSelectedPersonInfo;
@@ -295,6 +305,32 @@ Model Main_AddressBook {
                 elseif ( selectedAction = "cancel" ) then
                 	SelectedPersons(p) := 0;
                 	SelectedPersons(Form_Person) := 1;
+                else
+                	raise error "Unsupported action";
+                endif;
+            }
+            StringParameter selectedAction {
+                Property: Input;
+            }
+        }
+        Procedure HandleFormIsDirtyDialogResultFromNewPerson {
+            Arguments: (selectedAction);
+            Body: {
+                Display "HandleFormIsDirtyDialogResult2", selectedAction;
+                
+                if ( selectedAction = "apply-and-continue" ) then
+                	SaveChanges;
+                	IsNewPerson := 1;
+                	SelectedPersons(p) := 0;
+                	DataChangeMonitorReset(FormatString("%e", selectedPersonsMonitor), selectedPersonsIdentifier);
+                	UpdateFormWithSelectedPersonInfo;
+                elseif ( selectedAction = "discard-and-continue" ) then
+                	IsNewPerson := 1;
+                	SelectedPersons(p) := 0;
+                	DataChangeMonitorReset(FormatString("%e", selectedPersonsMonitor), selectedPersonsIdentifier);
+                	UpdateFormWithSelectedPersonInfo;
+                elseif ( selectedAction = "cancel" ) then
+                	! do nothing
                 else
                 	raise error "Unsupported action";
                 endif;
