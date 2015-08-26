@@ -152,7 +152,7 @@ Model Main_AddressBook {
                 	if (not isValid) then
                 		dialogActions -= 'apply-and-continue';
                 	endif;
-                		requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResultFromNewPerson');
+                	requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResultFromNewPerson');
                 else
                 	IsNewPerson := 1;
                 	SelectedPersons(p) := 0;
@@ -166,10 +166,13 @@ Model Main_AddressBook {
         }
         Procedure DeletePerson {
             Body: {
-                empty PhoneNumbers(theSelectedPerson);
-                empty SelectedPersons(theSelectedPerson);
-                Persons -= theSelectedPerson;
-                IsNewPerson := 0;
+                if (theSelectedPerson) then
+                	dialogActions := {'yes','no'};
+                	requestPerformWebUIDialog("delete-confirmation-title", "delete-confirmation-message", dialogActions, 'HandleDeletePersonDialogResult');
+                endif;
+            }
+            Set dialogActions {
+                OrderBy: user;
             }
         }
         Procedure SaveChanges {
@@ -307,6 +310,27 @@ Model Main_AddressBook {
                 elseif ( selectedAction = "cancel" ) then
                 	SelectedPersons(p) := 0;
                 	SelectedPersons(Form_Person) := 1;
+                else
+                	raise error "Unsupported action";
+                endif;
+            }
+            StringParameter selectedAction {
+                Property: Input;
+            }
+        }
+        Procedure HandleDeletePersonDialogResult {
+            Arguments: (selectedAction);
+            Body: {
+                Display "HandleDeletePersonDialogResult", selectedAction;
+                
+                if ( selectedAction = "yes" ) then
+                	empty PhoneNumbers(theSelectedPerson);
+                	empty SelectedPersons(theSelectedPerson);
+                	Persons -= theSelectedPerson;
+                	IsNewPerson := 0;
+                	UpdateFormWithSelectedPersonInfo;
+                elseif ( selectedAction = "no" ) then
+                	! do nothing
                 else
                 	raise error "Unsupported action";
                 endif;
