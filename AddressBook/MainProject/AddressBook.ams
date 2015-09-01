@@ -21,6 +21,38 @@ Model Main_AddressBook {
             Default: 'webui::NoOp';
         }
     }
+    Procedure ValidatePersonForm {
+        Arguments: (personForm);
+        Body: {
+            for (webui::fe | webui::FormEntryIdentifier(personForm,webui::fe)) do
+            	switch webui::FormEntryIdentifier(personForm,webui::fe) do
+            		'PersonName':
+            			IsValid := 1 onlyif StringLength(webui::StringFormEntry(personForm,'entry-1') >= 2);
+            			webui::FormEntryIsValid(personForm,'entry-1') := IsValid;
+            			webui::StringFormEntry_annotations(personForm,'entry-1') := "validation-error-min-length" onlyif (not IsValid);
+            		'PhoneNumbers':
+            			IsValid := 1 onlyif StringLength(webui::StringFormEntry(personForm,'entry-2') >= 10);
+            			webui::FormEntryIsValid(personForm,'entry-2') := IsValid;
+            			webui::StringFormEntry_annotations(personForm,'entry-2') := "validation-error-not-a-valid-phonenumber" onlyif (not IsValid);
+            	endswitch;
+            endfor
+        }
+        ElementParameter personForm {
+            Range: webui::RegisteredForms;
+            Property: Input;
+        }
+        Parameter IsValid;
+    }
+    Procedure TestForms {
+        Body: {
+            FormFields := { 'PersonName', 'PhoneNumbers' };
+            
+            webui::SetupForm("myform",'theSelectedPerson',FormFields,'ValidatePersonForm');
+        }
+        Set FormFields {
+            SubsetOf: AllIdentifiers;
+        }
+    }
     ElementParameter theSelectedPerson {
         Range: Persons;
         Definition: {
@@ -33,6 +65,9 @@ Model Main_AddressBook {
     Parameter SelectedPersons {
         IndexDomain: p;
         Default: -1;
+    }
+    StringParameter PersonName {
+        IndexDomain: p;
     }
     StringParameter PhoneNumbers {
         IndexDomain: p;
@@ -79,7 +114,6 @@ Model Main_AddressBook {
                 ValidPhoneNumber := 1 onlyif ( StringLength(Form_PhoneNumber) >= 10 );
                 
                 Form_PhoneNumber_annotations := "validation-error-not-a-valid-phonenumber" onlyif ( not ValidPhoneNumber );
-                
                 
                 IsValid := 1 onlyif ( ValidNameLength and ValidPhoneNumber and not NameAlreadyExists);
             }
@@ -140,6 +174,7 @@ Model Main_AddressBook {
             Body: {
                 
                 Persons := data { Raymond, Marcel };
+                PersonName(p) := FormatString("%e",p);
                 SelectedPersons(p) := data { Raymond : 0,  Marcel : 0 };
                 PhoneNumbers(p) := data { Raymond : "+31620340347",  Marcel : "+31624273820" };
                 
