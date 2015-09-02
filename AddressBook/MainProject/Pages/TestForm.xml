@@ -23,11 +23,15 @@
 		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
 		<BackgroundColor RGB="#ffffff" />
 		<Domain>
-			<Identifier>webui::StringFormEntry( '', webui::fe )</Identifier>
+			<Identifier>webui::StringFormEntry( 'myform', webui::fe )</Identifier>
 			<Index Name="webui::fe" />
 		</Domain>
 		<ExplicitIdentifier>
-			<Identifier>webui::StringFormEntry( '', webui::fe )</Identifier>
+			<Identifier>webui::StringFormEntry( 'myform', webui::fe )</Identifier>
+			<NumberFormat Width="15" Decimals="0" Alignment="Left" />
+		</ExplicitIdentifier>
+		<ExplicitIdentifier>
+			<Identifier>webui::StringFormEntry_annotations( 'myform', webui::fe )</Identifier>
 			<NumberFormat Width="15" Decimals="0" Alignment="Left" />
 		</ExplicitIdentifier>
 	</PageObject>
@@ -46,6 +50,7 @@
 	</PageObject>
 	<PageObject Type="Button">
 		<Location top="504" left="330" bottom="582" right="636" />
+		<TabOrder>4</TabOrder>
 		<LeaveOnEnter>false</LeaveOnEnter>
 		<ButtonType>Text</ButtonType>
 		<Title>"Check for Data Changes"</Title>
@@ -63,6 +68,7 @@
 			<Symbol>theSelectedPerson</Symbol>
 			<Symbol>SelectedPersons</Symbol>
 			<Symbol>webui::StringFormEntry</Symbol>
+			<Symbol>webui::StringFormEntry_annotations</Symbol>
 			<Symbol>webui::DataChangeMonitorsUpdate</Symbol>
 			<Symbol>webui::fe</Symbol>
 			<Symbol>p</Symbol>
