@@ -3,9 +3,9 @@
 Model Main_AddressBook {
     Procedure Initialize {
         Body: {
-            UnregisterAllOurDataChangeMonitors();
+            !UnregisterAllOurDataChangeMonitors();
             InitializeAddressBook();
-            RegisterDataChangeMonitors();
+            !RegisterDataChangeMonitors();
             
             initializeAllPublicIdentifiersProcedure := StringToElement(AllIdentifiers, "webui_runtime::InitializeAllPublicIdentifiers");
             if (initializeAllPublicIdentifiersProcedure) then
@@ -28,20 +28,41 @@ Model Main_AddressBook {
             	switch webui::FormEntryIdentifier(personForm,webui::fe) do
             		'PersonName':
             			IsValid := 1 onlyif StringLength(webui::StringFormEntry(personForm,'entry-1') >= 2);
-            			webui::FormEntryIsValid(personForm,'entry-1') := IsValid;
+            			!webui::FormEntryIsValid(personForm,'entry-1') := IsValid;
             			webui::StringFormEntry_annotations(personForm,'entry-1') := "validation-error-min-length" onlyif (not IsValid);
             		'PhoneNumbers':
             			IsValid := 1 onlyif StringLength(webui::StringFormEntry(personForm,'entry-2') >= 10);
-            			webui::FormEntryIsValid(personForm,'entry-2') := IsValid;
+            			!webui::FormEntryIsValid(personForm,'entry-2') := IsValid;
             			webui::StringFormEntry_annotations(personForm,'entry-2') := "validation-error-not-a-valid-phonenumber" onlyif (not IsValid);
             	endswitch;
-            endfor
+            endfor;
         }
         ElementParameter personForm {
             Range: webui::RegisteredForms;
             Property: Input;
         }
         Parameter IsValid;
+    }
+    DeclarationSection TestDeclaration {
+        ElementParameter TestEP {
+            Range: AllIdentifiers;
+        }
+    }
+    Procedure Test {
+        Body: {
+            ID := StringToElement(AllIdentifiers,"dcmr::MonitoredDataChangedProcedure_for_DataChangeMonitor001_Set");
+            display ID;
+            haschanged := apply(ID);
+            display HasChanged;
+        }
+        Parameter HasChanged;
+        ElementParameter ID {
+            Range: AllIdentifiers;
+            Default: 'webui::NoOp';
+        }
+        Set IDAttributes {
+            SubsetOf: AllAttributeNames;
+        }
     }
     Procedure TestForms {
         Body: {
