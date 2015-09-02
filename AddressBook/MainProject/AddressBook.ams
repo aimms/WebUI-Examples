@@ -51,13 +51,12 @@ Model Main_AddressBook {
             Range: AllIdentifiers;
         }
     }
-    Procedure Test {
+    Procedure SaveMyForm {
         Body: {
-            ID := StringToElement(AllIdentifiers,"dcmr::MonitoredDataChangedProcedure_for_DataChangeMonitor001_Set");
-            display ID;
-            haschanged := apply(ID);
-            display HasChanged;
+            theForm := "myform";
+            webui::SaveForm(theForm);
         }
+        StringParameter theForm;
         Parameter HasChanged;
         ElementParameter ID {
             Range: AllIdentifiers;
