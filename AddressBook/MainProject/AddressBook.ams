@@ -10,7 +10,7 @@ Model Main_AddressBook {
             	'PhoneNumbers' : "form-enter-phonenumber"
             };
             
-            webui::SetupForm("myform",'SelectedPersons',FormFields,NewPersonValue, 'ValidatePersonForm');
+            webui::SetupForm("myform",'SelectedPersons',FormFields,NewPersonValue,'MyValidateForm');
         }
         Set FormFields {
             SubsetOf: AllIdentifiers;
@@ -18,6 +18,24 @@ Model Main_AddressBook {
         }
         StringParameter NewPersonValue {
             IndexDomain: ff;
+        }
+    }
+    Procedure MyValidateForm {
+        Arguments: (formData,validationErrors);
+        Body: {
+            
+            if (StringLength(formData('PhoneNumbers')) < 4) then
+                DialogMessage("Validation ERror");
+                validationErrors('PhoneNumbers') := "validation-error-min-length";
+            endif;
+        }
+        StringParameter formData {
+            IndexDomain: (webui::ffn);
+            Property: Input;
+        }
+        StringParameter validationErrors {
+            IndexDomain: (webui::ffn);
+            Property: Output;
         }
     }
     Procedure ValidatePersonForm {
@@ -589,4 +607,5 @@ Model Main_AddressBook {
             }
         }
     }
+    Section Librarification;
 }
