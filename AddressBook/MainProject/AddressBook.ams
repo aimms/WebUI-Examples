@@ -5,23 +5,14 @@ Model Main_AddressBook {
         Body: {
             FormFields := { 'PersonName', 'PhoneNumbers' };
             
-            NewPersonValue := {
-            	'PersonName' : "form-enter-name",
-            	'PhoneNumbers' : "form-enter-phonenumber"
-            };
-            
-            webui::SetupForm("myform",'SelectedPersons',FormFields,NewPersonValue,'MyValidateForm');
+            webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm');
             
             /*
             ! second form
             
             FormFields := { 'ShipName' };
             
-            NewPersonValue := {
-            	'ShipName' : "form-enter-ship"
-            };
-            
-            webui::SetupForm("yourform",'SelectedShips',FormFields,NewPersonValue,'MyValidateShipForm');
+            webui::SetupForm("yourform",'SelectedShips',FormFields,'MyValidateShipForm');
             */
         }
         Set FormFields {
@@ -42,10 +33,19 @@ Model Main_AddressBook {
                 validationErrors('PersonName') := "validation-error-min-length";
             endif;
             
+            if (formData('PersonName') = "form-enter-personname" ) then
+                DialogMessage("Validation Error");
+                validationErrors('PersonName') := "validation-required-field";
+            endif;
             
             if (StringLength(formData('PhoneNumbers')) < 4) then
                 DialogMessage("Validation Error");
                 validationErrors('PhoneNumbers') := "validation-error-min-length";
+            endif;
+            
+            if (formData('PhoneNumbers') = "form-enter-personname" ) then
+                DialogMessage("Validation Error");
+                validationErrors('PhoneNumbers') := "validation-required-field";
             endif;
         }
         StringParameter formData {
@@ -74,30 +74,6 @@ Model Main_AddressBook {
             IndexDomain: (webui::ffn);
             Property: Output;
         }
-    }
-    Procedure ValidatePersonForm {
-        Arguments: (personForm);
-        Body: {
-            display "ValidatePersonForm",personForm;
-            
-            for (webui::fe | webui::FormEntryIdentifier(personForm,webui::fe)) do
-            	switch webui::FormEntryIdentifier(personForm,webui::fe) do
-            		'PersonName':
-            			IsValid := 1 onlyif (StringLength(webui::StringFormEntry(personForm,'entry-1')) >= 2);
-            			webui::FormEntryIsValid(personForm,'entry-1') := IsValid;
-            			webui::StringFormEntry_annotations(personForm,'entry-1') := "validation-error-min-length" onlyif (not IsValid);
-            		'PhoneNumbers':
-            			IsValid := 1 onlyif (StringLength(webui::StringFormEntry(personForm,'entry-2')) >= 10);
-            			webui::FormEntryIsValid(personForm,'entry-2') := IsValid;
-            			webui::StringFormEntry_annotations(personForm,'entry-2') := "validation-error-not-a-valid-phonenumber" onlyif (not IsValid);
-            	endswitch;
-            endfor;
-        }
-        ElementParameter personForm {
-            Range: webui::RegisteredForms;
-            Property: Input;
-        }
-        Parameter IsValid;
     }
     Section Stuff {
         DeclarationSection Second_Form_Stuff {
