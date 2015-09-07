@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Page Version="4000" TimeStamp="2015-09-03 12:36:25">
+<Page Version="4000" TimeStamp="2015-09-07 11:43:21">
 	<PageEditSize Type="Inherited" />
 	<ProjectUUID>B202B975-0524-4D38-B78E-2F4FC6874CF5</ProjectUUID>
 	<TemplatesTabOrderPosition>1</TemplatesTabOrderPosition>
@@ -14,25 +14,6 @@
 		<BackgroundColor RGB="#ffffff" />
 		<ExplicitIdentifier>
 			<Identifier>SelectedPersons( p )</Identifier>
-		</ExplicitIdentifier>
-	</PageObject>
-	<PageObject Type="Composite Table">
-		<Location top="54" left="366" bottom="444" right="678" />
-		<TabOrder>1</TabOrder>
-		<Font GUID="00000000-0000-0000-0000-000000000001" Name="Main Font" />
-		<Border Style="InShadow" Width="2" MarginTop="5" MarginRight="5" MarginBottom="5" MarginLeft="5" />
-		<BackgroundColor RGB="#ffffff" />
-		<Domain>
-			<Identifier>webui::StringFormEntry( 'myform', webui::fe )</Identifier>
-			<Index Name="webui::fe" />
-		</Domain>
-		<ExplicitIdentifier>
-			<Identifier>webui::StringFormEntry( 'myform', webui::fe )</Identifier>
-			<NumberFormat Width="15" Decimals="0" Alignment="Left" />
-		</ExplicitIdentifier>
-		<ExplicitIdentifier>
-			<Identifier>webui::StringFormEntry_annotations( 'myform', webui::fe )</Identifier>
-			<NumberFormat Width="15" Decimals="0" Alignment="Left" />
 		</ExplicitIdentifier>
 	</PageObject>
 	<PageObject Type="Scalar">
@@ -104,9 +85,6 @@
 			<Explicit_Identifier>
 				<Identifier ID="4110">webui::FormIsDirty( webui::rf )</Identifier>
 			</Explicit_Identifier>
-			<Explicit_Identifier>
-				<Identifier ID="4110">webui::FormIsCompleted( webui::rf )</Identifier>
-			</Explicit_Identifier>
 		</Contents>
 		<Indices>
 			<Identifier_Index>
@@ -149,20 +127,16 @@
 		<Model>
 			<Symbol>SelectedPersons</Symbol>
 			<Symbol>webui::MasterSelectionIsEmpty</Symbol>
-			<Symbol>webui::FormIsCompleted</Symbol>
 			<Symbol>webui::FormIsDirty</Symbol>
 			<Symbol>webui::FormIsNewEntry</Symbol>
-			<Symbol>webui::StringFormEntry</Symbol>
-			<Symbol>webui::StringFormEntry_annotations</Symbol>
 			<Symbol>webui::DataChangeMonitorsUpdate</Symbol>
 			<Symbol>webui::rf</Symbol>
-			<Symbol>webui::fe</Symbol>
 			<Symbol>p</Symbol>
-			<Symbol>webui_runtime::theSelection_myform</Symbol>
-			<Symbol>webui_runtime::Form_myform_PersonName</Symbol>
 			<Symbol>webui_runtime::Form_myform_PersonName_annotations</Symbol>
-			<Symbol>webui_runtime::Form_myform_PhoneNumbers</Symbol>
 			<Symbol>webui_runtime::Form_myform_PhoneNumbers_annotations</Symbol>
+			<Symbol>webui_runtime::Form_myform_PersonName</Symbol>
+			<Symbol>webui_runtime::Form_myform_PhoneNumbers</Symbol>
+			<Symbol>webui_runtime::theSelection_myform</Symbol>
 		</Model>
 	</UsedReferences>
 </Page>
