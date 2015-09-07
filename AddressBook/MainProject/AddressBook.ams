@@ -11,6 +11,18 @@ Model Main_AddressBook {
             };
             
             webui::SetupForm("myform",'SelectedPersons',FormFields,NewPersonValue,'MyValidateForm');
+            
+            /*
+            ! second form
+            
+            FormFields := { 'ShipName' };
+            
+            NewPersonValue := {
+            	'ShipName' : "form-enter-ship"
+            };
+            
+            webui::SetupForm("yourform",'SelectedShips',FormFields,NewPersonValue,'MyValidateShipForm');
+            */
         }
         Set FormFields {
             SubsetOf: AllIdentifiers;
@@ -23,10 +35,35 @@ Model Main_AddressBook {
     Procedure MyValidateForm {
         Arguments: (formData,validationErrors);
         Body: {
+            DialogMessage("MyValidateForm");
+            
+            if (StringLength(formData('PersonName')) <= 2) then
+                DialogMessage("Validation Error");
+                validationErrors('PersonName') := "validation-error-min-length";
+            endif;
+            
             
             if (StringLength(formData('PhoneNumbers')) < 4) then
-                DialogMessage("Validation ERror");
+                DialogMessage("Validation Error");
                 validationErrors('PhoneNumbers') := "validation-error-min-length";
+            endif;
+        }
+        StringParameter formData {
+            IndexDomain: (webui::ffn);
+            Property: Input;
+        }
+        StringParameter validationErrors {
+            IndexDomain: (webui::ffn);
+            Property: Output;
+        }
+    }
+    Procedure MyValidateShipForm {
+        Arguments: (formData,validationErrors);
+        Body: {
+            
+            if (StringLength(formData('ShipName')) < 4) then
+                DialogMessage("Validation Error");
+                validationErrors('ShipName') := "validation-error-min-length";
             endif;
         }
         StringParameter formData {
@@ -63,6 +100,17 @@ Model Main_AddressBook {
         Parameter IsValid;
     }
     Section Stuff {
+        DeclarationSection Second_Form_Stuff {
+            Set Ships {
+                Index: s;
+            }
+            Parameter SelectedShips {
+                IndexDomain: s;
+            }
+            StringParameter ShipName {
+                IndexDomain: s;
+            }
+        }
         Procedure Initialize {
             Body: {
                 !UnregisterAllOurDataChangeMonitors();
