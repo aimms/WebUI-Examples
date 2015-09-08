@@ -1,6 +1,11 @@
 ## ams_version=1.0
 
 Model Main_AddressBook {
+    Procedure TestRun {
+        Body: {
+            Foo := SelectedPersons('Marcel');
+        }
+    }
     Procedure TestForms {
         Body: {
             FormFields := { 'PersonName', 'PhoneNumbers' };
@@ -26,7 +31,7 @@ Model Main_AddressBook {
     Procedure MyValidateForm {
         Arguments: (formData,validationErrors);
         Body: {
-            DialogMessage("MyValidateForm");
+            !DialogMessage("MyValidateForm");
             
             if (StringLength(formData('PersonName')) <= 2) then
                 DialogMessage("Validation Error");
@@ -93,6 +98,8 @@ Model Main_AddressBook {
                 InitializeAddressBook();
                 !RegisterDataChangeMonitors();
                 
+                TestForms;
+                
                 initializeAllPublicIdentifiersProcedure := StringToElement(AllIdentifiers, "webui_runtime::InitializeAllPublicIdentifiers");
                 if (initializeAllPublicIdentifiersProcedure) then
                 	me::Compile(initializeAllPublicIdentifiersProcedure);
@@ -112,6 +119,7 @@ Model Main_AddressBook {
                 Range: AllIdentifiers;
             }
         }
+        Parameter Foo;
         ElementParameter theSelectedPerson {
             Range: Persons;
             Definition: {
