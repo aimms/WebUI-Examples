@@ -403,8 +403,9 @@ Model Main_AddressBook {
                 }
             }
             Procedure HandleFormIsDirtyDialogResult {
+                Arguments: (selectedAction);
                 Body: {
-                    selectedAction :=  DialogHandlerArg('HandleFormIsDirtyDialogResult');
+                    selectedAction :=  webui::FormDialogHandlerOnDone; !('HandleFormIsDirtyDialogResult');
                     
                     Display "HandleFormIsDirtyDialogResult", selectedAction;
                     DialogMessage("Handling dialog result");
@@ -422,7 +423,9 @@ Model Main_AddressBook {
                     	raise error "Unsupported action";
                     endif;
                 }
-                StringParameter selectedAction;
+                StringParameter selectedAction {
+                    Property: Input;
+                }
             }
             Procedure HandleDeletePersonDialogResult {
                 Arguments: (selectedAction);
@@ -552,9 +555,6 @@ Model Main_AddressBook {
                     Property: Input;
                 }
             }
-            StringParameter DialogHandlerArg {
-                IndexDomain: IndexIdentifiers;
-            }
             ElementParameter requestQueueMonitor {
                 Range: webui::RegisteredDataChangeMonitors;
             }
@@ -583,12 +583,7 @@ Model Main_AddressBook {
                     	onDone := StringToElement(AllProcedures, RequestQueue(completedRequest,'onDone'));
                     	resultValue := RequestQueue(completedRequest, 'result');
                     	if (onDone) then
-                    		! if zero arguments
-                    			DialogHandlerArg(onDone) := resultValue;
-                    			Apply(onDone);
-                    		! else if one argument
-                    		!	Apply(onDone, resultValue);
-                    		! endif
+                    		Apply(onDone, resultValue);
                     	endif;
                     	empty RequestQueue(completedRequest,df);
                     	Requests -= completedRequest;
@@ -603,52 +598,13 @@ Model Main_AddressBook {
                 }
                 ElementParameter onDone {
                     Range: AllProcedures;
-                    Default: 'webui::NoOp';
+                    Default: 'NoOp1';
                 }
                 StringParameter resultValue;
             }
             Procedure requestPerformWebUIDialog {
                 Arguments: (title,message,actions,onDone);
                 Body: {
-                    DialogMessage(FormatString("title = %s, message = %s",title,message));
-                    
-                    RequestCounter += 1;
-                    Requests += RequestCounter;
-                    RequestQueue(RequestCounter, 'title') := title;
-                    RequestQueue(RequestCounter, 'message') := message;
-                    for(a) do
-                    	actionsString += FormatString("%e", a);
-                    endfor;
-                    !RequestQueue(RequestCounter, 'actions') := actionsString;
-                    RequestQueue(RequestCounter, 'actions') := SettoJsonList(actions);
-                    RequestQueue(RequestCounter, 'onDone') := onDone;
-                    RequestQueue(RequestCounter, 'result') := "<empty>";
-                }
-                Set monitoredIdentifiers {
-                    SubsetOf: AllIdentifiers;
-                }
-                StringParameter actionsString;
-                Set actions {
-                    Index: a;
-                    Property: Input;
-                }
-                StringParameter title {
-                    Property: Input;
-                }
-                StringParameter message {
-                    Property: Input;
-                }
-                ElementParameter onDone {
-                    Range: AllProcedures;
-                    Default: 'NoOp1';
-                    Property: Input;
-                }
-            }
-            Procedure requestPerformWebUIDialog2 {
-                Arguments: (title,message,actions,onDone);
-                Body: {
-                    !DialogMessage(FormatString("title = %s, message = %s",title,message));
-                    
                     RequestCounter += 1;
                     Requests += RequestCounter;
                     RequestQueue(RequestCounter, 'title') := title;
