@@ -97,6 +97,7 @@ Model Main_AddressBook {
                 !UnregisterAllOurDataChangeMonitors();
                 InitializeAddressBook();
                 !RegisterDataChangeMonitors();
+                InitializeModelWebUIInteraction();
                 
                 TestForms;
                 
@@ -402,9 +403,11 @@ Model Main_AddressBook {
                 }
             }
             Procedure HandleFormIsDirtyDialogResult {
-                Arguments: (selectedAction);
                 Body: {
+                    selectedAction :=  DialogHandlerArg('HandleFormIsDirtyDialogResult');
+                    
                     Display "HandleFormIsDirtyDialogResult", selectedAction;
+                    DialogMessage("Handling dialog result");
                     
                     if ( selectedAction = "apply-and-continue" ) then
                     	SaveChanges;
@@ -419,9 +422,7 @@ Model Main_AddressBook {
                     	raise error "Unsupported action";
                     endif;
                 }
-                StringParameter selectedAction {
-                    Property: Input;
-                }
+                StringParameter selectedAction;
             }
             Procedure HandleDeletePersonDialogResult {
                 Arguments: (selectedAction);
@@ -495,6 +496,18 @@ Model Main_AddressBook {
             }
         }
         Section Model_WebUI_Interaction {
+            Procedure InitializeModelWebUIInteraction {
+                Body: {
+                    
+                    if(not requestQueueMonitor) then
+                    	monitoredIdentifiers := { 'RequestQueue' };
+                    	webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'HandleCompletedDialogRequests', requestQueueMonitor);
+                    endif;
+                }
+                Set monitoredIdentifiers {
+                    SubsetOf: AllIdentifiers;
+                }
+            }
             Procedure NoOp1 {
                 Arguments: (arg1);
                 Body: {
@@ -539,6 +552,9 @@ Model Main_AddressBook {
                     Property: Input;
                 }
             }
+            StringParameter DialogHandlerArg {
+                IndexDomain: IndexIdentifiers;
+            }
             ElementParameter requestQueueMonitor {
                 Range: webui::RegisteredDataChangeMonitors;
             }
@@ -567,7 +583,12 @@ Model Main_AddressBook {
                     	onDone := StringToElement(AllProcedures, RequestQueue(completedRequest,'onDone'));
                     	resultValue := RequestQueue(completedRequest, 'result');
                     	if (onDone) then
-                    		Apply(onDone, resultValue);
+                    		! if zero arguments
+                    			DialogHandlerArg(onDone) := resultValue;
+                    			Apply(onDone);
+                    		! else if one argument
+                    		!	Apply(onDone, resultValue);
+                    		! endif
                     	endif;
                     	empty RequestQueue(completedRequest,df);
                     	Requests -= completedRequest;
@@ -582,7 +603,7 @@ Model Main_AddressBook {
                 }
                 ElementParameter onDone {
                     Range: AllProcedures;
-                    Default: 'NoOp1';
+                    Default: 'webui::NoOp';
                 }
                 StringParameter resultValue;
             }
@@ -591,12 +612,42 @@ Model Main_AddressBook {
                 Body: {
                     DialogMessage(FormatString("title = %s, message = %s",title,message));
                     
-                    !return;
-                    
-                    if(not requestQueueMonitor) then
-                    	monitoredIdentifiers := { 'RequestQueue' };
-                    	webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'HandleCompletedDialogRequests', requestQueueMonitor);
-                    endif;
+                    RequestCounter += 1;
+                    Requests += RequestCounter;
+                    RequestQueue(RequestCounter, 'title') := title;
+                    RequestQueue(RequestCounter, 'message') := message;
+                    for(a) do
+                    	actionsString += FormatString("%e", a);
+                    endfor;
+                    !RequestQueue(RequestCounter, 'actions') := actionsString;
+                    RequestQueue(RequestCounter, 'actions') := SettoJsonList(actions);
+                    RequestQueue(RequestCounter, 'onDone') := onDone;
+                    RequestQueue(RequestCounter, 'result') := "<empty>";
+                }
+                Set monitoredIdentifiers {
+                    SubsetOf: AllIdentifiers;
+                }
+                StringParameter actionsString;
+                Set actions {
+                    Index: a;
+                    Property: Input;
+                }
+                StringParameter title {
+                    Property: Input;
+                }
+                StringParameter message {
+                    Property: Input;
+                }
+                ElementParameter onDone {
+                    Range: AllProcedures;
+                    Default: 'NoOp1';
+                    Property: Input;
+                }
+            }
+            Procedure requestPerformWebUIDialog2 {
+                Arguments: (title,message,actions,onDone);
+                Body: {
+                    !DialogMessage(FormatString("title = %s, message = %s",title,message));
                     
                     RequestCounter += 1;
                     Requests += RequestCounter;
