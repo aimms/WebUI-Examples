@@ -17,7 +17,7 @@
 	"slot6": "",
 	"slot7": "",
 	"------------------------------------------------------------------<<<<-contents-": "",
-	"contents": "aimms:{\"contents\":[\"webui_runtime2::Form_myform_theSelectedItemThatTheFormIsShowing\",\"webui_runtime2::theSelection_myform\",\"webui_runtime2::IsFormDirty_myform\",\"webui_runtime2::IsFormValid_myform\"]}",
+	"contents": "aimms:{\"contents\":[\"webui_runtime2::IsNewEntry_myform\",\"webui_runtime2::Form_myform_theSelectedItemThatTheFormIsShowing\",\"webui_runtime2::theSelection_myform\",\"webui_runtime2::IsFormDirty_myform\",\"webui_runtime2::IsFormValid_myform\"]}",
 	"------------------------------------------------------------------>>>>-contents-": "",
 	"slot8": "",
 	"------------------------------------------------------------------<<<<-title-": "",

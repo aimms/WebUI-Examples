@@ -10,7 +10,7 @@ Model Main_AddressBook {
         Body: {
             FormFields := { 'PersonName', 'PhoneNumbers' };
             
-            webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm');
+            webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
             
             /*
             ! second form
@@ -34,22 +34,18 @@ Model Main_AddressBook {
             !DialogMessage("MyValidateForm");
             
             if (StringLength(formData('PersonName')) <= 2) then
-                DialogMessage("Validation Error");
                 validationErrors('PersonName') := "validation-error-min-length";
             endif;
             
             if (formData('PersonName') = "form-enter-personname" ) then
-                DialogMessage("Validation Error");
                 validationErrors('PersonName') := "validation-required-field";
             endif;
             
             if (StringLength(formData('PhoneNumbers')) < 4) then
-                DialogMessage("Validation Error");
                 validationErrors('PhoneNumbers') := "validation-error-min-length";
             endif;
             
             if (formData('PhoneNumbers') = "form-enter-personname" ) then
-                DialogMessage("Validation Error");
                 validationErrors('PhoneNumbers') := "validation-required-field";
             endif;
         }
@@ -60,6 +56,28 @@ Model Main_AddressBook {
         StringParameter validationErrors {
             IndexDomain: (webui::ffn);
             Property: Output;
+        }
+    }
+    Procedure CreateNewPerson {
+        Arguments: (formData,newPersonName);
+        Body: {
+            !DialogMessage("MyValidateForm");
+            
+            ! TODO check wheter name already exists in Persons set
+            
+            SetElementAdd(Persons,aPerson,formData('PersonName'));
+            
+            newPersonName := formData('PersonName');
+        }
+        StringParameter formData {
+            IndexDomain: (webui::ffn);
+            Property: Input;
+        }
+        StringParameter newPersonName {
+            Property: Output;
+        }
+        ElementParameter aPerson {
+            Range: Persons;
         }
     }
     Procedure MyValidateShipForm {
