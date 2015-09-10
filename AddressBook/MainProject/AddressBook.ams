@@ -33,20 +33,26 @@ Model Main_AddressBook {
         Body: {
             !DialogMessage("MyValidateForm");
             
-            if (StringLength(formData('PersonName')) <= 2) then
+            if ( not exists[ p | SelectedPersons(p) ] ) then
+            	if ( StringToElement(Persons, formData('PersonName')) ) then
+            		validationErrors('PersonName') := "validation-error-name-already-exists";
+            	endif;
+            endif;
+            
+            if (StringLength(formData('PersonName')) < 2) then
                 validationErrors('PersonName') := "validation-error-min-length";
             endif;
             
-            if (formData('PersonName') = "form-enter-personname" ) then
-                validationErrors('PersonName') := "validation-required-field";
+            if (formData('PersonName') = "form-enter-PersonName" ) then
+                validationErrors('PersonName') := "validation-error-required-field";
             endif;
             
             if (StringLength(formData('PhoneNumbers')) < 4) then
-                validationErrors('PhoneNumbers') := "validation-error-min-length";
+                validationErrors('PhoneNumbers') := "validation-error-not-a-valid-phonenumber";
             endif;
             
-            if (formData('PhoneNumbers') = "form-enter-personname" ) then
-                validationErrors('PhoneNumbers') := "validation-required-field";
+            if (formData('PhoneNumbers') = "form-enter-PhoneNumbers" ) then
+                validationErrors('PhoneNumbers') := "validation-error-required-field";
             endif;
         }
         StringParameter formData {
@@ -62,8 +68,6 @@ Model Main_AddressBook {
         Arguments: (formData,newPersonName);
         Body: {
             !DialogMessage("MyValidateForm");
-            
-            ! TODO check wheter name already exists in Persons set
             
             SetElementAdd(Persons,aPerson,formData('PersonName'));
             
