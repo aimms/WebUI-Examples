@@ -1,108 +1,7 @@
 ## ams_version=1.0
 
 Model Main_AddressBook {
-    Procedure TestRun {
-        Body: {
-            Foo := SelectedPersons('Marcel');
-        }
-    }
-    Procedure TestForms {
-        Body: {
-            FormFields := { 'PersonName', 'PhoneNumbers' };
-            
-            webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
-            
-            /*
-            ! second form
-            
-            FormFields := { 'ShipName' };
-            
-            webui::SetupForm("yourform",'SelectedShips',FormFields,'MyValidateShipForm');
-            */
-        }
-        Set FormFields {
-            SubsetOf: AllIdentifiers;
-            Index: ff;
-        }
-        StringParameter NewPersonValue {
-            IndexDomain: ff;
-        }
-    }
-    Procedure MyValidateForm {
-        Arguments: (formData,validationErrors);
-        Body: {
-            !DialogMessage("MyValidateForm");
-            
-            if ( not exists[ p | SelectedPersons(p) ] ) then
-            	if ( StringToElement(Persons, formData('PersonName')) ) then
-            		validationErrors('PersonName') := "validation-error-name-already-exists";
-            	endif;
-            endif;
-            
-            if (StringLength(formData('PersonName')) < 2) then
-                validationErrors('PersonName') := "validation-error-min-length";
-            endif;
-            
-            if (formData('PersonName') = "form-enter-PersonName" ) then
-                validationErrors('PersonName') := "validation-error-required-field";
-            endif;
-            
-            if (StringLength(formData('PhoneNumbers')) < 4) then
-                validationErrors('PhoneNumbers') := "validation-error-not-a-valid-phonenumber";
-            endif;
-            
-            if (formData('PhoneNumbers') = "form-enter-PhoneNumbers" ) then
-                validationErrors('PhoneNumbers') := "validation-error-required-field";
-            endif;
-        }
-        StringParameter formData {
-            IndexDomain: (webui::ffn);
-            Property: Input;
-        }
-        StringParameter validationErrors {
-            IndexDomain: (webui::ffn);
-            Property: Output;
-        }
-    }
-    Procedure CreateNewPerson {
-        Arguments: (formData,newPersonName);
-        Body: {
-            !DialogMessage("MyValidateForm");
-            
-            SetElementAdd(Persons,aPerson,formData('PersonName'));
-            
-            newPersonName := formData('PersonName');
-        }
-        StringParameter formData {
-            IndexDomain: (webui::ffn);
-            Property: Input;
-        }
-        StringParameter newPersonName {
-            Property: Output;
-        }
-        ElementParameter aPerson {
-            Range: Persons;
-        }
-    }
-    Procedure MyValidateShipForm {
-        Arguments: (formData,validationErrors);
-        Body: {
-            
-            if (StringLength(formData('ShipName')) < 4) then
-                DialogMessage("Validation Error");
-                validationErrors('ShipName') := "validation-error-min-length";
-            endif;
-        }
-        StringParameter formData {
-            IndexDomain: (webui::ffn);
-            Property: Input;
-        }
-        StringParameter validationErrors {
-            IndexDomain: (webui::ffn);
-            Property: Output;
-        }
-    }
-    Section Stuff {
+    Section Do_It_Yourself_Form {
         DeclarationSection Second_Form_Stuff {
             Set Ships {
                 Index: s;
@@ -121,7 +20,7 @@ Model Main_AddressBook {
                 !RegisterDataChangeMonitors();
                 InitializeModelWebUIInteraction();
                 
-                TestForms;
+                SetupPersonForm;
                 
                 initializeAllPublicIdentifiersProcedure := StringToElement(AllIdentifiers, "webui_runtime::InitializeAllPublicIdentifiers");
                 if (initializeAllPublicIdentifiersProcedure) then
@@ -219,7 +118,6 @@ Model Main_AddressBook {
                 }
             }
         }
-        Section Form_Selection;
         Section AddressBook_Operations {
             Procedure UpdatePerson {
                 Arguments: (aPerson,personName,phoneNumber);
@@ -668,5 +566,84 @@ Model Main_AddressBook {
             }
         }
     }
-    Section Librarification;
+    Section Using_WebUI_Form_Support {
+        Procedure SetupPersonForm {
+            Body: {
+                FormFields := { 'PersonName', 'PhoneNumbers' };
+                
+                webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
+                
+                /*
+                ! second form
+                
+                FormFields := { 'ShipName' };
+                
+                webui::SetupForm("yourform",'SelectedShips',FormFields,'MyValidateShipForm');
+                */
+            }
+            Set FormFields {
+                SubsetOf: AllIdentifiers;
+                Index: ff;
+            }
+            StringParameter NewPersonValue {
+                IndexDomain: ff;
+            }
+        }
+        Procedure MyValidateForm {
+            Arguments: (formData,validationErrors);
+            Body: {
+                !DialogMessage("MyValidateForm");
+                
+                if ( not exists[ p | SelectedPersons(p) ] ) then
+                	if ( StringToElement(Persons, formData('PersonName')) ) then
+                		validationErrors('PersonName') := "validation-error-name-already-exists";
+                	endif;
+                endif;
+                
+                if (StringLength(formData('PersonName')) < 2) then
+                    validationErrors('PersonName') := "validation-error-min-length";
+                endif;
+                
+                if (formData('PersonName') = "form-enter-PersonName" ) then
+                    validationErrors('PersonName') := "validation-error-required-field";
+                endif;
+                
+                if (StringLength(formData('PhoneNumbers')) < 4) then
+                    validationErrors('PhoneNumbers') := "validation-error-not-a-valid-phonenumber";
+                endif;
+                
+                if (formData('PhoneNumbers') = "form-enter-PhoneNumbers" ) then
+                    validationErrors('PhoneNumbers') := "validation-error-required-field";
+                endif;
+            }
+            StringParameter formData {
+                IndexDomain: (webui::ffn);
+                Property: Input;
+            }
+            StringParameter validationErrors {
+                IndexDomain: (webui::ffn);
+                Property: Output;
+            }
+        }
+        Procedure CreateNewPerson {
+            Arguments: (formData,newPersonName);
+            Body: {
+                !DialogMessage("MyValidateForm");
+                
+                SetElementAdd(Persons,aPerson,formData('PersonName'));
+                
+                newPersonName := formData('PersonName');
+            }
+            StringParameter formData {
+                IndexDomain: (webui::ffn);
+                Property: Input;
+            }
+            StringParameter newPersonName {
+                Property: Output;
+            }
+            ElementParameter aPerson {
+                Range: Persons;
+            }
+        }
+    }
 }
