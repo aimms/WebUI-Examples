@@ -2,17 +2,6 @@
 
 Model Main_AddressBook {
     Section Do_It_Yourself_Form {
-        DeclarationSection Second_Form_Stuff {
-            Set Ships {
-                Index: s;
-            }
-            Parameter SelectedShips {
-                IndexDomain: s;
-            }
-            StringParameter ShipName {
-                IndexDomain: s;
-            }
-        }
         Procedure Initialize {
             Body: {
                 !UnregisterAllOurDataChangeMonitors();
@@ -34,11 +23,6 @@ Model Main_AddressBook {
             ElementParameter initializeAllPublicIdentifiersProcedure {
                 Range: AllProcedures;
                 Default: 'webui::NoOp';
-            }
-        }
-        DeclarationSection TestDeclaration {
-            ElementParameter TestEP {
-                Range: AllIdentifiers;
             }
         }
         Parameter Foo;
@@ -63,6 +47,9 @@ Model Main_AddressBook {
         }
         StringParameter PhoneNumbers_flags {
             Definition: "readonly";
+        }
+        Parameter PersonAge {
+            IndexDomain: p;
         }
         DeclarationSection Form_Data {
             ElementParameter Form_Person {
@@ -165,6 +152,7 @@ Model Main_AddressBook {
                     PersonName(p) := FormatString("%e",p);
                     SelectedPersons(p) := data { Raymond : 0,  Marcel : 0 };
                     PhoneNumbers(p) := data { Raymond : "+31620340347",  Marcel : "+31624273820" };
+                    PersonAge(p) := 1;
                     
                     empty Form_Data;
                     IsDirty := 0;
@@ -569,17 +557,9 @@ Model Main_AddressBook {
     Section Using_WebUI_Form_Support {
         Procedure SetupPersonForm {
             Body: {
-                FormFields := { 'PersonName', 'PhoneNumbers' };
+                FormFields := { 'PersonName', 'PhoneNumbers', 'PersonAge' };
                 
                 webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
-                
-                /*
-                ! second form
-                
-                FormFields := { 'ShipName' };
-                
-                webui::SetupForm("yourform",'SelectedShips',FormFields,'MyValidateShipForm');
-                */
             }
             Set FormFields {
                 SubsetOf: AllIdentifiers;
@@ -612,9 +592,23 @@ Model Main_AddressBook {
                     validationErrors('PhoneNumbers') := "validation-error-not-a-valid-phonenumber";
                 endif;
                 
+                block
+                	Age := Val(formData('PersonAge'));
+                	if ( ( Age < 0 ) or ( Age > 150 ) ) then
+                		validationErrors('PersonAge') := "validation-error-not-a-valid-age";
+                	endif;
+                onerror err do
+                	validationErrors('PersonAge') := "validation-error-not-a-valid-age";
+                endblock;
+                
+                
                 if (formData('PhoneNumbers') = "form-enter-PhoneNumbers" ) then
                     validationErrors('PhoneNumbers') := "validation-error-required-field";
                 endif;
+            }
+            Parameter Age;
+            ElementParameter err {
+                Range: errh::PendingErrors;
             }
             StringParameter formData {
                 IndexDomain: (webui::ffn);
