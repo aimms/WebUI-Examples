@@ -7,7 +7,6 @@ Model Main_AddressBook {
                 !UnregisterAllOurDataChangeMonitors();
                 InitializeAddressBook();
                 !RegisterDataChangeMonitors();
-                InitializeModelWebUIInteraction();
                 
                 SetupPersonForm;
                 
@@ -16,9 +15,6 @@ Model Main_AddressBook {
                 	me::Compile(initializeAllPublicIdentifiersProcedure);
                 	Apply(initializeAllPublicIdentifiersProcedure);
                 endif ;
-                
-                empty Requests;
-                empty RequestQueue;
             }
             ElementParameter initializeAllPublicIdentifiersProcedure {
                 Range: AllProcedures;
@@ -166,7 +162,7 @@ Model Main_AddressBook {
                     	if (not isValid) then
                     		dialogActions -= 'apply-and-continue';
                     	endif;
-                    	requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResultFromNewPerson');
+                    	webui::requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResultFromNewPerson');
                     else
                     	IsNewPerson := 1;
                     	SelectedPersons(p) := 0;
@@ -182,7 +178,7 @@ Model Main_AddressBook {
                 Body: {
                     if (theSelectedPerson) then
                     	dialogActions := {'yes','no'};
-                    	requestPerformWebUIDialog("delete-confirmation-title", "delete-confirmation-message", dialogActions, 'HandleDeletePersonDialogResult');
+                    	webui::requestPerformWebUIDialog("delete-confirmation-title", "delete-confirmation-message", dialogActions, 'HandleDeletePersonDialogResult');
                     endif;
                 }
                 Set dialogActions {
@@ -201,7 +197,7 @@ Model Main_AddressBook {
                 Body: {
                     if (not IsValid) then
                     	dialogActions := {'ok'};
-                    	requestPerformWebUIDialog("person-form-not-valid-title", "person-form-not-valid-message", dialogActions, '');
+                    	webui::requestPerformWebUIDialog("person-form-not-valid-title", "person-form-not-valid-message", dialogActions, '');
                     else
                     
                     	if ( not Form_Person ) then
@@ -296,7 +292,7 @@ Model Main_AddressBook {
                     		if (not isValid) then
                     			dialogActions -= 'apply-and-continue';
                     		endif;
-                    		requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResult');
+                    		webui::requestPerformWebUIDialog("person-form-dirty-title", "person-form-dirty-message", dialogActions, 'HandleFormIsDirtyDialogResult');
                     	endif;!elseif ( not IsNewPerson ) then
                     else
                     	IsNewPerson := 0;
@@ -403,146 +399,6 @@ Model Main_AddressBook {
                     !webui::DataChangeMonitorReset(formMonitor); @TODO
                     DataChangeMonitorReset(FormatString("%e", formMonitor), formIdentifiers);
                     IsDirty := 0;
-                }
-            }
-        }
-        Section Model_WebUI_Interaction {
-            Procedure InitializeModelWebUIInteraction {
-                Body: {
-                    
-                    if(not requestQueueMonitor) then
-                    	monitoredIdentifiers := { 'RequestQueue' };
-                    	webui::DataChangeMonitorRegisterCallback(monitoredIdentifiers, 'HandleCompletedDialogRequests', requestQueueMonitor);
-                    endif;
-                }
-                Set monitoredIdentifiers {
-                    SubsetOf: AllIdentifiers;
-                }
-            }
-            Procedure NoOp1 {
-                Arguments: (arg1);
-                Body: {
-                    !Does nothing
-                }
-                StringParameter arg1 {
-                    Property: Input;
-                }
-            }
-            Function toJsonString {
-                Arguments: (str);
-                Range: string;
-                Body: {
-                    str := FormatString("\"%s\"", str);
-                    toJsonString := str;
-                }
-                StringParameter str {
-                    Property: Input;
-                }
-            }
-            Function SettoJsonList {
-                Arguments: (aSet);
-                Range: string;
-                Body: {
-                    tmpString += "[";
-                    
-                    for(s) do
-                    	tmpString += toJsonString(FormatString("%e", s));
-                    Display tmpString;
-                    	if (s <> Last(aSet)) then
-                    		tmpString += ",";
-                    	endif;
-                    endfor;
-                    
-                    tmpString += "]";
-                    
-                    SettoJsonList := tmpString;
-                }
-                StringParameter tmpString;
-                Set aSet {
-                    Index: s;
-                    Property: Input;
-                }
-            }
-            ElementParameter requestQueueMonitor {
-                Range: webui::RegisteredDataChangeMonitors;
-            }
-            Set Requests {
-                SubsetOf: Integers;
-                Index: rq;
-            }
-            Parameter RequestCounter;
-            StringParameter RequestQueue {
-                IndexDomain: (rq,df);
-            }
-            StringParameter RequestPerformDialogInfo {
-                IndexDomain: df;
-            }
-            Set DialogFields {
-                Index: df;
-                InitialData: data { title, message, actions, onDone, result };
-            }
-            Procedure HandleCompletedDialogRequests {
-                Body: {
-                    CompletedRequests := { rq | RequestQueue(rq, 'result') <> "<empty>" };
-                    
-                    while Card(CompletedRequests) > 0 do
-                    	completedRequest := First(CompletedRequests);
-                    	Display  RequestQueue(completedRequest,'onDone');
-                    	onDone := StringToElement(AllProcedures, RequestQueue(completedRequest,'onDone'));
-                    	resultValue := RequestQueue(completedRequest, 'result');
-                    	if (onDone) then
-                    		Apply(onDone, resultValue);
-                    	endif;
-                    	empty RequestQueue(completedRequest,df);
-                    	Requests -= completedRequest;
-                    endwhile;
-                }
-                ElementParameter completedRequest {
-                    Range: Requests;
-                }
-                Set CompletedRequests {
-                    SubsetOf: Requests;
-                    Index: crq;
-                }
-                ElementParameter onDone {
-                    Range: AllProcedures;
-                    Default: 'NoOp1';
-                }
-                StringParameter resultValue;
-            }
-            Procedure requestPerformWebUIDialog {
-                Arguments: (title,message,actions,onDone);
-                Body: {
-                    RequestCounter += 1;
-                    Requests += RequestCounter;
-                    RequestQueue(RequestCounter, 'title') := title;
-                    RequestQueue(RequestCounter, 'message') := message;
-                    for(a) do
-                    	actionsString += FormatString("%e", a);
-                    endfor;
-                    !RequestQueue(RequestCounter, 'actions') := actionsString;
-                    RequestQueue(RequestCounter, 'actions') := SettoJsonList(actions);
-                    RequestQueue(RequestCounter, 'onDone') := onDone;
-                    RequestQueue(RequestCounter, 'result') := "<empty>";
-                }
-                Set monitoredIdentifiers {
-                    SubsetOf: AllIdentifiers;
-                }
-                StringParameter actionsString;
-                Set actions {
-                    Index: a;
-                    Property: Input;
-                }
-                StringParameter title {
-                    Property: Input;
-                }
-                StringParameter message {
-                    Property: Input;
-                }
-                ElementParameter onDone {
-                    Range: AllProcedures;
-                    Default: 'NoOp1';
-                    Property: Input;
                 }
             }
         }
