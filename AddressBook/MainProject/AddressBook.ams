@@ -599,6 +599,7 @@ Model Main_AddressBook {
                 	endif;
                 onerror err do
                 	validationErrors('PersonAge') := "validation-error-not-a-valid-age";
+                	errh::MarkAsHandled(err);
                 endblock;
                 
                 
