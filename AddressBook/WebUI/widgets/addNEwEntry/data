@@ -4,7 +4,7 @@
 	"slot2": "",
 	"slot3": "",
 	"------------------------------------------------------------------<<<<-procedure-": "",
-	"procedure": "aimms:{\"run\":\"webui_runtime2::NewEntry_myform\"}",
+	"procedure": "aimms:{\"run\":\"webui_runtime::NewEntry_myform\"}",
 	"------------------------------------------------------------------>>>>-procedure-": "",
 	"slot4": "",
 	"slot5": "",

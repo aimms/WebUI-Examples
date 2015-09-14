@@ -4,7 +4,7 @@
 	"slot2": "",
 	"slot3": "",
 	"------------------------------------------------------------------<<<<-contents-": "",
-	"contents": "aimms:{\"contents\":[\"webui_runtime2::Form_myform_validationErrors\"]}",
+	"contents": "aimms:{\"contents\":[\"webui_runtime::Form_myform_validationErrors\"]}",
 	"------------------------------------------------------------------>>>>-contents-": "",
 	"slot4": "",
 	"------------------------------------------------------------------<<<<-awf.persistence.version-": "",
