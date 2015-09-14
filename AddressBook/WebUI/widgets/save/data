@@ -21,7 +21,7 @@
 	"slot7": "",
 	"slot8": "",
 	"------------------------------------------------------------------<<<<-procedure-": "",
-	"procedure": "aimms:{\"run\":\"webui_runtime2::SaveForm_myform\"}",
+	"procedure": "aimms:{\"run\":\"webui_runtime::SaveForm_myform\"}",
 	"------------------------------------------------------------------>>>>-procedure-": "",
 	"slot9": ""
 }

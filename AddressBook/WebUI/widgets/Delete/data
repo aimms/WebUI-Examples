@@ -13,7 +13,7 @@
 	"title": "literal:\"Delete\"",
 	"------------------------------------------------------------------>>>>-title-": "",
 	"------------------------------------------------------------------<<<<-procedure-": "",
-	"procedure": "aimms:{\"run\":\"webui_runtime2::DeleteEntry_myform\"}",
+	"procedure": "aimms:{\"run\":\"webui_runtime::DeleteEntry_myform\"}",
 	"------------------------------------------------------------------>>>>-procedure-": "",
 	"slot4": "",
 	"slot5": "",

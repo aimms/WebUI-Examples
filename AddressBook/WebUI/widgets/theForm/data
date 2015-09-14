@@ -11,7 +11,7 @@
 	"slot6": "",
 	"slot7": "",
 	"------------------------------------------------------------------<<<<-contents-": "",
-	"contents": "aimms:{\"contents\":[\"webui_runtime2::Form_myform_PersonName\",\"webui_runtime2::Form_myform_PhoneNumbers\",\"webui_runtime2::Form_myform_PersonAge\"]}",
+	"contents": "aimms:{\"contents\":[\"webui_runtime::Form_myform_PersonName\",\"webui_runtime::Form_myform_PhoneNumbers\",\"webui_runtime::Form_myform_PersonAge\"]}",
 	"------------------------------------------------------------------>>>>-contents-": "",
 	"------------------------------------------------------------------<<<<-widget.uri-": "",
 	"widget.uri": "theForm",

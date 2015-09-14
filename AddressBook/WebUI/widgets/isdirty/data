@@ -2,7 +2,7 @@
 	"slot0": "",
 	"slot1": "",
 	"------------------------------------------------------------------<<<<-contents-": "",
-	"contents": "aimms:{\"contents\":[\"webui_runtime2::IsFormDirty_myform\"]}",
+	"contents": "aimms:{\"contents\":[\"webui_runtime::IsFormDirty_myform\"]}",
 	"------------------------------------------------------------------>>>>-contents-": "",
 	"slot2": "",
 	"slot3": "",

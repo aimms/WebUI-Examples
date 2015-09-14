@@ -12,7 +12,7 @@
 	"slot4": "",
 	"slot5": "",
 	"------------------------------------------------------------------<<<<-contents-": "",
-	"contents": "aimms:{\"contents\":[\"webui_runtime2::Form_myform_PersonName_annotations\",\"webui_runtime2::Form_myform_PhoneNumbers_annotations\",\"webui_runtime2::Form_myform_PersonAge_annotations\"]}",
+	"contents": "aimms:{\"contents\":[\"webui_runtime::Form_myform_PersonName_annotations\",\"webui_runtime::Form_myform_PhoneNumbers_annotations\",\"webui_runtime::Form_myform_PersonAge_annotations\"]}",
 	"------------------------------------------------------------------>>>>-contents-": "",
 	"slot6": "",
 	"------------------------------------------------------------------<<<<-aimms.widget.type-": "",
