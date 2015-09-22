@@ -57,35 +57,35 @@ Model Main_AddressBook {
             
             if ( not exists[ p | SelectedPersons(p) ] ) then
             	if ( StringToElement(Persons, formData('PersonName')) ) then
-            		validationErrors('PersonName') := "validation-error-name-already-exists";
+            		validationErrors('PersonName') := webui::CreateValidationError("validation-error-name-already-exists");
             	endif;
             endif;
             
             if (StringLength(formData('PersonName')) < 2) then
-                validationErrors('PersonName') := "validation-error-min-length";
+                validationErrors('PersonName') := webui::CreateValidationError("validation-error-min-length");
             endif;
             
             if (formData('PersonName') = "form-enter-PersonName" ) then
-                validationErrors('PersonName') := "validation-error-required-field";
+                validationErrors('PersonName') := webui::CreateValidationError("validation-error-required-field");
             endif;
             
             if (StringLength(formData('PhoneNumber')) < 4) then
-                validationErrors('PhoneNumber') := "validation-error-not-a-valid-phonenumber";
+                validationErrors('PhoneNumber') := webui::CreateValidationError("validation-error-not-a-valid-phonenumber");
             endif;
             
             block
             	Age := Val(formData('PersonAge'));
             	if ( ( Age < 0 ) or ( Age > 150 ) ) then
-            		validationErrors('PersonAge') := "validation-error-not-a-valid-age";
+            		validationErrors('PersonAge') := webui::CreateValidationError("validation-error-not-a-valid-age");
             	endif;
             onerror err do
-            	validationErrors('PersonAge') := "validation-error-not-a-valid-age";
+            	validationErrors('PersonAge') := webui::CreateValidationError("validation-error-not-a-valid-age");
             	errh::MarkAsHandled(err);
             endblock;
             
             
             if (formData('PhoneNumber') = "form-enter-PhoneNumber" ) then
-                validationErrors('PhoneNumber') := "validation-error-required-field";
+                validationErrors('PhoneNumber') := webui::CreateValidationError("validation-error-required-field");
             endif;
         }
         Parameter Age;
