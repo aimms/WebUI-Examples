@@ -3,5 +3,5 @@
 	<MainProject Path="MainProject" />
 	<Library System="true" Path="AimmsPro" />
 	<Library System="true" Path="AimmsProUI" />
-	<Library System="true" Path="AimmsWebUI" />
+	<Library Path="..\..\aimms-webui-library\src4\AimmsWebUI" />
 </References>
