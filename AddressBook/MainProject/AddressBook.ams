@@ -17,39 +17,6 @@ Model Main_AddressBook {
     Parameter PersonAge {
         IndexDomain: p;
     }
-    Procedure Initialize {
-        Body: {
-            !UnregisterAllOurDataChangeMonitors();
-            !InitializeAddressBook();
-            !RegisterDataChangeMonitors();
-            
-            SetupPersonForm;
-            
-            initializeAllPublicIdentifiersProcedure := StringToElement(AllIdentifiers, "webui_runtime::InitializeAllPublicIdentifiers");
-            if (initializeAllPublicIdentifiersProcedure) then
-            	me::Compile(initializeAllPublicIdentifiersProcedure);
-            	Apply(initializeAllPublicIdentifiersProcedure);
-            endif ;
-        }
-        ElementParameter initializeAllPublicIdentifiersProcedure {
-            Range: AllProcedures;
-            Default: 'webui::NoOp';
-        }
-    }
-    Procedure SetupPersonForm {
-        Body: {
-            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge' };
-            
-            webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
-        }
-        Set FormFields {
-            SubsetOf: AllIdentifiers;
-            Index: ff;
-        }
-        StringParameter NewPersonValue {
-            IndexDomain: ff;
-        }
-    }
     Procedure MyValidateForm {
         Arguments: (formData,validationErrors);
         Body: {
@@ -119,6 +86,20 @@ Model Main_AddressBook {
         }
         ElementParameter aPerson {
             Range: Persons;
+        }
+    }
+    Procedure SetupPersonForm {
+        Body: {
+            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge' };
+            
+            webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
+        }
+        Set FormFields {
+            SubsetOf: AllIdentifiers;
+            Index: ff;
+        }
+        StringParameter NewPersonValue {
+            IndexDomain: ff;
         }
     }
 }
