@@ -1,26 +1,12 @@
 ﻿* AIMMS
 * AOA
-* BARON 15
-* BARON 7.5.3
 * CBC 2.8.0
 * CBC 2.9
-* CONOPT 3.14G
-* CONOPT 3.14V
+* CPLEX 12.5.1
 * CPLEX 12.6
 * CPLEX 12.6.1
 * CPLEX 12.6.2
-* CPOptimizer 12.6
-* GUROBI 5.6
-* GUROBI 6.0
 * IPOPT 3.11
-* KNITRO 6.0
-* KNITRO 9.0
-* KNITRO 9.1
-* MINOS
-* PATH 4.6
-* SNOPT 6.1
-* SNOPT 7.2
-* XA 15
 * NETSOL
 * Environment
-Startup_Procedure "Initialize"
+Startup_Procedure "SetupPersonForm"
