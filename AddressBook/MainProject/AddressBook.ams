@@ -1,0 +1,105 @@
+## ams_version=1.0
+
+Model Main_AddressBook {
+    Set Persons {
+        Index: p;
+    }
+    Parameter SelectedPersons {
+        IndexDomain: p;
+        Default: -1;
+    }
+    StringParameter PersonName {
+        IndexDomain: p;
+    }
+    StringParameter PhoneNumber {
+        IndexDomain: p;
+    }
+    Parameter PersonAge {
+        IndexDomain: p;
+    }
+    Procedure MyValidateForm {
+        Arguments: (formData,validationErrors);
+        Body: {
+            !DialogMessage("MyValidateForm");
+            
+            if ( not exists[ p | SelectedPersons(p) ] ) then
+            	if ( StringToElement(Persons, formData('PersonName')) ) then
+            		validationErrors('PersonName') := webui::CreateValidationError("validation-error-name-already-exists");
+            	endif;
+            endif;
+            
+            if (StringLength(formData('PersonName')) < 2) then
+                validationErrors('PersonName') := webui::CreateValidationError("validation-error-min-length");
+            endif;
+            
+            if (formData('PersonName') = "form-enter-PersonName" ) then
+                validationErrors('PersonName') := webui::CreateValidationError("validation-error-required-field");
+            endif;
+            
+            if (StringLength(formData('PhoneNumber')) < 4) then
+                validationErrors('PhoneNumber') := webui::CreateValidationError("validation-error-not-a-valid-phonenumber");
+            endif;
+            
+            block
+            	Age := Val(formData('PersonAge'));
+            	if ( ( Age < 0 ) or ( Age > 150 ) ) then
+            		validationErrors('PersonAge') := webui::CreateValidationError("validation-error-not-a-valid-age");
+            	endif;
+            onerror err do
+            	validationErrors('PersonAge') := webui::CreateValidationError("validation-error-not-a-valid-age");
+            	errh::MarkAsHandled(err);
+            endblock;
+            
+            
+            if (formData('PhoneNumber') = "form-enter-PhoneNumber" ) then
+                validationErrors('PhoneNumber') := webui::CreateValidationError("validation-error-required-field");
+            endif;
+        }
+        Parameter Age;
+        ElementParameter err {
+            Range: errh::PendingErrors;
+        }
+        StringParameter formData {
+            IndexDomain: (webui::ffn);
+            Property: Input;
+        }
+        StringParameter validationErrors {
+            IndexDomain: (webui::ffn);
+            Property: Output;
+        }
+    }
+    Procedure CreateNewPerson {
+        Arguments: (formData,newPersonName);
+        Body: {
+            !DialogMessage("MyValidateForm");
+            
+            SetElementAdd(Persons,aPerson,formData('PersonName'));
+            
+            newPersonName := formData('PersonName');
+        }
+        StringParameter formData {
+            IndexDomain: (webui::ffn);
+            Property: Input;
+        }
+        StringParameter newPersonName {
+            Property: Output;
+        }
+        ElementParameter aPerson {
+            Range: Persons;
+        }
+    }
+    Procedure SetupPersonForm {
+        Body: {
+            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge' };
+            
+            webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
+        }
+        Set FormFields {
+            SubsetOf: AllIdentifiers;
+            Index: ff;
+        }
+        StringParameter NewPersonValue {
+            IndexDomain: ff;
+        }
+    }
+}
