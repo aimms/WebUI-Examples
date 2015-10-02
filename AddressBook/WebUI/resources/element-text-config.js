@@ -1,0 +1,3 @@
+ElementTextMap = {
+	"p": "PersonName",
+};
