@@ -29,7 +29,9 @@ Model Main_AddressBook {
             endif;
             
             if (StringLength(formData('PersonName')) < 2) then
-                validationErrors('PersonName') := webui::CreateValidationError("validation-error-min-length");
+                arg0 := formData('PersonName');
+                arg1 := "2";
+                validationErrors('PersonName') := webui::CreateValidationError("validation-error-min-length", arg0, arg1);
             endif;
             
             if (formData('PersonName') = "form-enter-PersonName" ) then
@@ -67,6 +69,8 @@ Model Main_AddressBook {
             IndexDomain: (webui::ffn);
             Property: Output;
         }
+        StringParameter arg0;
+        StringParameter arg1;
     }
     Procedure CreateNewPerson {
         Arguments: (formData,newPersonName);
