@@ -17,6 +17,14 @@ Model Main_AddressBook {
     Parameter PersonAge {
         IndexDomain: p;
     }
+    Set GenderTypes {
+        Definition: data { gender-type-male, gender-type-female };
+    }
+    ElementParameter Gender {
+        IndexDomain: p;
+        Range: GenderTypes;
+        Default: '';
+    }
     Procedure MyValidateForm {
         Arguments: (formData,validationErrors);
         Body: {
@@ -94,7 +102,7 @@ Model Main_AddressBook {
     }
     Procedure SetupPersonForm {
         Body: {
-            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge' };
+            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge', 'Gender' };
             
             webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
         }

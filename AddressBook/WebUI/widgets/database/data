@@ -8,7 +8,7 @@
 	"------------------------------------------------------------------>>>>-aimms.widget.type-": "",
 	"slot1": "",
 	"------------------------------------------------------------------<<<<-contents-": "",
-	"contents": "aimms:{\"contents\":[\"PersonName\",\"PhoneNumber\",\"PersonAge\"]}",
+	"contents": "aimms:{\"contents\":[\"Gender\",\"PersonName\",\"PhoneNumber\",\"PersonAge\"]}",
 	"------------------------------------------------------------------>>>>-contents-": "",
 	"slot2": "",
 	"slot3": "",
