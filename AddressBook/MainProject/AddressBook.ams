@@ -11,11 +11,23 @@ Model Main_AddressBook {
     StringParameter PersonName {
         IndexDomain: p;
     }
+    StringParameter PersonName_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
+    }
     StringParameter PhoneNumber {
         IndexDomain: p;
     }
+    StringParameter PhoneNumber_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
+    }
     Parameter PersonAge {
         IndexDomain: p;
+    }
+    StringParameter PersonAge_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
     }
     Set GenderTypes {
         Definition: data { gender-type-male, gender-type-female };
@@ -24,6 +36,10 @@ Model Main_AddressBook {
         IndexDomain: p;
         Range: GenderTypes;
         Default: '';
+    }
+    StringParameter Gender_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
     }
     Procedure MyValidateForm {
         Arguments: (formData,validationErrors);
