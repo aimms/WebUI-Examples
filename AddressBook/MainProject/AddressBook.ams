@@ -41,6 +41,14 @@ Model Main_AddressBook {
         Definition: "readOnly";
         Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
     }
+    Parameter IsPersonFavorite {
+        IndexDomain: p;
+        Range: binary;
+    }
+    StringParameter IsPersonFavorite_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
+    }
     Procedure MyValidateForm {
         Arguments: (formData,validationErrors);
         Body: {
@@ -118,7 +126,7 @@ Model Main_AddressBook {
     }
     Procedure SetupPersonForm {
         Body: {
-            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge', 'Gender' };
+            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge', 'Gender', 'IsPersonFavorite' };
             
             webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
         }
