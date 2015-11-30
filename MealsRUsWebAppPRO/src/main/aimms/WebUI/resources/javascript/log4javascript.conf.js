@@ -58,4 +58,6 @@ setupLogger("awf.options", "ERROR");
 //setupLogger("awf.typeswitching", "TRACE");
 //setupLogger("awf.changestack", "TRACE");
 
+setupLogger("addons.data_management", "TRACE");
+
 })(jQuery);
