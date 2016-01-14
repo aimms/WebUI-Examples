@@ -505,6 +505,25 @@ Model Main_Ready_To_Eat_Meal_Production {
     }
     Section WebUI_Teaser_Declarations {
         DeclarationSection Declarations {
+            Set DemoUsers {
+                InitialData: data { Manager, Analyst };
+            }
+            ElementParameter CurrentDemoUser {
+                Range: DemoUsers;
+                InitialData: {
+                    'Analyst' ;
+                }
+            }
+            Parameter NotVisibleByManager {
+                Definition: {
+                    CurrentDemoUser <> 'Manager';
+                }
+            }
+            StringParameter NOOT {
+                InitialData: {
+                    "Yes it Works!" ;
+                }
+            }
             Set Scenarios {
                 Index: s;
                 Parameter: BaseScenario, AScenario;
@@ -545,7 +564,7 @@ Model Main_Ready_To_Eat_Meal_Production {
             Set AllPublicIdentifiers {
                 SubsetOf: AllIdentifiers;
                 Index: api;
-                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode, MealProductionLineDuration, MealProductionLineStart };
+                Definition: data { DemoUsers, CurrentDemoUser, NotVisibleByManager, NOOT, IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode, MealProductionLineDuration, MealProductionLineStart };
             }
             Set AllPublicProcedures {
                 SubsetOf: AllIdentifiers;

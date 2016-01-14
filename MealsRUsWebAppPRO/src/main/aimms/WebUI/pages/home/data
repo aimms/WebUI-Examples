@@ -1,1 +1,24 @@
-<section id="main" data-aimms.widget.type="literal:&quot;page&quot;" data-widget.uri="home" tabindex="0" style="position: relative; height: 689.1180725097656px; padding-right: 0px; padding-left: 160px;" data-widgets="literal:[{&quot;uri&quot;:&quot;Scenarios&quot;,&quot;layoutInfo&quot;:{&quot;width&quot;:&quot;1&quot;,&quot;height&quot;:&quot;2&quot;}},{&quot;uri&quot;:&quot;Ingredient Prices&quot;,&quot;layoutInfo&quot;:{&quot;width&quot;:&quot;3&quot;,&quot;height&quot;:&quot;2&quot;}},{&quot;uri&quot;:&quot;Ingredients&quot;,&quot;layoutInfo&quot;:{&quot;width&quot;:&quot;1&quot;,&quot;height&quot;:&quot;2&quot;}},{&quot;uri&quot;:&quot;Profit&quot;,&quot;layoutInfo&quot;:{&quot;width&quot;:&quot;3&quot;,&quot;height&quot;:&quot;2&quot;}},{&quot;uri&quot;:&quot;Maximum Profit&quot;,&quot;layoutInfo&quot;:{&quot;width&quot;:&quot;1&quot;,&quot;height&quot;:&quot;2&quot;}},{&quot;uri&quot;:&quot;Optimize&quot;,&quot;layoutInfo&quot;:{&quot;width&quot;:&quot;1&quot;,&quot;height&quot;:&quot;1&quot;}}]" data-defaultheight="430px"></section>
+{
+	"slot0": "",
+	"slot1": "",
+	"------------------------------------------------------------------<<<<-aimms.widget.type-": "",
+	"aimms.widget.type": "literal:\"page\"",
+	"------------------------------------------------------------------>>>>-aimms.widget.type-": "",
+	"slot2": "",
+	"slot3": "",
+	"slot4": "",
+	"slot5": "",
+	"------------------------------------------------------------------<<<<-widget.uri-": "",
+	"widget.uri": "home",
+	"------------------------------------------------------------------>>>>-widget.uri-": "",
+	"slot6": "",
+	"slot7": "",
+	"------------------------------------------------------------------<<<<-awf.persistence.version-": "",
+	"awf.persistence.version": "1.1",
+	"------------------------------------------------------------------>>>>-awf.persistence.version-": "",
+	"slot8": "",
+	"------------------------------------------------------------------<<<<-widgets-": "",
+	"widgets": "literal:[{\"uri\":\"Scenarios\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Ingredient Prices\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"2\"}},{\"uri\":\"Ingredients\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Profit\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"2\"}},{\"uri\":\"Maximum Profit\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Optimize\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"1\"}},{\"uri\":\"CurrentUser\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"1\"}}]",
+	"------------------------------------------------------------------>>>>-widgets-": "",
+	"slot9": ""
+}
