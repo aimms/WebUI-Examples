@@ -18,7 +18,7 @@
 	"------------------------------------------------------------------>>>>-awf.persistence.version-": "",
 	"slot8": "",
 	"------------------------------------------------------------------<<<<-widgets-": "",
-	"widgets": "literal:[{\"uri\":\"Scenarios\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Ingredient Prices\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"2\"}},{\"uri\":\"Ingredients\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Profit\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"2\"}},{\"uri\":\"Maximum Profit\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Optimize\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"1\"}},{\"uri\":\"CurrentUser\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"1\"}}]",
+	"widgets": "literal:[{\"uri\":\"Scenarios\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Ingredient Prices\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"2\"}},{\"uri\":\"Ingredients\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Maximum Profit\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"2\"}},{\"uri\":\"Profit\",\"layoutInfo\":{\"width\":\"3\",\"height\":\"2\"}},{\"uri\":\"Optimize\",\"layoutInfo\":{\"width\":\"1\",\"height\":\"1\"}}]",
 	"------------------------------------------------------------------>>>>-widgets-": "",
 	"slot9": ""
 }
