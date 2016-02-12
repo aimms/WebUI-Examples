@@ -11,11 +11,43 @@ Model Main_AddressBook {
     StringParameter PersonName {
         IndexDomain: p;
     }
+    StringParameter PersonName_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
+    }
     StringParameter PhoneNumber {
         IndexDomain: p;
     }
+    StringParameter PhoneNumber_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
+    }
     Parameter PersonAge {
         IndexDomain: p;
+    }
+    StringParameter PersonAge_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
+    }
+    Set GenderTypes {
+        Definition: data { gender-type-male, gender-type-female };
+    }
+    ElementParameter Gender {
+        IndexDomain: p;
+        Range: GenderTypes;
+        Default: '';
+    }
+    StringParameter Gender_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
+    }
+    Parameter IsPersonFavorite {
+        IndexDomain: p;
+        Range: binary;
+    }
+    StringParameter IsPersonFavorite_flags {
+        Definition: "readOnly";
+        Comment: "Make the identifier readOnly from within the WebUI, so end users are forced to update using the form.";
     }
     Procedure MyValidateForm {
         Arguments: (formData,validationErrors);
@@ -29,7 +61,9 @@ Model Main_AddressBook {
             endif;
             
             if (StringLength(formData('PersonName')) < 2) then
-                validationErrors('PersonName') := webui::CreateValidationError("validation-error-min-length");
+                arg0 := formData('PersonName');
+                arg1 := "2";
+                validationErrors('PersonName') := webui::CreateValidationError("validation-error-min-length", arg0, arg1);
             endif;
             
             if (formData('PersonName') = "form-enter-PersonName" ) then
@@ -67,6 +101,8 @@ Model Main_AddressBook {
             IndexDomain: (webui::ffn);
             Property: Output;
         }
+        StringParameter arg0;
+        StringParameter arg1;
     }
     Procedure CreateNewPerson {
         Arguments: (formData,newPersonName);
@@ -90,7 +126,7 @@ Model Main_AddressBook {
     }
     Procedure SetupPersonForm {
         Body: {
-            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge' };
+            FormFields := { 'PersonName', 'PhoneNumber', 'PersonAge', 'Gender', 'IsPersonFavorite' };
             
             webui::SetupForm("myform",'SelectedPersons',FormFields,'MyValidateForm','CreateNewPerson');
         }
