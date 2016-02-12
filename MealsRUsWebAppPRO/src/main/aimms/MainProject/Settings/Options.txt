@@ -10,16 +10,25 @@ external_dll_AIMMS_reference Unicode
 external_message_filter 4
 external_string_character_encoding UTF-16LE
 minimum_column_fill_percentage_tabular_display 101
+postsolve_continuous_variables round_to_nearest_bound_and_resolve_LP
 rounding_compatibility Aimms_3_7
 seed 1234567
 warning_not_initialized off
 * AOA
-* BARON 14
-* CONOPT 3.14G
+* BARON 15
+* CBC 2.9
 * CONOPT 3.14V
-* CPLEX 12.6
-* GUROBI 5.6
+* CPLEX 12.6.2
+* CPLEX 12.6.3
+* CPOptimizer 12.6
+* CPOptimizer 12.6.3
+* GUROBI 6.0
+* GUROBI 6.5
 * IPOPT 3.11
+* KNITRO 9.1
+* Knitro 10.0
+* MINOS
+* SNOPT 7.2
 * XA 15
 * NETSOL
 * Environment
