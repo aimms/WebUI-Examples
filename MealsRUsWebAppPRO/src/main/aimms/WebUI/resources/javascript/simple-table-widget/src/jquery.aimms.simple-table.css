@@ -1,5 +1,9 @@
 /* File with widget-specific (behavioral) css */
 
+.tag-simple-table .awf-dock.center {
+	overflow: hidden;
+}
+
 .simpleTableWrap {
 	width:100%;
 	height:100%;
