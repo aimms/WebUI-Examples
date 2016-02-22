@@ -461,6 +461,12 @@ Model Main_Ready_To_Eat_Meal_Production {
             Unit: meal;
             Definition: Stock(m,d) onlyif ( ( MealToProductionLineMapping(m) = pl ) and ( DayToWeekMapping(d) = w ) );
         }
+        Parameter SelectedIngredients {
+            IndexDomain: i;
+        }
+        Parameter SelectedScenarios {
+            IndexDomain: s;
+        }
         Procedure ChangeSalmonPrice {
             Body: {
                 IngredientPrice('salmon',d) := SalmonPriceFactor * InitialSalmonPrice(d);
@@ -545,7 +551,11 @@ Model Main_Ready_To_Eat_Meal_Production {
             Set AllPublicIdentifiers {
                 SubsetOf: AllIdentifiers;
                 Index: api;
-                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode, MealProductionLineDuration, MealProductionLineStart, SelectBeef, UnselectBeef, SelectedIngredients, UnselectAllIngredients, CreateSharedCase };
+                Definition: {
+                    data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit,
+                    	StartupMode, MealProductionLineDuration, MealProductionLineStart, SelectBeef, UnselectBeef, SelectedIngredients, UnselectAllIngredients,
+                    	CreateSharedCase, SelectedScenarios }
+                }
             }
             Set AllPublicProcedures {
                 SubsetOf: AllIdentifiers;
@@ -675,10 +685,6 @@ Model Main_Ready_To_Eat_Meal_Production {
         }
     }
     Section Testing_Declarations {
-        Parameter SelectedIngredients {
-            IndexDomain: i;
-            Default: -2;
-        }
         Procedure CreateSharedCase {
             Body: {
                 caseUrl := FormatString("PRO:/PublicData/Cases/%s/shared-case1.data",pro::ModelName);

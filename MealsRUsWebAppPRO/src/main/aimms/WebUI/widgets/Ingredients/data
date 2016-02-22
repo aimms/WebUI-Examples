@@ -1,1 +1,27 @@
-<div id="f8952956-bbc9-4d45-8924-e4c74c965fa9" tabindex="0" data-aimms.widget.type="literal:&quot;multiselect&quot;" data-widget.uri="Ingredients" data-contents="aimms:{&quot;contents&quot;:[&quot;i&quot;]}" data-title="literal:&quot;Ingredients&quot;"></div>
+{
+	"slot0": "",
+	"------------------------------------------------------------------<<<<-aimms.widget.type-": "",
+	"aimms.widget.type": "literal:\"multiselect\"",
+	"------------------------------------------------------------------>>>>-aimms.widget.type-": "",
+	"slot1": "",
+	"slot2": "",
+	"------------------------------------------------------------------<<<<-widget.uri-": "",
+	"widget.uri": "Ingredients",
+	"------------------------------------------------------------------>>>>-widget.uri-": "",
+	"slot3": "",
+	"slot4": "",
+	"slot5": "",
+	"slot6": "",
+	"------------------------------------------------------------------<<<<-awf.persistence.version-": "",
+	"awf.persistence.version": "1.1",
+	"------------------------------------------------------------------>>>>-awf.persistence.version-": "",
+	"slot7": "",
+	"slot8": "",
+	"------------------------------------------------------------------<<<<-title-": "",
+	"title": "literal:\"Ingredients\"",
+	"------------------------------------------------------------------>>>>-title-": "",
+	"------------------------------------------------------------------<<<<-contents-": "",
+	"contents": "aimms:{\"contents\":[\"SelectedIngredients\"]}",
+	"------------------------------------------------------------------>>>>-contents-": "",
+	"slot9": ""
+}
