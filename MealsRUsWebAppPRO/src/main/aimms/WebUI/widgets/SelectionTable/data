@@ -17,7 +17,7 @@
 	"slot3": "",
 	"slot4": "",
 	"------------------------------------------------------------------<<<<-aimms.widget.type-": "",
-	"aimms.widget.type": "literal:\"simple-table\"",
+	"aimms.widget.type": "literal:\"multiselect\"",
 	"------------------------------------------------------------------>>>>-aimms.widget.type-": "",
 	"slot5": "",
 	"slot6": "",
