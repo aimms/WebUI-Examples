@@ -117,6 +117,11 @@ AWF.Bus.subscribe({
 			collectedTypes.push("my-widget");
 		}
 	},
+	onInitializeTags: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.awf.tags(["placeable"], 'add');
+		}
+	},
 	onDecorateElement: function(elQ, type) {
 		if (type === "my-widget") {
 			elQ.aimms_my_widget();

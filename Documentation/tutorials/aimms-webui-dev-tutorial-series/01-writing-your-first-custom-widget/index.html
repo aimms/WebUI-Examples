@@ -158,6 +158,12 @@ AWF.Bus.subscribe({
 		}
 	},
 
+	onInitializeTags: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.awf.tags(["placeable"], 'add');
+		}
+	},
+
 	onDecorateElement: function(elQ, type) {
 		if(type === "my-widget") {
 			elQ.aimms_my_widget();
@@ -217,10 +223,19 @@ AWF.Bus.subscribe({
 	// and what basic characteristics they have. Since the AIMMS WebUI
 	// itself is also built using AWF and not all of those widgets are
 	// meant to be put inside a WebUI page, we respond only if either
-	// there is no contextElQ or it has a tag called "placeable"
+	// there is no contextElQ or it has a tag called "placeable-widget-container"
 	onCollectTypes: function(collectedTypes, contextElQ) {
-		if(!contextElQ || contextElQ.awf.tags("placeable")) {
+		if(!contextElQ || contextElQ.awf.tags("placeable-widget-container")) {
 			collectedTypes.push("my-widget");
+		}
+	},
+
+	// This is called by AWF to initialize some generic characteristics
+	// of a widget. In this case, we indicate that the widget placeable,
+	// so that the framework can treat/recognize it as such.
+	onInitializeTags: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.awf.tags(["placeable"], 'add');
 		}
 	},
 
