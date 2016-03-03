@@ -461,6 +461,12 @@ Model Main_Ready_To_Eat_Meal_Production {
             Unit: meal;
             Definition: Stock(m,d) onlyif ( ( MealToProductionLineMapping(m) = pl ) and ( DayToWeekMapping(d) = w ) );
         }
+        Parameter SelectedIngredients {
+            IndexDomain: i;
+        }
+        Parameter SelectedScenarios {
+            IndexDomain: s;
+        }
         Procedure ChangeSalmonPrice {
             Body: {
                 IngredientPrice('salmon',d) := SalmonPriceFactor * InitialSalmonPrice(d);
@@ -545,7 +551,10 @@ Model Main_Ready_To_Eat_Meal_Production {
             Set AllPublicIdentifiers {
                 SubsetOf: AllIdentifiers;
                 Index: api;
-                Definition: data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit, StartupMode, MealProductionLineDuration, MealProductionLineStart };
+                Definition: {
+                    data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit,
+                    	StartupMode, MealProductionLineDuration, MealProductionLineStart, SelectedIngredients, SelectedScenarios }
+                }
             }
             Set AllPublicProcedures {
                 SubsetOf: AllIdentifiers;
