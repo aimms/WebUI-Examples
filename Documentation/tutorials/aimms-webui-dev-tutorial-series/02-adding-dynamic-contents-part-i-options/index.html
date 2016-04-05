@@ -113,7 +113,7 @@
 // factory.js
 AWF.Bus.subscribe({
 	onCollectTypes: function(collectedTypes, contextElQ) {
-		if (!contextElQ || contextElQ.awf.tags("placeable")) {
+		if(!contextElQ || contextElQ.awf.tags("placeable-widget-container")) {
 			collectedTypes.push("my-widget");
 		}
 	},

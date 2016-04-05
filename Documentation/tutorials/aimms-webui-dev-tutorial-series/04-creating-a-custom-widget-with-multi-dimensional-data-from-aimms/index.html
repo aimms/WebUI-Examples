@@ -224,14 +224,14 @@ var OptionTypeTable =
 AWF.installListenerToMethodBridges(AWF, {
 
 	onCollectTypes: function(collectedTypes, contextElQ) {
-		if(!contextElQ || contextElQ.awf.tags("placeable")) {
-			collectedTypes.push('my-table-widget');
+		if(!contextElQ || contextElQ.awf.tags("placeable-widget-container")) {
+			collectedTypes.push("my-widget");
 		}
 	},
 
 	onInitializeTags: function(elQ, type) {
 		if(type === 'my-table-widget') {
-			elQ.awf.tags(["pivotable contents property", "my-table-widget"], 'add');
+			elQ.awf.tags(["placeable", "pivotable contents property", "my-table-widget"], 'add');
 		}
 	},
 
