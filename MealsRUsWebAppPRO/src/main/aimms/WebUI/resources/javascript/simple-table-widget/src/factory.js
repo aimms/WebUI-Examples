@@ -137,7 +137,7 @@ AWF.installListenerToMethodBridges(AWF, {
 	 * to collectedTypes).
 	 */
 	onCollectTypes: function(collectedTypes, contextElQ) {
-		if(!contextElQ || contextElQ.awf.tags("contents property") || contextElQ.awf.tags("placeable")) {
+		if(!contextElQ || contextElQ.awf.tags("contents property") || contextElQ.awf.tags("placeable-widget-container")) {
 			collectedTypes.push(widgetType);
 		}
 	},
@@ -170,7 +170,7 @@ AWF.installListenerToMethodBridges(AWF, {
 	 */
 	onInitializeTags: function(elQ, type) {
 		if(type === widgetType) {
-			elQ.awf.tags(["complex widget", "contents property", "simple-table", "table-widget"], 'add');
+			elQ.awf.tags(["complex widget", "contents property", "simple-table", "table-widget", "placeable"], 'add');
 		}
 	},
 
