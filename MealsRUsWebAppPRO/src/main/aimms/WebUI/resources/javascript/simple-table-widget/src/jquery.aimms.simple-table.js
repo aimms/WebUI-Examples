@@ -28,6 +28,33 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		widget.element.find('.awf-dock.center')
 			.append(widget.simpleTableWrap);
+
+		let scrollbarElQ = $(`<div style="
+									width: 500px;
+									height: 10px;
+							">`);
+		widget.element.find('.awf-dock.bottom').append(scrollbarElQ);
+		scrollbarElQ.scrollbar({
+			minimum: 0,
+			maximum: 50,
+			value: 0,
+			visibleAmount: 5,
+			blockIncrement: 'visibleAmount',
+			unitIncrement: 1,
+			change: function(event, ui) {
+				console.log("change", event, ui);
+		//					},
+		//					start: function(event, ui) {
+		//						console.log("start", event, ui);
+		//					},
+		//					scroll: function(event, ui) {
+		//						console.log("scroll", event, ui);
+		//					},
+		//					stop: function(event, ui) {
+		//						console.log("stop", event, ui);
+			}
+		})
+		.on('scrollbarchange', function(){console.log('scroll')});
 	},
 
 /*

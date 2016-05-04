@@ -1,0 +1,88 @@
+.ui-scrollbar, .ui-scrollbar * {
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing:border-box;
+}
+
+.ui-scrollbar {
+	position: absolute;
+}
+
+.ui-thumb-container-horizontal {
+	height: 100%;
+}
+
+.ui-thumb-container-vertical {
+	width: 100%;
+}
+
+.ui-thumb {
+	position: absolute;
+}
+
+.ui-thumb-horizontal {
+	width: 10%;
+	height: 100%;
+}
+
+.ui-thumb-vertical {
+	width: 100%;
+	height: 10%;
+}
+
+.ui-scrollbar>.ui-button, .ui-scrollbar>.ui-thumb-container {
+	position: absolute;
+}
+
+.ui-scrollbar>.ui-button {
+	overflow: hidden;
+	margin: 0;
+}
+
+.ui-scrollbar>.ui-button-left {
+	left: 0;
+	width: 18px;
+}
+.ui-scrollbar>.ui-button-right {
+	right: 0;
+	width: 18px;
+}
+.ui-scrollbar>.ui-thumb-container-horizontal {
+	left: 18px; right: 18px;
+	margin: 0 auto;
+}
+.ui-scrollbar>.ui-button-right, .ui-scrollbar>.ui-button-left {
+	height: 100%;
+}
+
+.ui-scrollbar>.ui-button-right>.ui-icon, .ui-scrollbar>.ui-button-left>.ui-icon {
+	top: 0;
+}
+
+.ui-scrollbar>.ui-button-up {
+	top: 0;
+	height: 18px;
+}
+.ui-scrollbar>.ui-button-down {
+	bottom: 0;
+	height: 18px;
+}
+.ui-scrollbar>.ui-thumb-container-vertical {
+	top: 18px;
+	bottom: 18px;
+	margin: auto 0;
+}
+
+.ui-scrollbar>.ui-button-up, .ui-scrollbar>.ui-button-down {
+	width: 100%;
+}
+
+.ui-scrollbar>.ui-button-up>.ui-icon {
+	top: 0;
+	left: 0px;
+}
+
+.ui-scrollbar>.ui-button-down>.ui-icon {
+	top: 0;
+	left: -1px;
+}

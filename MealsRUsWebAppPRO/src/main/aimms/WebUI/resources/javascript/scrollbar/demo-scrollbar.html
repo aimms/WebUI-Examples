@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.js"></script>
+		<script type="text/javascript" src="../../../../com.aimms.net/web/3rdparty/jquery-ui-1.9pre-pdt.full.js"></script>
+<!--		<script type="text/javascript" src="../../../../com.aimms.net/web/3rdparty/jquery-ui-1.8.full.js"></script>-->
+		<script src="http://github.com/cowboy/jquery-resize/raw/v1.1/jquery.ba-resize.min.js"></script>
+		<script src="../util/jquery.auto-repeat.js"></script>
+		<script src="jquery.scrollbar.js"></script>
+		<link href="jquery.scrollbar.css" rel="stylesheet" type="text/css"/>
+		<script type="text/javascript" src="../../../../com.aimms.net/web/js/monkeypatch/Function.js"></script>
+		<script type="text/javascript" src="../../../../com.aimms.net/web/js/monkeypatch/Array.js"></script>
+		<script type="text/javascript" src="../../../../com.aimms.net/web/js/monkeypatch/Number.js"></script>
+		<script type="text/javascript" src="../../../../com.aimms.net/web/js/monkeypatch/toString.js"></script>
+		<style type="text/css">
+		</style>
+		<script>
+			$(document).ready(function() {
+				$('.test-scrollbar').scrollbar({
+					minimum: 0,
+					maximum: 50,
+					value: 0,
+					visibleAmount: 5,
+					blockIncrement: 'visibleAmount',
+					unitIncrement: 1,
+					change: function(event, ui) {
+						console.log("change", event, ui);
+//					},
+//					start: function(event, ui) {
+//						console.log("start", event, ui);
+//					},
+//					scroll: function(event, ui) {
+//						console.log("scroll", event, ui);
+//					},
+//					stop: function(event, ui) {
+//						console.log("stop", event, ui);
+					}
+				});
+				$('.test-scrollbar').bind('scrollbarchange', function(){console.log('scroll')});
+			});
+		</script>
+	</head>
+	<body style="font-size:62.5%;">
+		<div id="scrollbar1" class="test-scrollbar" style="width: 200px; height: 18px; top: 100px; left: 150px">
+		</div>
+		<div id="scrollbar2" class="test-scrollbar" style="width: 18px; height: 200px; top: 300px; left: 300px">
+		</div>
+	</body>
+</html>
