@@ -345,16 +345,19 @@
 		 *	@private @function @memberOf Scrollbar
 		 */
 		_onButtonMouseDown: function _onButtonMouseDown(event, ui, isAutoRepeating) {
-			// Single click
-			if($(event.target).closest('.ui-button')[0] === this.element.decrementButton[0]) {
-				this._setValue(this.options.value - this.options.unitIncrement);
-			} else {
-				this._setValue(this.options.value + this.options.unitIncrement);
-			}
-			this._refreshThumb();
-
-			if(!isAutoRepeating) {
-				$.autoRepeat(event, ui, this);
+			var PRIMARY_BUTTON=0;
+			if(event.button === PRIMARY_BUTTON) {
+				// Single click
+				if($(event.target).closest('.ui-button')[0] === this.element.decrementButton[0]) {
+					this._setValue(this.options.value - this.options.unitIncrement);
+				} else {
+					this._setValue(this.options.value + this.options.unitIncrement);
+				}
+				this._refreshThumb();
+				
+				if(!isAutoRepeating) {
+					$.autoRepeat(event, ui, this);
+				}
 			}
 		},
 

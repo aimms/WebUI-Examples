@@ -1,0 +1,11 @@
+{
+  "logLevel": {
+    "global": "warn"
+  },
+  "stdout": false,
+  "destFile": "webui-service.log",
+  "dateFormat": "MMM DD, YYYY / hh:mm A",
+  "remote": {
+    "global": null
+  }
+}

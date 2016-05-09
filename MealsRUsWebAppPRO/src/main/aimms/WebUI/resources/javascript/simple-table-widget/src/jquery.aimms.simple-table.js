@@ -36,13 +36,13 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.element.find('.awf-dock.bottom').append(scrollbarElQ);
 		scrollbarElQ.scrollbar({
 			minimum: 0,
-			maximum: 50,
+			maximum: 6300,
 			value: 0,
-			visibleAmount: 5,
+			visibleAmount: 510,
 			blockIncrement: 'visibleAmount',
 			unitIncrement: 1,
 			change: function(event, ui) {
-				console.log("change", event, ui);
+				// console.log("change", event, ui);
 		//					},
 		//					start: function(event, ui) {
 		//						console.log("start", event, ui);
@@ -54,7 +54,12 @@ var SimpleTableWidget = AWF.Widget.create({
 		//						console.log("stop", event, ui);
 			}
 		})
-		.on('scrollbarchange', function(){console.log('scroll')});
+		.on('scrollbarchange', function(event, ui){
+			// console.log('scroll')
+			widget.tableElQ.css({
+				left: -ui.value,
+			})
+		});
 	},
 
 /*
