@@ -154,9 +154,9 @@ var SimpleTableWidget = AWF.Widget.create({
 		var tbodyElQ = $('<tbody>');
 		rowHeader.getNumRows().times(function(row) {
 			var trElQ = $('<tr>');
-			rowHeader.getNumCols().times(function(col) {
-				trElQ.append(createCellElQ('th', 'rowHeader', row, col));
-			});
+			// rowHeader.getNumCols().times(function(col) {
+			// 	trElQ.append(createCellElQ('th', 'rowHeader', row, col));
+			// });
 			grid.getNumCols().times(function(col) {
 				trElQ.append(createCellElQ('td', 'grid', row, col));
 			});
@@ -165,7 +165,7 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		// 1d. Construct the table
 		widget.tableElQ.empty();
-		widget.tableElQ.append(theadElQ);
+		// widget.tableElQ.append(theadElQ);
 		widget.tableElQ.append(tbodyElQ);
 
 		// 2. Fill the table  (uses asynchronous data retrieval)
@@ -176,7 +176,8 @@ var SimpleTableWidget = AWF.Widget.create({
 			],
 			["values"],
 			function onReady(layeredDataBlocks) {
-				['rowHeader', 'colHeader', 'grid'].forEach(function(type) {
+				// ['rowHeader', 'colHeader', 'grid'].forEach(function(type) {
+				['grid'].forEach(function(type) {
 					var partDataSource = dataSource[type];
 					partDataSource.getNumRows().times(function(row) {
 						partDataSource.getNumCols().times(function(col) {
