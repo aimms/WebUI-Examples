@@ -36,9 +36,9 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.element.find('.awf-dock.bottom').append(scrollbarElQ);
 		scrollbarElQ.scrollbar({
 			minimum: 0,
-			maximum: 6300,
+			maximum: 84,
 			value: 0,
-			visibleAmount: 510,
+			visibleAmount: 12,
 			blockIncrement: 'visibleAmount',
 			unitIncrement: 1,
 			change: function(event, ui) {
@@ -57,7 +57,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		.on('scrollbarchange', function(event, ui){
 			// console.log('scroll')
 			widget.tableElQ.css({
-				left: -ui.value,
+				left: -$('.row0.col'+ui.value).position().left,
 			})
 		});
 	},
