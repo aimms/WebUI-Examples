@@ -511,6 +511,30 @@ Model Main_Ready_To_Eat_Meal_Production {
     }
     Section WebUI_Teaser_Declarations {
         DeclarationSection Declarations {
+            Set RowColSet {
+                SubsetOf: Integers;
+                Index: row, col;
+                Definition: {
+                    ElementRange(0, max(MaxRow, maxCol) - 1);
+                }
+            }
+            Parameter MaxRow {
+                Definition: 100;
+            }
+            Parameter MaxCol {
+                Definition: 150;
+            }
+            Parameter RowColPar {
+                IndexDomain: (row,col);
+                Definition: row + col / power(10, ceil(log10(MaxCol)));
+            }
+            StringParameter RowCol {
+                IndexDomain: (row,col);
+                Definition: {
+                    
+                    FormatString("%i", row) * ceil((col / 6));
+                }
+            }
             Set Scenarios {
                 Index: s;
                 Parameter: BaseScenario, AScenario;
@@ -553,7 +577,7 @@ Model Main_Ready_To_Eat_Meal_Production {
                 Index: api;
                 Definition: {
                     data { IngredientPriceUI, MaximumProfitUI, ProfitUI, OptimalProductionUI, OptimalStockUI, Scenarios, s, Ingredients, i, CalculateScenarioProfit,
-                    	StartupMode, MealProductionLineDuration, MealProductionLineStart, SelectedIngredients, SelectedScenarios }
+                    	StartupMode, MealProductionLineDuration, MealProductionLineStart, SelectedIngredients, SelectedScenarios, RowCol, RowColPar, row, col }
                 }
             }
             Set AllPublicProcedures {

@@ -20,6 +20,8 @@ var SimpleTableWidget = AWF.Widget.create({
 	_create: function _create() {
 		var widget = this;
 
+		widget.observablePosition = new ObservablePosition();
+
 		widget.simpleTableWrap = $('<div class="simpleTableWrap"></div>');
 		widget.tableElQ = $('<table>');
 
@@ -55,9 +57,14 @@ var SimpleTableWidget = AWF.Widget.create({
 			}
 		})
 		.on('scrollbarchange', function(event, ui){
+			widget.observablePosition.set(0, ui.value);
+		});
+
+		widget.observablePosition.on('change', (position) => {
+			// console.log("observablePosition has changed: ", position);
 			// console.log('scroll')
-			widget.tableElQ.css({
-				left: -$('.row0.col'+ui.value).position().left,
+			widget.element.find('table').css({
+				left: -$(`.row${position.row}.col${position.col}`).position().left,
 			})
 		});
 	},
@@ -123,70 +130,23 @@ var SimpleTableWidget = AWF.Widget.create({
 		log.debug("grid.getNumRows(): ", grid.getNumRows());
 		log.debug("grid.getNumCols(): ", grid.getNumCols());
 
-		function updateTableCell(type, row, col, text) {
-			widget.tableElQ.find('.'+type+'.row'+row+'.col'+col).text(text);
-		}
-
-		// 1. Create the table.
-		/**
-		 *
-		 * createTdOrTh('th', 'foo', 3, 4)  ==>  '<th class="foo row3 col4"></th>'
-		 *
-		 */
-		function createCellElQ(type, name, row, col) {
-			return $(['<', type, ' class="', name, ' row'+row, ' col'+col, '">X</', type, '>'].join(''));
-		}
-
-		// 1a. Create the column header
-		var theadElQ = $('<thead>');
-		colHeader.getNumCols().times(function(col) {
-			var trElQ = $('<tr>');
-			colHeader.getNumRows().times(function(row) {
-				trElQ.append(createCellElQ('th', 'colHeader', row, col));
-			});
-			theadElQ.append(trElQ);
+		const blockSize = {
+			numRows: 10,
+			numCols: 84,
+		};
+		const tileDataCache = new TileDataCache({
+			blockSize,
+			requestDataBlock: (...args) => grid.requestDataBlock(...args)
 		});
-
-		// 1b. Add the pivot area
-		theadElQ.find('tr:first').prepend('<th colspan="'+rowHeader.getNumCols()+'" rowspan="'+colHeader.getNumCols()+'"></th>');
-
-		// 1c. Create the row header and grid
-		var tbodyElQ = $('<tbody>');
-		rowHeader.getNumRows().times(function(row) {
-			var trElQ = $('<tr>');
-			// rowHeader.getNumCols().times(function(col) {
-			// 	trElQ.append(createCellElQ('th', 'rowHeader', row, col));
-			// });
-			grid.getNumCols().times(function(col) {
-				trElQ.append(createCellElQ('td', 'grid', row, col));
-			});
-			tbodyElQ.append(trElQ);
+		const tile = new Tile({
+			startRow: widget.observablePosition.row,
+			startCol: widget.observablePosition.col,
+			blockSize,
+			tileDataCache,
 		});
-
-		// 1d. Construct the table
-		widget.tableElQ.empty();
-		// widget.tableElQ.append(theadElQ);
-		widget.tableElQ.append(tbodyElQ);
-
-		// 2. Fill the table  (uses asynchronous data retrieval)
-		dataSource.requestDataBlocks(
-			[
-				{start: 0, end: grid.getNumRows()},
-				{start: 0, end: grid.getNumCols()},
-			],
-			["values"],
-			function onReady(layeredDataBlocks) {
-				// ['rowHeader', 'colHeader', 'grid'].forEach(function(type) {
-				['grid'].forEach(function(type) {
-					var partDataSource = dataSource[type];
-					partDataSource.getNumRows().times(function(row) {
-						partDataSource.getNumCols().times(function(col) {
-							updateTableCell(type, row, col, layeredDataBlocks[type].getLayer("values").get(row, col));
-						});
-					});
-				});
-			}
-		);
+		tile.getOrConstructTileElQ().then((elQ) => {
+			widget.simpleTableWrap.append(elQ);
+		});
 	},
 
 	/**
