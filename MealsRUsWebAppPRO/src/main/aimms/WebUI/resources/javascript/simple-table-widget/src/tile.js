@@ -68,7 +68,7 @@ class Tile {
 					console.log("WEGWEGEG", valuesLayer, valuesLayer.get(0,0), valuesLayer.get(10,10));
 					const {startRow, startCol, blockSize:{numRows, numCols}} = this;
 					const tileHtml = `
-						<table>
+						<table class="tile startRow${startRow} startCol${startCol}">
 							<tbody>
 								${
 									numRows.times((row) =>
@@ -89,6 +89,13 @@ class Tile {
 		}
 
 		return promisedTileElQ;
+	}
+
+	destroy() {
+		if(this.promisedTileElQ) {
+			console.log("Removing tile ", this.startRow, this.startCol);
+			this.promisedTileElQ.then((elQ) => elQ.remove());
+		}
 	}
 
 	// 		// 2. Fill the table  (uses asynchronous data retrieval)

@@ -59,14 +59,6 @@ var SimpleTableWidget = AWF.Widget.create({
 		.on('scrollbarchange', function(event, ui){
 			widget.observablePosition.set(0, ui.value);
 		});
-
-		widget.observablePosition.on('change', (position) => {
-			// console.log("observablePosition has changed: ", position);
-			// console.log('scroll')
-			widget.element.find('table').css({
-				left: -$(`.row${position.row}.col${position.col}`).position().left,
-			})
-		});
 	},
 
 /*
@@ -132,21 +124,64 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		const blockSize = {
 			numRows: 10,
-			numCols: 84,
+			numCols: 20,
 		};
 		const tileDataCache = new TileDataCache({
 			blockSize,
 			requestDataBlock: (...args) => grid.requestDataBlock(...args)
 		});
-		const tile = new Tile({
-			startRow: widget.observablePosition.row,
-			startCol: widget.observablePosition.col,
-			blockSize,
-			tileDataCache,
+		const tiles = {};
+		const getTileStartRowAndCol = (position) => ({
+			tileStartRow: Math.floor(position.row/blockSize.numRows) * blockSize.numRows,
+			tileStartCol: Math.floor(position.col/blockSize.numCols) * blockSize.numCols,
 		});
-		tile.getOrConstructTileElQ().then((elQ) => {
-			widget.simpleTableWrap.append(elQ);
-		});
+		const assertThatMasterTileExists = (position) => {
+			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
+			console.log("tileStartRow,tileStartCol",tileStartRow,tileStartCol);
+			const tileKey = _key_(tileStartRow, tileStartCol);
+			if(!tiles[tileKey]) {
+				const tile = tiles[tileKey] = new Tile({
+					startRow: tileStartRow,
+					startCol: tileStartCol,
+					blockSize,
+					tileDataCache,
+				});
+				tile.getOrConstructTileElQ().then((elQ) => {
+					widget.simpleTableWrap.append(elQ);
+				});
+			}
+		};
+		const assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed = (position) => {
+			const {tileStartRow: masterTileStartRow, tileStartCol: masterTileStartCol} = getTileStartRowAndCol(position);
+			Object.forEach(tiles, (tileKey, tile) => {
+				if(Math.abs(tile.startRow - masterTileStartRow) >= 1 ||
+				   Math.abs(tile.startCol - masterTileStartCol) >= 1) {
+
+					delete tiles[tileKey];
+					tile.destroy();
+				}
+			});
+		};
+		const scrollToCell = (position) => {
+			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
+			const tileKey = _key_(tileStartRow, tileStartCol);
+			const tile = tiles[tileKey];
+
+			if(tile) {
+				tile.getOrConstructTileElQ().then((elQ) => {
+					elQ.css({
+						left: -elQ.find(`.row${position.row}.col${position.col}`).position().left,
+					});
+				});
+			} else {
+				console.error("Tile does not exist! ", tileKey);
+			}
+		};
+
+		widget.observablePosition.on('change', assertThatMasterTileExists);
+		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
+		widget.observablePosition.on('change', scrollToCell);
+		assertThatMasterTileExists(widget.observablePosition);
 	},
 
 	/**
