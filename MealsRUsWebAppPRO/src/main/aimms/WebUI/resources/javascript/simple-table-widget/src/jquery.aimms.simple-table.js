@@ -38,7 +38,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.element.find('.awf-dock.bottom').append(scrollbarElQ);
 		scrollbarElQ.scrollbar({
 			minimum: 0,
-			maximum: 84,
+			maximum: 150,
 			value: 0,
 			visibleAmount: 12,
 			blockIncrement: 'visibleAmount',
@@ -125,8 +125,8 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.simpleTableWrap.empty();
 
 		const blockSize = {
-			numRows: 10,
-			numCols: 20,
+			numRows: 15,
+			numCols: 40,
 		};
 		const tileDataCache = new TileDataCache({
 			blockSize,
