@@ -20,8 +20,6 @@ class TileDataCache {
 
 		if(!promisedData) {
 			promisedData = new Promise((resolve, reject) => {
-				console.log("WTF", [{start: startRow, end: startRow + this.blockSize.numRows},
-									   {start: startCol, end: startCol + this.blockSize.numCols}]);
 				this.requestDataBlock([{start: startRow, end: startRow + this.blockSize.numRows},
 									   {start: startCol, end: startCol + this.blockSize.numCols}],
 								      ["values"], // @TODO who determines the layer names?
@@ -97,28 +95,6 @@ class Tile {
 			this.promisedTileElQ.then((elQ) => elQ.remove());
 		}
 	}
-
-	// 		// 2. Fill the table  (uses asynchronous data retrieval)
-	// 		dataSource.requestDataBlocks(
-	// 			[
-	// 				{start: 0, end: grid.getNumRows()},
-	// 				{start: 0, end: grid.getNumCols()},
-	// 			],
-	// 			["values"],
-	// 			function onReady(layeredDataBlocks) {
-	// 				// ['rowHeader', 'colHeader', 'grid'].forEach(function(type) {
-	// 				['grid'].forEach(function(type) {
-	// 					var partDataSource = dataSource[type];
-	// 					partDataSource.getNumRows().times(function(row) {
-	// 						partDataSource.getNumCols().times(function(col) {
-	// 							updateTableCell(type, row, col, layeredDataBlocks[type].getLayer("values").get(row, col));
-	// 						});
-	// 					});
-	// 				});
-	// 			}
-	// 		);
-	// 	});
-	// }
 }
 
 // })(jQuery, _);
