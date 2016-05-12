@@ -513,16 +513,29 @@ Model Main_Ready_To_Eat_Meal_Production {
         DeclarationSection Declarations {
             Set RowColSet {
                 SubsetOf: Integers;
-                Index: row, col;
                 Definition: {
                     ElementRange(0, max(MaxRow, maxCol) - 1);
                 }
             }
+            Set RowSet {
+                SubsetOf: Integers;
+                Index: row;
+                Definition: {
+                    ElementRange(0, MaxRow - 1);
+                }
+            }
+            Set ColSet {
+                SubsetOf: Integers;
+                Index: col;
+                Definition: {
+                    ElementRange(0, MaxCol - 1);
+                }
+            }
             Parameter MaxRow {
-                Definition: 100;
+                Definition: 15;
             }
             Parameter MaxCol {
-                Definition: 150;
+                Definition: 2000;
             }
             Parameter RowColPar {
                 IndexDomain: (row,col);
