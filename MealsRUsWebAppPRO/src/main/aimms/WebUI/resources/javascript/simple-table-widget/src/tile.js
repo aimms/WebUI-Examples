@@ -44,6 +44,10 @@ class Tile {
 
 			{tileDataCache:     Args.OBJECT  | Args.Required},
 		], args));
+
+		Observable(this, ["boundsChanged"]);
+		this.on = this.bind;
+		this.off = this.unbind;
 	}
 	getOrConstructTileElQ() {
 		let promisedTileElQ = this.promisedTileElQ;
@@ -87,6 +91,21 @@ class Tile {
 		}
 
 		return promisedTileElQ;
+	}
+
+	scrollToPosition(position) {
+		let bounds = {};
+		this.getOrConstructTileElQ().then((elQ) => {
+			const top = 0;
+			const left = -elQ.find(`.row${position.row}.col${position.col}`).position().left;
+			const bottom = top + orElse(bounds.height, elQ.height());
+			const right = left + orElse(bounds.width, elQ.width());
+			elQ.css({
+				left: left,
+			});
+
+			this.trigger("boundsChanged", {top, left, bottom, right});
+		});
 	}
 
 	destroy() {

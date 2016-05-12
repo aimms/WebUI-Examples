@@ -163,17 +163,13 @@ var SimpleTableWidget = AWF.Widget.create({
 				}
 			});
 		};
-		const scrollToCell = (position) => {
+		const scrollMasterTileToPosition = (position) => {
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
 			const tileKey = _key_(tileStartRow, tileStartCol);
 			const tile = tiles[tileKey];
 
 			if(tile) {
-				tile.getOrConstructTileElQ().then((elQ) => {
-					elQ.css({
-						left: -elQ.find(`.row${position.row}.col${position.col}`).position().left,
-					});
-				});
+				tile.scrollToPosition(position);
 			} else {
 				console.error("Tile does not exist! ", tileKey);
 			}
@@ -188,7 +184,7 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		widget.observablePosition.on('change', assertThatMasterTileExists);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
-		widget.observablePosition.on('change', scrollToCell);
+		widget.observablePosition.on('change', scrollMasterTileToPosition);
 		widget.observablePosition.on('change', printStats);
 
 		assertThatMasterTileExists(widget.observablePosition);
