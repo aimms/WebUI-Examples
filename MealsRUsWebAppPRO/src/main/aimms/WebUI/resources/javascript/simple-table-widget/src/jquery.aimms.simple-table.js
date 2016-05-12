@@ -56,9 +56,9 @@ var SimpleTableWidget = AWF.Widget.create({
 		//						console.log("stop", event, ui);
 			}
 		})
-		.on('scrollbarchange', function(event, ui){
+		.on('scrollbarchange', _.throttle((event, ui) => {
 			widget.observablePosition.set(0, ui.value);
-		});
+		}, 40));
 	},
 
 /*
