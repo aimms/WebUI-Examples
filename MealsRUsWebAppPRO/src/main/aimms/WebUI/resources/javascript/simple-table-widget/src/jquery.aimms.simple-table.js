@@ -139,7 +139,6 @@ var SimpleTableWidget = AWF.Widget.create({
 		});
 		const assertThatMasterTileExists = (position) => {
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
-			console.log("tileStartRow,tileStartCol",tileStartRow,tileStartCol);
 			const tileKey = _key_(tileStartRow, tileStartCol);
 			if(!tiles[tileKey]) {
 				const tile = tiles[tileKey] = new Tile({
@@ -179,10 +178,19 @@ var SimpleTableWidget = AWF.Widget.create({
 				console.error("Tile does not exist! ", tileKey);
 			}
 		};
+		const printStats = _.debounce((position) => {
+			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
+			console.log("tileStartRow,tileStartCol",tileStartRow,tileStartCol);
+			console.log("tables: ", widget.simpleTableWrap.find('> table.tile'));
+			console.log("tiles: ", tiles);
+			console.log("tileDataCache size: ", Object.keys(tileDataCache.cache).length);
+		}, 100);
 
 		widget.observablePosition.on('change', assertThatMasterTileExists);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
 		widget.observablePosition.on('change', scrollToCell);
+		widget.observablePosition.on('change', printStats);
+
 		assertThatMasterTileExists(widget.observablePosition);
 	},
 
