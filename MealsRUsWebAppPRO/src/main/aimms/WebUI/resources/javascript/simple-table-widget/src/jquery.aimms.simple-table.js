@@ -122,6 +122,8 @@ var SimpleTableWidget = AWF.Widget.create({
 		log.debug("grid.getNumRows(): ", grid.getNumRows());
 		log.debug("grid.getNumCols(): ", grid.getNumCols());
 
+		widget.simpleTableWrap.empty();
+
 		const blockSize = {
 			numRows: 10,
 			numCols: 20,
