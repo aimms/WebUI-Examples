@@ -11,7 +11,17 @@
 	overflow:hidden;
 }
 
-.tag-simple-table .simpleTableWrap table {
+.tag-simple-table .simpleTableWrap table.tile {
 	position: absolute;
 	transition: all 0.3s ease;
+	table-layout: fixed;
+	width: 2050px;
+}
+
+.tag-simple-table .simpleTableWrap col {
+	width: 50px;
+}
+
+.tag-simple-table .simpleTableWrap col.col32 {
+	width: 100px;
 }

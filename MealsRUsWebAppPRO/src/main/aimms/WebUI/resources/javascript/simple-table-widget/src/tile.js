@@ -62,6 +62,7 @@ class Tile {
 					 *
 					 */
 					const createCellHtml = (type, name, row, col, text) => {
+						// return ['<', type, ' class="', name, ' row'+row, ' col'+col, '"><div>', text, '</div></', type, '>'].join('');
 						return ['<', type, ' class="', name, ' row'+row, ' col'+col, '">', text, '</', type, '>'].join('');
 					};
 
@@ -71,6 +72,9 @@ class Tile {
 					const {startRow, startCol, blockSize:{numRows, numCols}} = this;
 					const tileHtml = `
 						<table class="tile startRow${startRow} startCol${startCol}">
+							<colgroup>
+								${numCols.times((col) => `<col class="col col${startCol + col}"></col>`).join("")}
+							</colgroup>
 							<tbody>
 								${
 									numRows.times((row) =>
