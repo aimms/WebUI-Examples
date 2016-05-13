@@ -532,10 +532,10 @@ Model Main_Ready_To_Eat_Meal_Production {
                 }
             }
             Parameter MaxRow {
-                Definition: 15;
+                Definition: 25;
             }
             Parameter MaxCol {
-                Definition: 2000;
+                Definition: 800;
             }
             Parameter RowColPar {
                 IndexDomain: (row,col);

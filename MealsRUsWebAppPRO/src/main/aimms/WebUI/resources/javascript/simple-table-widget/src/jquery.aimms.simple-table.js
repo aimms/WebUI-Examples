@@ -1,5 +1,8 @@
 (function($) {
 
+// disable packery
+$.fn.packery = null;
+
 var log = log4javascript.getLogger("widgets.simple-table");
 //setupLogger("widgets.simple-table2", "TRACE");
 
@@ -31,8 +34,9 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.element.find('.awf-dock.center')
 			.append(widget.simpleTableWrap);
 
-		let scrollbarElQ = $(`<div style="
-									width: 500px;
+		let scrollbarElQ = widget.scrollbarElQ =
+							$(`<div style="
+									width: 100%;
 									height: 10px;
 							">`);
 		widget.element.find('.awf-dock.bottom').append(scrollbarElQ);
@@ -122,7 +126,10 @@ var SimpleTableWidget = AWF.Widget.create({
 		log.debug("grid.getNumRows(): ", grid.getNumRows());
 		log.debug("grid.getNumCols(): ", grid.getNumCols());
 
+		widget.scrollbarElQ.scrollbar('maximum', grid.getNumCols());
+
 		widget.simpleTableWrap.empty();
+		widget.observablePosition.off();
 
 		const blockSize = {
 			numRows: 15,
@@ -137,16 +144,40 @@ var SimpleTableWidget = AWF.Widget.create({
 			tileStartRow: Math.floor(position.row/blockSize.numRows) * blockSize.numRows,
 			tileStartCol: Math.floor(position.col/blockSize.numCols) * blockSize.numCols,
 		});
+		const createTile = (tileStartRow, tileStartCol) => {
+			const tile = new Tile({
+				startRow: tileStartRow,
+				startCol: tileStartCol,
+				blockSize,
+				tileDataCache,
+			});
+			tile.on("boundsChanged", (bounds) => {
+				const adjacentTileInfos = [
+					{placement: ["left_of", "above"],  key: _key_(tileStartRow+blockSize.numRows, tileStartCol+blockSize.numCols)},
+					{placement: ["above"],             key: _key_(tileStartRow+blockSize.numRows, tileStartCol)},
+					{placement: ["right_of", "above"], key: _key_(tileStartRow+blockSize.numRows, tileStartCol-blockSize.numCols)},
+					{placement: ["right_of"],          key: _key_(tileStartRow                  , tileStartCol-blockSize.numCols)},
+					{placement: ["right_of", "below"], key: _key_(tileStartRow-blockSize.numRows, tileStartCol-blockSize.numCols)},
+					{placement: ["below"],             key: _key_(tileStartRow-blockSize.numRows, tileStartCol)},
+					{placement: ["left_of", "below"],  key: _key_(tileStartRow-blockSize.numRows, tileStartCol+blockSize.numCols)},
+					{placement: ["left_of"],           key: _key_(tileStartRow                  , tileStartCol+blockSize.numCols)},
+				];
+				adjacentTileInfos.forEach((tileInfo) => {
+					// console.log("Searching for tile with key", tileInfo.key);
+					const tile_ = tiles[tileInfo.key];
+					if(tile_) {
+						tile_.onAdjacentTileBoundsChanged(tileInfo.placement, bounds);
+					}
+				});
+			});
+			return tile;
+		};
 		const assertThatMasterTileExists = (position) => {
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
 			const tileKey = _key_(tileStartRow, tileStartCol);
 			if(!tiles[tileKey]) {
-				const tile = tiles[tileKey] = new Tile({
-					startRow: tileStartRow,
-					startCol: tileStartCol,
-					blockSize,
-					tileDataCache,
-				});
+				const tile = tiles[tileKey] = createTile(tileStartRow, tileStartCol);
+
 				tile.getOrConstructTileElQ().then((elQ) => {
 					widget.simpleTableWrap.append(elQ);
 				});
@@ -155,13 +186,34 @@ var SimpleTableWidget = AWF.Widget.create({
 		const assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed = (position) => {
 			const {tileStartRow: masterTileStartRow, tileStartCol: masterTileStartCol} = getTileStartRowAndCol(position);
 			Object.forEach(tiles, (tileKey, tile) => {
-				if(Math.abs(tile.startRow - masterTileStartRow) >= 1 ||
-				   Math.abs(tile.startCol - masterTileStartCol) >= 1) {
+				// console.log(tile.startCol , masterTileStartCol);
+				if(Math.abs(tile.startRow/blockSize.numRows - masterTileStartRow/blockSize.numRows) >= 2 ||
+				   Math.abs(tile.startCol/blockSize.numCols - masterTileStartCol/blockSize.numCols) >= 2) {
 
 					delete tiles[tileKey];
 					tile.destroy();
 				}
 			});
+		};
+		const assertThatTheAdjacentTileInTheScrollDirectionIsAdded = (position) => {
+			// @TODO we can also optimize to only assert the tile is added when nearing the edge of the current tile
+
+			let {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
+
+			// @TODO For now: Assume scrolling to the right
+			if(Math.abs(position.col - tileStartCol) > (blockSize.numCols/5)) {
+				tileStartCol += blockSize.numCols;
+
+				const tileKey = _key_(tileStartRow, tileStartCol);
+				if(!tiles[tileKey]) {
+					const tile = tiles[tileKey] = createTile(tileStartRow, tileStartCol);
+
+					tile.getOrConstructTileElQ().then((elQ) => {
+						console.log("tile appended: ", tileStartRow, tileStartCol);
+						widget.simpleTableWrap.append(elQ);
+					});
+				}
+			}
 		};
 		const scrollMasterTileToPosition = (position) => {
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
@@ -175,6 +227,7 @@ var SimpleTableWidget = AWF.Widget.create({
 			}
 		};
 		const printStats = _.debounce((position) => {
+			console.log("position", position.row, position.col);
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
 			console.log("tileStartRow,tileStartCol",tileStartRow,tileStartCol);
 			console.log("tables: ", widget.simpleTableWrap.find('> table.tile'));
@@ -184,8 +237,9 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		widget.observablePosition.on('change', assertThatMasterTileExists);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
+		widget.observablePosition.on('change', assertThatTheAdjacentTileInTheScrollDirectionIsAdded);
 		widget.observablePosition.on('change', scrollMasterTileToPosition);
-		widget.observablePosition.on('change', printStats);
+		// widget.observablePosition.on('change', printStats);
 
 		assertThatMasterTileExists(widget.observablePosition);
 	},

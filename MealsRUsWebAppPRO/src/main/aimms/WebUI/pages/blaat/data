@@ -17,7 +17,7 @@
 	"slot6": "",
 	"slot7": "",
 	"------------------------------------------------------------------<<<<-widgets-": "",
-	"widgets": "literal:[{\"uri\":\"SimpleTable\",\"layoutInfo\":{\"width\":\"4\",\"height\":\"2\"}}]",
+	"widgets": "literal:[{\"uri\":\"SimpleTable\",\"layoutInfo\":{\"width\":\"4\",\"height\":\"3\",\"customPosition\":\"\"}}]",
 	"------------------------------------------------------------------>>>>-widgets-": "",
 	"slot8": "",
 	"slot9": ""

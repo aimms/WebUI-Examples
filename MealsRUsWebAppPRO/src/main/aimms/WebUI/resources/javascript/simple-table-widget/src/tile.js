@@ -66,8 +66,8 @@ class Tile {
 					};
 
 					const valuesLayer = layeredDataBlock.getLayer("values");
-					window.VL = valuesLayer;window.LDB = layeredDataBlock;
-					console.log("WEGWEGEG", valuesLayer, valuesLayer.get(0,0), valuesLayer.get(10,10));
+					// window.VL = valuesLayer;window.LDB = layeredDataBlock;
+					// console.log("WEGWEGEG", valuesLayer, valuesLayer.get(0,0), valuesLayer.get(10,10));
 					const {startRow, startCol, blockSize:{numRows, numCols}} = this;
 					const tileHtml = `
 						<table class="tile startRow${startRow} startCol${startCol}">
@@ -105,6 +105,34 @@ class Tile {
 			});
 
 			this.trigger("boundsChanged", {top, left, bottom, right});
+		});
+	}
+
+	// @TODO also trigger boundsChanged iff they changed
+	// probably needs bounds to go to instance scope :(
+	// do not respond if this is the master tile
+	onAdjacentTileBoundsChanged(placement, bounds) {
+		// console.log("onAdjacentTileBoundsChanged", placement, bounds);
+
+		this.getOrConstructTileElQ().then((elQ) => {
+			if(placement.contains("right_of")) {
+				elQ.css({
+					left: bounds.left - elQ.width(),
+				});
+			} else if(placement.contains("left_of")) {
+				elQ.css({
+					left: bounds.right,
+				});
+			}
+
+			// CAVEAT REFACTOR: No else if!
+			// if(placement.contains("ABOVE")) {
+			// 	elQ.css({
+			//
+			// 	});
+			// } else if(placement.contains("BELOW")) {
+			//
+			// }
 		});
 	}
 
