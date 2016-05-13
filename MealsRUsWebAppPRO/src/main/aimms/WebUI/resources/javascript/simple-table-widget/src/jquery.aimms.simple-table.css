@@ -11,11 +11,17 @@
 	overflow:hidden;
 }
 
+.tag-simple-table .simpleTableWrap .tile-container {
+	position: absolute;
+	transition: left 0.3s ease;
+}
+
 .tag-simple-table .simpleTableWrap table.tile {
 	position: absolute;
 	transition: all 0.3s ease;
 	table-layout: fixed;
-	width: 2050px;
+	width: 750px;
+	/*width: 2050px;*/
 }
 
 .tag-simple-table .simpleTableWrap col {
@@ -23,5 +29,5 @@
 }
 
 .tag-simple-table .simpleTableWrap col.col32 {
-	width: 100px;
+	/*width: 100px;*/
 }

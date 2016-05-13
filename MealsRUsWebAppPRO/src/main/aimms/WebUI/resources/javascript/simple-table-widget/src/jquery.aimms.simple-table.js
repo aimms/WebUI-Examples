@@ -62,7 +62,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		})
 		.on('scrollbarchange', _.throttle((event, ui) => {
 			widget.observablePosition.set(0, ui.value);
-		}, 40));
+		}, 33));
 	},
 
 /*
@@ -131,9 +131,12 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.simpleTableWrap.empty();
 		widget.observablePosition.off();
 
+		const tileContainer = $('<div class="tile-container"></div>');
+		widget.simpleTableWrap.append(tileContainer);
+
 		const blockSize = {
 			numRows: 15,
-			numCols: 40,
+			numCols: 15,
 		};
 		const tileDataCache = new TileDataCache({
 			blockSize,
@@ -179,7 +182,10 @@ var SimpleTableWidget = AWF.Widget.create({
 				const tile = tiles[tileKey] = createTile(tileStartRow, tileStartCol);
 
 				tile.getOrConstructTileElQ().then((elQ) => {
-					widget.simpleTableWrap.append(elQ);
+					elQ.css({
+						left: `${tileStartCol * 50}px`,
+					});
+					tileContainer.append(elQ);
 				});
 			}
 		};
@@ -210,7 +216,10 @@ var SimpleTableWidget = AWF.Widget.create({
 
 					tile.getOrConstructTileElQ().then((elQ) => {
 						console.log("tile appended: ", tileStartRow, tileStartCol);
-						widget.simpleTableWrap.append(elQ);
+						elQ.css({
+							left: `${tileStartCol * 50}px`,
+						});
+						tileContainer.append(elQ);
 					});
 				}
 			}
@@ -226,6 +235,20 @@ var SimpleTableWidget = AWF.Widget.create({
 				console.error("Tile does not exist! ", tileKey);
 			}
 		};
+		const scrollTileContainerToPosition = (position) => {
+			tileContainer.css({
+				left: `-${position.col * 50}px`,
+			});
+			// const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
+			// const tileKey = _key_(tileStartRow, tileStartCol);
+			// const tile = tiles[tileKey];
+			// 
+			// if(tile) {
+			// 	tile.scrollToPosition(position);
+			// } else {
+			// 	console.error("Tile does not exist! ", tileKey);
+			// }
+		};
 		const printStats = _.debounce((position) => {
 			console.log("position", position.row, position.col);
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
@@ -238,7 +261,8 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.observablePosition.on('change', assertThatMasterTileExists);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
 		widget.observablePosition.on('change', assertThatTheAdjacentTileInTheScrollDirectionIsAdded);
-		widget.observablePosition.on('change', scrollMasterTileToPosition);
+		widget.observablePosition.on('change', scrollTileContainerToPosition);
+		// widget.observablePosition.on('change', scrollMasterTileToPosition);
 		// widget.observablePosition.on('change', printStats);
 
 		assertThatMasterTileExists(widget.observablePosition);

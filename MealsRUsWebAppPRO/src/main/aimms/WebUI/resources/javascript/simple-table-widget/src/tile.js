@@ -62,8 +62,8 @@ class Tile {
 					 *
 					 */
 					const createCellHtml = (type, name, row, col, text) => {
-						// return ['<', type, ' class="', name, ' row'+row, ' col'+col, '"><div>', text, '</div></', type, '>'].join('');
-						return ['<', type, ' class="', name, ' row'+row, ' col'+col, '">', text, '</', type, '>'].join('');
+						return ['<', type, ' class="', name, ' row'+row, ' col'+col, '"><div>', text, '</div></', type, '>'].join('');
+						// return ['<', type, ' class="', name, ' row'+row, ' col'+col, '">', text, '</', type, '>'].join('');
 					};
 
 					const valuesLayer = layeredDataBlock.getLayer("values");
