@@ -98,49 +98,6 @@ class Tile {
 		return promisedTileElQ;
 	}
 
-	scrollToPosition(position) {
-		let bounds = {};
-		this.getOrConstructTileElQ().then((elQ) => {
-			const top = 0;
-			const left = -elQ.find(`.row${position.row}.col${position.col}`).position().left;
-			const bottom = top + orElse(bounds.height, elQ.height());
-			const right = left + orElse(bounds.width, elQ.width());
-			elQ.css({
-				left: left,
-			});
-
-			this.trigger("boundsChanged", {top, left, bottom, right});
-		});
-	}
-
-	// @TODO also trigger boundsChanged iff they changed
-	// probably needs bounds to go to instance scope :(
-	// do not respond if this is the master tile
-	onAdjacentTileBoundsChanged(placement, bounds) {
-		// console.log("onAdjacentTileBoundsChanged", placement, bounds);
-
-		this.getOrConstructTileElQ().then((elQ) => {
-			if(placement.contains("right_of")) {
-				elQ.css({
-					left: bounds.left - elQ.width(),
-				});
-			} else if(placement.contains("left_of")) {
-				elQ.css({
-					left: bounds.right,
-				});
-			}
-
-			// CAVEAT REFACTOR: No else if!
-			// if(placement.contains("ABOVE")) {
-			// 	elQ.css({
-			//
-			// 	});
-			// } else if(placement.contains("BELOW")) {
-			//
-			// }
-		});
-	}
-
 	destroy() {
 		if(this.promisedTileElQ) {
 			console.log("Removing tile ", this.startRow, this.startCol);

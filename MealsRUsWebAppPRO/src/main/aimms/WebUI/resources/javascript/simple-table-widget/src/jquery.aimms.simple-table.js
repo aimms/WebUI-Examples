@@ -154,25 +154,6 @@ var SimpleTableWidget = AWF.Widget.create({
 				blockSize,
 				tileDataCache,
 			});
-			tile.on("boundsChanged", (bounds) => {
-				const adjacentTileInfos = [
-					{placement: ["left_of", "above"],  key: _key_(tileStartRow+blockSize.numRows, tileStartCol+blockSize.numCols)},
-					{placement: ["above"],             key: _key_(tileStartRow+blockSize.numRows, tileStartCol)},
-					{placement: ["right_of", "above"], key: _key_(tileStartRow+blockSize.numRows, tileStartCol-blockSize.numCols)},
-					{placement: ["right_of"],          key: _key_(tileStartRow                  , tileStartCol-blockSize.numCols)},
-					{placement: ["right_of", "below"], key: _key_(tileStartRow-blockSize.numRows, tileStartCol-blockSize.numCols)},
-					{placement: ["below"],             key: _key_(tileStartRow-blockSize.numRows, tileStartCol)},
-					{placement: ["left_of", "below"],  key: _key_(tileStartRow-blockSize.numRows, tileStartCol+blockSize.numCols)},
-					{placement: ["left_of"],           key: _key_(tileStartRow                  , tileStartCol+blockSize.numCols)},
-				];
-				adjacentTileInfos.forEach((tileInfo) => {
-					// console.log("Searching for tile with key", tileInfo.key);
-					const tile_ = tiles[tileInfo.key];
-					if(tile_) {
-						tile_.onAdjacentTileBoundsChanged(tileInfo.placement, bounds);
-					}
-				});
-			});
 			return tile;
 		};
 		const assertThatMasterTileExists = (position) => {
@@ -224,30 +205,10 @@ var SimpleTableWidget = AWF.Widget.create({
 				}
 			}
 		};
-		const scrollMasterTileToPosition = (position) => {
-			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
-			const tileKey = _key_(tileStartRow, tileStartCol);
-			const tile = tiles[tileKey];
-
-			if(tile) {
-				tile.scrollToPosition(position);
-			} else {
-				console.error("Tile does not exist! ", tileKey);
-			}
-		};
 		const scrollTileContainerToPosition = (position) => {
 			tileContainer.css({
 				left: `-${position.col * 50}px`,
 			});
-			// const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
-			// const tileKey = _key_(tileStartRow, tileStartCol);
-			// const tile = tiles[tileKey];
-			// 
-			// if(tile) {
-			// 	tile.scrollToPosition(position);
-			// } else {
-			// 	console.error("Tile does not exist! ", tileKey);
-			// }
 		};
 		const printStats = _.debounce((position) => {
 			console.log("position", position.row, position.col);
@@ -262,7 +223,6 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
 		widget.observablePosition.on('change', assertThatTheAdjacentTileInTheScrollDirectionIsAdded);
 		widget.observablePosition.on('change', scrollTileContainerToPosition);
-		// widget.observablePosition.on('change', scrollMasterTileToPosition);
 		// widget.observablePosition.on('change', printStats);
 
 		assertThatMasterTileExists(widget.observablePosition);
