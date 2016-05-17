@@ -22,7 +22,7 @@ class TileDataCache {
 			promisedData = new Promise((resolve, reject) => {
 				this.requestDataBlock([{start: startRow, end: startRow + this.blockSize.numRows},
 									   {start: startCol, end: startCol + this.blockSize.numCols}],
-								      ["values"], // @TODO who determines the layer names?
+								      ["values", "flags", "annotations"], // @TODO who determines the layer names?
 								      resolve); // @TODO reject
 			});
 			this.cache[_key_(startRow, startCol)] = promisedData;
@@ -67,6 +67,7 @@ class Tile {
 					};
 
 					const valuesLayer = layeredDataBlock.getLayer("values");
+					window.LDB = layeredDataBlock;
 					// window.VL = valuesLayer;window.LDB = layeredDataBlock;
 					// console.log("WEGWEGEG", valuesLayer, valuesLayer.get(0,0), valuesLayer.get(10,10));
 					const {startRow, startCol, blockSize:{numRows, numCols}} = this;

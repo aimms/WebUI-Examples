@@ -42,9 +42,8 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.element.find('.awf-dock.bottom').append(scrollbarElQ);
 		scrollbarElQ.scrollbar({
 			minimum: 0,
-			maximum: 150,
+			maximum: 0,
 			value: 0,
-			visibleAmount: 12,
 			blockIncrement: 'visibleAmount',
 			unitIncrement: 1,
 			change: function(event, ui) {
@@ -127,6 +126,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		log.debug("grid.getNumCols(): ", grid.getNumCols());
 
 		widget.scrollbarElQ.scrollbar('maximum', grid.getNumCols());
+		widget.scrollbarElQ.scrollbar('visibleAmount', 12);
 
 		widget.simpleTableWrap.empty();
 		widget.observablePosition.off();
