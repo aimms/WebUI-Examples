@@ -170,7 +170,7 @@ AWF.installListenerToMethodBridges(AWF, {
 	 */
 	onInitializeTags: function(elQ, type) {
 		if(type === widgetType) {
-			elQ.awf.tags(["complex widget", "contents property", "simple-table", "table-widget", "placeable"], 'add');
+			elQ.awf.tags(["complex widget", "contents property", "pivotable contents property", "simple-table", "table-widget", "placeable"], 'add');
 		}
 	},
 
