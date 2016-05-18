@@ -226,7 +226,15 @@ var SimpleTableWidget = AWF.Widget.create({
 				}
 			}
 		};
+		// "private local variable" to the scrollTileContainerToPosition;
+		let previousPosition = {row: widget.observablePosition.row, col: widget.observablePosition.col};
 		const scrollTileContainerToPosition = (position) => {
+			const delta = Math.abs(previousPosition.col - position.col);
+			previousPosition = position;
+
+			tileContainer.toggleClass("fast-scrolling", delta > (2 * blockSize.numCols));
+
+			log.debug(`Scrolling to col ${position.col} (delta: ${delta})`);
 			tileContainer.css({
 				left: `-${position.col * 50}px`,
 			});

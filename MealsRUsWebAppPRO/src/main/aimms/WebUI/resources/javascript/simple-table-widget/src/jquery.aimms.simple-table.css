@@ -16,6 +16,10 @@
 	transition: left 0.3s ease;
 }
 
+.tag-simple-table .simpleTableWrap .fast-scrolling.tile-container {
+	transition: left 0.1s ease;
+}
+
 .tag-simple-table .simpleTableWrap table.tile {
 	position: absolute;
 	transition: all 0.3s ease;
