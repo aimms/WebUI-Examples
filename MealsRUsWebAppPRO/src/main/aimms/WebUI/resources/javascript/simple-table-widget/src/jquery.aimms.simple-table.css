@@ -29,3 +29,7 @@
 .tag-simple-table .simpleTableWrap col {
 	width: 50px;
 }
+
+.tag-simple-table .simpleTableWrap table.tile td > div {
+	height: 1em;
+}
