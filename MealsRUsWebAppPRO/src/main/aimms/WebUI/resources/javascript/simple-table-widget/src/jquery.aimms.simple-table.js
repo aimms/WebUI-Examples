@@ -266,30 +266,6 @@ var SimpleTableWidget = AWF.Widget.create({
 				}
 			});
 		};
-		const assertThatTheAdjacentTileInTheScrollDirectionIsAdded = (position) => {
-			// @TODO we can also optimize to only assert the tile is added when nearing the edge of the current tile
-
-			let {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
-
-			// @TODO For now: Assume scrolling to the right
-			if(Math.abs(position.col - tileStartCol) > (blockSize.numCols/5)) {
-				tileStartCol += blockSize.numCols;
-
-				const tileKey = _key_(tileStartRow, tileStartCol);
-				if(!tiles[tileKey]) {
-					const tile = tiles[tileKey] = createTile(tileStartRow, tileStartCol);
-
-					tile.getOrConstructTileElQ().then((elQ) => {
-						console.log("tile appended: ", tileStartRow, tileStartCol);
-						elQ.css({
-							top: `${calculateCellTopOffsetInPx(tileStartRow)}px`,
-							left: `${calculateCellLeftOffsetInPx(tileStartCol)}px`,
-						});
-						tileContainer.append(elQ);
-					});
-				}
-			}
-		};
 		// "private local variable" to the scrollTileContainerToPosition;
 		let previousPosition = {row: widget.observablePosition.row, col: widget.observablePosition.col};
 		const scrollTileContainerToPosition = (position) => {
@@ -314,7 +290,6 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		widget.observablePosition.on('change', assertThatTheViewPortIsFilledWithTiles);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
-		// widget.observablePosition.on('change', assertThatTheAdjacentTileInTheScrollDirectionIsAdded);
 		widget.observablePosition.on('change', scrollTileContainerToPosition);
 		// widget.observablePosition.on('change', printStats);
 
