@@ -139,19 +139,44 @@ var SimpleTableWidget = AWF.Widget.create({
 		const tileContainer = $('<div class="tile-container"></div>');
 		widget.simpleTableWrap.append(tileContainer);
 
+		const defaultTileHeightInPx = (function determineTileHeight() {
+			// @TODO create proper tile based on block size
+			const tileSizingElQ =
+				$(`<table class="tile">
+					<tbody>
+						<tr><td class="grid"><div>mmmmmmmmmm</div></td></tr>
+						<tr><td class="grid"><div>mmmmmmmmmm</div></td></tr>
+						<tr><td class="grid"><div>mmmmmmmmmm</div></td></tr>
+					</tbody>
+				   </table>
+			    `)
+				.css({top: '-999px', left:'-999px'})
+				.appendTo(tileContainer)
+			;
+			// sizes in px
+			const defaultTileHeightInPx = tileSizingElQ.outerHeight();
+			tileContainer.empty();
+			console.log('defaultTileHeightInPx', defaultTileHeightInPx);
+
+			return defaultTileHeightInPx;
+		})();
+
+		// @TODO can we calculate these based on the viewport size to obtain an optimized performance?
 		const blockSize = {
 			numRows: 15,
 			numCols: 15,
 		};
 
-		// widths in em
+		// sizes in em
 		const defaultColWidth = 10; // @TODO from user-option
 		const nonDefaultColWidths = {}; // @TODO from non-user visible option
 
 		// width of 1 em in px
 		const emToPx = 5; // @TODO calculate
 
-		// width in px
+		// sizes in px
+		// @TODO: for when we construct the sizingTileElQ based on blockSize: replace '3' with 'blockSize.numRows'
+		const defaultRowHeightInPx = defaultTileHeightInPx / 3;
 		const getColWidthInPx = (col) => orElse(nonDefaultColWidths[col], defaultColWidth) * emToPx;
 		const isColInTile = (col) => (col >= startCol) && (col < (startCol + blockSize.numCols));
 		const calculateTileWidthInPx = (startCol) => {
@@ -162,6 +187,10 @@ var SimpleTableWidget = AWF.Widget.create({
 
 			return emToPx * tileWidthInEm;
 		};
+
+		// @TODO take non default column widths into account
+		const calculateCellLeftOffsetInPx = (col) => col * defaultColWidth * emToPx;
+		const calculateCellTopOffsetInPx = (row) => row * defaultRowHeightInPx;
 
 		const tileDataCache = new TileDataCache({
 			blockSize,
@@ -193,7 +222,8 @@ var SimpleTableWidget = AWF.Widget.create({
 
 				tile.getOrConstructTileElQ().then((elQ) => {
 					elQ.css({
-						left: `${tileStartCol * 50}px`,
+						top: `${calculateCellTopOffsetInPx(tileStartRow)}px`,
+						left: `${calculateCellLeftOffsetInPx(tileStartCol)}px`,
 					});
 					tileContainer.append(elQ);
 				});
@@ -209,20 +239,27 @@ var SimpleTableWidget = AWF.Widget.create({
 				numColsInViewPort++;
 			}
 
-			// console.log("Num cols in vp:", numColsInViewPort);
+			let numRowsInViewPort = Math.ceil(viewPortSizeInPx.height / defaultRowHeightInPx);
 
+			// console.log("Num rows / cols in vp:", numRowsInViewPort, numColsInViewPort);
+
+			// @TODO do some smartness because we know the block size:
 			for(let i = 0; i <= numColsInViewPort; i++) {
-				// @TODO do some smartness because we know the block size
-				// console.log("assertThatTileExistsAndIsPlaced", position.col+i);
-				assertThatTileExistsAndIsPlaced(0, position.col+i);
+				for(let j = 0; j < numRowsInViewPort; j++) {
+					// console.log("assertThatTileExistsAndIsPlaced", position.row+j, position.col+i);
+					assertThatTileExistsAndIsPlaced(position.row+j, position.col+i);
+				}
 			}
 		};
 		const assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed = (position) => {
 			const {tileStartRow: masterTileStartRow, tileStartCol: masterTileStartCol} = getTileStartRowAndCol(position);
 			Object.forEach(tiles, (tileKey, tile) => {
 				// console.log(tile.startCol , masterTileStartCol);
-				if(Math.abs(tile.startRow/blockSize.numRows - masterTileStartRow/blockSize.numRows) >= 2 ||
-				   Math.abs(tile.startCol/blockSize.numCols - masterTileStartCol/blockSize.numCols) >= 2) {
+				// @TODO find better definition of when to remove tiles
+				const maxRowDistance = 30 / blockSize.numRows;
+				const maxColDistance = 30 / blockSize.numCols;
+				if(Math.abs(tile.startRow/blockSize.numRows - masterTileStartRow/blockSize.numRows) >= maxRowDistance ||
+				   Math.abs(tile.startCol/blockSize.numCols - masterTileStartCol/blockSize.numCols) >= maxColDistance) {
 
 					delete tiles[tileKey];
 					tile.destroy();
@@ -245,7 +282,8 @@ var SimpleTableWidget = AWF.Widget.create({
 					tile.getOrConstructTileElQ().then((elQ) => {
 						console.log("tile appended: ", tileStartRow, tileStartCol);
 						elQ.css({
-							left: `${tileStartCol * 50}px`,
+							top: `${calculateCellTopOffsetInPx(tileStartRow)}px`,
+							left: `${calculateCellLeftOffsetInPx(tileStartCol)}px`,
 						});
 						tileContainer.append(elQ);
 					});

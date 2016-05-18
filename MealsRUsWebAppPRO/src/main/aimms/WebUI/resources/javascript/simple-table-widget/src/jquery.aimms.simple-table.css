@@ -33,3 +33,10 @@
 .tag-simple-table .simpleTableWrap table.tile td > div {
 	height: 1em;
 }
+
+.tag-simple-table .simpleTableWrap table.tile tr td:last-of-type {
+	border-right: none;
+}
+.tag-simple-table .simpleTableWrap table.tile tr:last-of-type td {
+	border-bottom: none;
+}
