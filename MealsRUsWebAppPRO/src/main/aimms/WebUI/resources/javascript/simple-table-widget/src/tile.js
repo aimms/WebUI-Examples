@@ -43,6 +43,8 @@ class Tile {
 			{blockSize:         Args.OBJECT  | Args.Required},
 
 			{tileDataCache:     Args.OBJECT  | Args.Required},
+
+			{calculateTileWidthInPx: Args.FUNCTION | Args.Required},
 		], args));
 
 		Observable(this, ["boundsChanged"]);
@@ -71,8 +73,9 @@ class Tile {
 					// window.VL = valuesLayer;window.LDB = layeredDataBlock;
 					// console.log("WEGWEGEG", valuesLayer, valuesLayer.get(0,0), valuesLayer.get(10,10));
 					const {startRow, startCol, blockSize:{numRows, numCols}} = this;
+					const id = genUUID().replace(/-/g, "").slice(0,10);
 					const tileHtml = `
-						<table class="tile startRow${startRow} startCol${startCol}">
+						<table id="${id}"class="tile startRow${startRow} startCol${startCol}">
 							<colgroup>
 								${numCols.times((col) => `<col class="col col${startCol + col}"></col>`).join("")}
 							</colgroup>
@@ -90,7 +93,11 @@ class Tile {
 						</table>
 					`;
 
-					return $(tileHtml);
+					const tileElQ = $(tileHtml);
+					const tileWidthInPx = this.calculateTileWidthInPx(this.startCol);
+					tileElQ.css({width: `${tileWidthInPx}px`})
+
+					return tileElQ;
 				})
 			;
 		}

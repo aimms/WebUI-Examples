@@ -138,6 +138,26 @@ var SimpleTableWidget = AWF.Widget.create({
 			numRows: 15,
 			numCols: 15,
 		};
+
+		// widths in em
+		const defaultColWidth = 5; // @TODO from user-option
+		const nonDefaultColWidths = {}; // @TODO from non-user visible option
+
+		// width of 1 em in px
+		const emToPx = 5; // @TODO calculate
+
+		// width in px
+		const getColWidthInPx = (col) => orElse(nonDefaultColWidths[col], defaultColWidth);
+		const isColInTile = (col) => (col >= startCol) && (col < (startCol + blockSize.numCols));
+		const calculateTileWidthInPx = (startCol) => {
+			const allColsWithNonDefaultWidth = Object.keys(nonDefaultColWidths);
+			const colsInTileWithNonDefaultWidth = allColsWithNonDefaultWidth.filter(isColInTile);
+			const tileWidthInEm = (blockSize.numCols - colsInTileWithNonDefaultWidth.length) * defaultColWidth
+				+ _.sum(colsInTileWithNonDefaultWidth.map((col) => nonDefaultColWidths[col]));
+
+			return emToPx * tileWidthInEm;
+		};
+
 		const tileDataCache = new TileDataCache({
 			blockSize,
 			requestDataBlock: (...args) => grid.requestDataBlock(...args)
@@ -153,6 +173,7 @@ var SimpleTableWidget = AWF.Widget.create({
 				startCol: tileStartCol,
 				blockSize,
 				tileDataCache,
+				calculateTileWidthInPx,
 			});
 			return tile;
 		};
