@@ -131,6 +131,11 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.simpleTableWrap.empty();
 		widget.observablePosition.off();
 
+		const viewPortSizeInPx = {
+			width: widget.simpleTableWrap.width(),
+			height: widget.simpleTableWrap.height(),
+		}
+
 		const tileContainer = $('<div class="tile-container"></div>');
 		widget.simpleTableWrap.append(tileContainer);
 
@@ -177,10 +182,13 @@ var SimpleTableWidget = AWF.Widget.create({
 			});
 			return tile;
 		};
-		const assertThatMasterTileExists = (position) => {
-			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
+		// Note: row, col can be any row or col, the function will figure out which tile it needs
+		//       and make sure that it is placed
+		const assertThatTileExistsAndIsPlaced = (row, col) => {
+			const {tileStartRow, tileStartCol} = getTileStartRowAndCol({row, col});
 			const tileKey = _key_(tileStartRow, tileStartCol);
 			if(!tiles[tileKey]) {
+				log.debug("Creating tile", tileStartRow, tileStartCol);
 				const tile = tiles[tileKey] = createTile(tileStartRow, tileStartCol);
 
 				tile.getOrConstructTileElQ().then((elQ) => {
@@ -189,6 +197,24 @@ var SimpleTableWidget = AWF.Widget.create({
 					});
 					tileContainer.append(elQ);
 				});
+			}
+		};
+		const assertThatTheViewPortIsFilledWithTiles = (position) => {
+			let numColsInViewPort = 0;
+			let colWidthsInPx = 0;
+			for(let col = position.col; col < grid.getNumCols() && colWidthsInPx < viewPortSizeInPx.width; col++) {
+				const colWidthInPx = Math.max(getColWidthInPx(col), 1); // guard against non-positive results
+				colWidthsInPx += colWidthInPx;
+				// console.log("col widths:", col, colWidthInPx, colWidthsInPx);
+				numColsInViewPort++;
+			}
+
+			// console.log("Num cols in vp:", numColsInViewPort);
+
+			for(let i = 0; i <= numColsInViewPort; i++) {
+				// @TODO do some smartness because we know the block size
+				// console.log("assertThatTileExistsAndIsPlaced", position.col+i);
+				assertThatTileExistsAndIsPlaced(0, position.col+i);
 			}
 		};
 		const assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed = (position) => {
@@ -248,13 +274,13 @@ var SimpleTableWidget = AWF.Widget.create({
 			console.log("tileDataCache size: ", Object.keys(tileDataCache.cache).length);
 		}, 100);
 
-		widget.observablePosition.on('change', assertThatMasterTileExists);
+		widget.observablePosition.on('change', assertThatTheViewPortIsFilledWithTiles);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
-		widget.observablePosition.on('change', assertThatTheAdjacentTileInTheScrollDirectionIsAdded);
+		// widget.observablePosition.on('change', assertThatTheAdjacentTileInTheScrollDirectionIsAdded);
 		widget.observablePosition.on('change', scrollTileContainerToPosition);
 		// widget.observablePosition.on('change', printStats);
 
-		assertThatMasterTileExists(widget.observablePosition);
+		assertThatTheViewPortIsFilledWithTiles(widget.observablePosition);
 	},
 
 	/**
