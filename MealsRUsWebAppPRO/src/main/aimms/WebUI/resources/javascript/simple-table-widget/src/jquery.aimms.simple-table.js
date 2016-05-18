@@ -34,34 +34,43 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.element.find('.awf-dock.center')
 			.append(widget.simpleTableWrap);
 
-		let scrollbarElQ = widget.scrollbarElQ =
+		let horizontalScrollBarElQ = widget.horizontalScrollBarElQ =
 							$(`<div style="
 									width: 100%;
 									height: 10px;
 							">`);
-		widget.element.find('.awf-dock.bottom').append(scrollbarElQ);
-		scrollbarElQ.scrollbar({
-			minimum: 0,
-			maximum: 0,
-			value: 0,
-			blockIncrement: 'visibleAmount',
-			unitIncrement: 1,
-			change: function(event, ui) {
-				// console.log("change", event, ui);
-		//					},
-		//					start: function(event, ui) {
-		//						console.log("start", event, ui);
-		//					},
-		//					scroll: function(event, ui) {
-		//						console.log("scroll", event, ui);
-		//					},
-		//					stop: function(event, ui) {
-		//						console.log("stop", event, ui);
-			}
-		})
-		.on('scrollbarchange', _.throttle((event, ui) => {
-			widget.observablePosition.set(0, ui.value);
-		}, 33));
+		widget.element.find('.awf-dock.bottom').append(horizontalScrollBarElQ);
+		horizontalScrollBarElQ
+			.scrollbar({
+				minimum: 0,
+				maximum: 0,
+				value: 0,
+				blockIncrement: 'visibleAmount',
+				unitIncrement: 1,
+			})
+			.on('scrollbarchange', _.throttle((event, ui) => {
+				widget.observablePosition.set(widget.observablePosition.row, ui.value);
+			}, 33))
+		;
+
+		let verticalScrollBarElQ = widget.verticalScrollBarElQ =
+							$(`<div style="
+									width: 10px;
+									height: 100%;
+							">`);
+		widget.element.find('.awf-dock.right').append(verticalScrollBarElQ);
+		verticalScrollBarElQ
+			.scrollbar({
+				minimum: 0,
+				maximum: 0,
+				value: 0,
+				blockIncrement: 'visibleAmount',
+				unitIncrement: 1,
+			})
+			.on('scrollbarchange', _.throttle((event, ui) => {
+				widget.observablePosition.set(ui.value, widget.observablePosition.col);
+			}, 33))
+		;
 	},
 
 /*
@@ -125,8 +134,10 @@ var SimpleTableWidget = AWF.Widget.create({
 		log.debug("grid.getNumRows(): ", grid.getNumRows());
 		log.debug("grid.getNumCols(): ", grid.getNumCols());
 
-		widget.scrollbarElQ.scrollbar('maximum', grid.getNumCols());
-		widget.scrollbarElQ.scrollbar('visibleAmount', 12);
+		widget.horizontalScrollBarElQ.scrollbar('maximum', grid.getNumCols());
+		widget.horizontalScrollBarElQ.scrollbar('visibleAmount', 12);
+		widget.verticalScrollBarElQ.scrollbar('maximum', grid.getNumRows());
+		widget.verticalScrollBarElQ.scrollbar('visibleAmount', 24);
 
 		widget.simpleTableWrap.empty();
 		widget.observablePosition.off();
@@ -276,7 +287,8 @@ var SimpleTableWidget = AWF.Widget.create({
 
 			log.debug(`Scrolling to col ${position.col} (delta: ${delta})`);
 			tileContainer.css({
-				left: `-${position.col * 50}px`,
+				top: `-${calculateCellTopOffsetInPx(position.row)}px`,
+				left: `-${calculateCellLeftOffsetInPx(position.col)}px`,
 			});
 		};
 		const printStats = _.debounce((position) => {

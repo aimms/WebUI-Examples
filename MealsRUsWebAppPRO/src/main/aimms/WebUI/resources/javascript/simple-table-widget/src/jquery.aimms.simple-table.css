@@ -13,11 +13,17 @@
 
 .tag-simple-table .simpleTableWrap .tile-container {
 	position: absolute;
-	transition: left 0.3s ease;
+	transition:
+		top 0.3s ease,
+		left 0.3s ease
+	;
 }
 
 .tag-simple-table .simpleTableWrap .fast-scrolling.tile-container {
-	transition: left 0.1s ease;
+	transition:
+		top 0.3s ease,
+		left 0.3s ease
+	;
 }
 
 .tag-simple-table .simpleTableWrap table.tile {
