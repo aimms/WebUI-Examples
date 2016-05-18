@@ -140,7 +140,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		};
 
 		// widths in em
-		const defaultColWidth = 5; // @TODO from user-option
+		const defaultColWidth = 10; // @TODO from user-option
 		const nonDefaultColWidths = {}; // @TODO from non-user visible option
 
 		// width of 1 em in px
