@@ -147,7 +147,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		const emToPx = 5; // @TODO calculate
 
 		// width in px
-		const getColWidthInPx = (col) => orElse(nonDefaultColWidths[col], defaultColWidth);
+		const getColWidthInPx = (col) => orElse(nonDefaultColWidths[col], defaultColWidth) * emToPx;
 		const isColInTile = (col) => (col >= startCol) && (col < (startCol + blockSize.numCols));
 		const calculateTileWidthInPx = (startCol) => {
 			const allColsWithNonDefaultWidth = Object.keys(nonDefaultColWidths);
