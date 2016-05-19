@@ -319,11 +319,11 @@ var SimpleTableWidget = AWF.Widget.create({
 				}
 			};
 
-			if(options.orientation === "horizontal")){
+			if(options.orientation === "horizontal"){
 				numOfItems = grid.getNumCols();
 				getEndPosition = (col) => [0, col + 2];
 				doItemsOverflow = createOverflowCheck(getColWidthInPx, viewPortSizeInPx.width);
-			} else if(options.orientation === "vertical")){
+			} else if(options.orientation === "vertical"){
 				numOfItems = grid.getNumRows();
 				getEndPosition = (row) => [row + 2, 0];
 				doItemsOverflow = createOverflowCheck(() => defaultRowHeightInPx, viewPortSizeInPx.height);
