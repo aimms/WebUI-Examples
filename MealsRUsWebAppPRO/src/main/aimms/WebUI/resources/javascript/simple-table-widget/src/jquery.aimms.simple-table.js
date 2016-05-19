@@ -231,95 +231,110 @@ var SimpleTableWidget = AWF.Widget.create({
 		}
 		log.debug("viewPortSizeInPx", viewPortSizeInPx.width, viewPortSizeInPx.height);
 
-		const tileDataCache = new TileDataCache({
-			blockSize,
-			requestDataBlock: (...args) => grid.requestDataBlock(...args)
-		});
-		const tiles = {};
-		const getTileStartRowAndCol = (position) => ({
-			tileStartRow: Math.floor(position.row/blockSize.numRows) * blockSize.numRows,
-			tileStartCol: Math.floor(position.col/blockSize.numCols) * blockSize.numCols,
-		});
-		const createTile = (tileStartRow, tileStartCol) => {
-			console.log("Create", tileStartCol);
-			const tile = new Tile({
-				startRow: tileStartRow,
-				startCol: tileStartCol,
-				blockSize,
-				tileDataCache,
-				calculateTileWidthInPx,
-			});
-			return tile;
-		};
-		// Note: row, col can be any row or col, the function will figure out which tile it needs
-		//       and make sure that it is placed
-		const assertThatTileExistsAndIsPlaced = (row, col) => {
-			const {tileStartRow, tileStartCol} = getTileStartRowAndCol({row, col});
-			const tileKey = _key_(tileStartRow, tileStartCol);
-			if(!tiles[tileKey]) {
-				log.debug("Creating tile", tileStartRow, tileStartCol, calculateCellLeftOffsetInPx(tileStartCol));
-				const tile = tiles[tileKey] = createTile(tileStartRow, tileStartCol);
+		class TiledGridView {
+			constructor() {
+				this.tileDataCache = new TileDataCache({
+					blockSize,
+					requestDataBlock: (...args) => grid.requestDataBlock(...args)
+				});
+				this.tiles = {};
+			}
+			getTileStartRowAndCol(position) {
+				return {
+					tileStartRow: Math.floor(position.row/blockSize.numRows) * blockSize.numRows,
+					tileStartCol: Math.floor(position.col/blockSize.numCols) * blockSize.numCols,
+				}
+			}
+			createTile(tileStartRow, tileStartCol) {
+				console.log("Create", tileStartCol);
+				const tile = new Tile({
+					startRow: tileStartRow,
+					startCol: tileStartCol,
+					blockSize,
+					tileDataCache: this.tileDataCache,
+					calculateTileWidthInPx,
+				});
+				return tile;
+			}
+			// Note: row, col can be any row or col, the function will figure out which tile it needs
+			//       and make sure that it is placed
+			assertThatTileExistsAndIsPlaced(row, col) {
+				const {tileStartRow, tileStartCol} = this.getTileStartRowAndCol({row, col});
+				const tileKey = _key_(tileStartRow, tileStartCol);
+				if(!this.tiles[tileKey]) {
+					log.debug("Creating tile", tileStartRow, tileStartCol, calculateCellLeftOffsetInPx(tileStartCol));
+					const tile = this.tiles[tileKey] = this.createTile(tileStartRow, tileStartCol);
 
-				tile.getOrConstructTileElQ().then((elQ) => {
-					elQ.css({
-						top: `${calculateCellTopOffsetInPx(tileStartRow)}px`,
-						left: `${calculateCellLeftOffsetInPx(tileStartCol)}px`,
+					tile.getOrConstructTileElQ().then((elQ) => {
+						elQ.css({
+							top: `${calculateCellTopOffsetInPx(tileStartRow)}px`,
+							left: `${calculateCellLeftOffsetInPx(tileStartCol)}px`,
+						});
+						tileContainer.append(elQ);
 					});
-					tileContainer.append(elQ);
+				}
+			}
+			assertThatTheViewPortIsFilledWithTiles(position) {
+				let numColsInViewPort = 0;
+				let colWidthsInPx = 0;
+				for(let col = position.col; col < grid.getNumCols() && colWidthsInPx < viewPortSizeInPx.width; col++) {
+					const colWidthInPx = Math.max(getColWidthInPx(col), 1); // guard against non-positive results
+					colWidthsInPx += colWidthInPx;
+					// console.log("col widths:", col, colWidthInPx, colWidthsInPx);
+					numColsInViewPort++;
+				}
+
+				let numRowsInViewPort = Math.ceil(viewPortSizeInPx.height / defaultRowHeightInPx);
+
+				// console.log("Num rows / cols in vp:", numRowsInViewPort, numColsInViewPort);
+
+				// @TODO do some smartness because we know the block size:
+				for(let i = 0; i <= numColsInViewPort; i++) {
+					for(let j = 0; j < numRowsInViewPort; j++) {
+						// console.log("assertThatTileExistsAndIsPlaced", position.row+j, position.col+i);
+						this.assertThatTileExistsAndIsPlaced(position.row+j, position.col+i);
+					}
+				}
+			}
+			assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed(position) {
+				const {tileStartRow: masterTileStartRow, tileStartCol: masterTileStartCol} = this.getTileStartRowAndCol(position);
+				Object.forEach(this.tiles, (tileKey, tile) => {
+					// console.log(tile.startCol , masterTileStartCol);
+					// @TODO find better definition of when to remove tiles
+					const maxRowDistance = 30 / blockSize.numRows;
+					const maxColDistance = 30 / blockSize.numCols;
+					if(Math.abs(tile.startRow/blockSize.numRows - masterTileStartRow/blockSize.numRows) >= maxRowDistance ||
+					Math.abs(tile.startCol/blockSize.numCols - masterTileStartCol/blockSize.numCols) >= maxColDistance) {
+
+						delete this.tiles[tileKey];
+						tile.destroy();
+					}
+				});
+			}
+			scrollTileContainerToPosition(position) {
+				// "private local variable" to the scrollTileContainerToPosition;
+				this.previousPosition = this.previousPosition || {row: position.row, col: position.col};
+				const delta = Math.abs(this.previousPosition.col - position.col);
+				this.previousPosition = position;
+
+				tileContainer.toggleClass("fast-scrolling", delta > (2 * blockSize.numCols));
+
+				log.debug(`Scrolling to col ${position.col} (delta: ${delta})`);
+				tileContainer.css({
+					top: `-${calculateCellTopOffsetInPx(position.row)}px`,
+					left: `-${calculateCellLeftOffsetInPx(position.col)}px`,
 				});
 			}
 		};
-		const assertThatTheViewPortIsFilledWithTiles = (position) => {
-			let numColsInViewPort = 0;
-			let colWidthsInPx = 0;
-			for(let col = position.col; col < grid.getNumCols() && colWidthsInPx < viewPortSizeInPx.width; col++) {
-				const colWidthInPx = Math.max(getColWidthInPx(col), 1); // guard against non-positive results
-				colWidthsInPx += colWidthInPx;
-				// console.log("col widths:", col, colWidthInPx, colWidthsInPx);
-				numColsInViewPort++;
-			}
 
-			let numRowsInViewPort = Math.ceil(viewPortSizeInPx.height / defaultRowHeightInPx);
+		const gridView = new TiledGridView();
 
-			// console.log("Num rows / cols in vp:", numRowsInViewPort, numColsInViewPort);
+		widget.observablePosition.on('change', gridView.assertThatTheViewPortIsFilledWithTiles.bind(gridView));
+		widget.observablePosition.on('change', gridView.assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed.bind(gridView));
+		widget.observablePosition.on('change', gridView.scrollTileContainerToPosition.bind(gridView));
 
-			// @TODO do some smartness because we know the block size:
-			for(let i = 0; i <= numColsInViewPort; i++) {
-				for(let j = 0; j < numRowsInViewPort; j++) {
-					// console.log("assertThatTileExistsAndIsPlaced", position.row+j, position.col+i);
-					assertThatTileExistsAndIsPlaced(position.row+j, position.col+i);
-				}
-			}
-		};
-		const assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed = (position) => {
-			const {tileStartRow: masterTileStartRow, tileStartCol: masterTileStartCol} = getTileStartRowAndCol(position);
-			Object.forEach(tiles, (tileKey, tile) => {
-				// console.log(tile.startCol , masterTileStartCol);
-				// @TODO find better definition of when to remove tiles
-				const maxRowDistance = 30 / blockSize.numRows;
-				const maxColDistance = 30 / blockSize.numCols;
-				if(Math.abs(tile.startRow/blockSize.numRows - masterTileStartRow/blockSize.numRows) >= maxRowDistance ||
-				   Math.abs(tile.startCol/blockSize.numCols - masterTileStartCol/blockSize.numCols) >= maxColDistance) {
+		gridView.assertThatTheViewPortIsFilledWithTiles(widget.observablePosition);
 
-					delete tiles[tileKey];
-					tile.destroy();
-				}
-			});
-		};
-		// "private local variable" to the scrollTileContainerToPosition;
-		let previousPosition = {row: widget.observablePosition.row, col: widget.observablePosition.col};
-		const scrollTileContainerToPosition = (position) => {
-			const delta = Math.abs(previousPosition.col - position.col);
-			previousPosition = position;
-
-			tileContainer.toggleClass("fast-scrolling", delta > (2 * blockSize.numCols));
-
-			log.debug(`Scrolling to col ${position.col} (delta: ${delta})`);
-			tileContainer.css({
-				top: `-${calculateCellTopOffsetInPx(position.row)}px`,
-				left: `-${calculateCellLeftOffsetInPx(position.col)}px`,
-			});
-		};
 		const printStats = _.debounce((position) => {
 			console.log("position", position.row, position.col);
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
@@ -328,7 +343,9 @@ var SimpleTableWidget = AWF.Widget.create({
 			console.log("tiles: ", tiles);
 			console.log("tileDataCache size: ", Object.keys(tileDataCache.cache).length);
 		}, 100);
+		// widget.observablePosition.on('change', printStats);
 
+		// @TODO Move to scroll plugin
 		const handleScrollEnd = (orientation) => {
 			let numOfItems = null;
 			let getEndPosition = null;
@@ -359,13 +376,6 @@ var SimpleTableWidget = AWF.Widget.create({
 		};
 		widget.horizontalScrollBarElQ.off('scrollbarend').on('scrollbarend', handleScrollEnd.curry("horizontal"));
 		widget.verticalScrollBarElQ.off('scrollbarend').on('scrollbarend', handleScrollEnd.curry("vertical"));
-
-		widget.observablePosition.on('change', assertThatTheViewPortIsFilledWithTiles);
-		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
-		widget.observablePosition.on('change', scrollTileContainerToPosition);
-		// widget.observablePosition.on('change', printStats);
-
-		assertThatTheViewPortIsFilledWithTiles(widget.observablePosition);
 	},
 
 	/**
