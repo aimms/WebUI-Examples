@@ -145,9 +145,10 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.verticalScrollBarElQ.scrollbar('visibleAmount', 24);
 
 		// reset state
-		try {
-			widget.element.stylesheet('dispose');
-		} catch(e) {} // @TODO fix stylesheet plugin (make dispose idempotent or something)
+		// try {
+		// 	// @TODO fix stylesheet plugin (make dispose idempotent or something)
+		// 	widget.element.stylesheet('dispose');
+		// } catch(e) {} 
 		widget.gridViewPort.empty();
 		widget.observablePosition.off();
 
