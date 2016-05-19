@@ -25,14 +25,16 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		widget.observablePosition = new ObservablePosition();
 
-		widget.simpleTableWrap = $('<div class="simpleTableWrap"></div>');
-		widget.tableElQ = $('<table>');
-
-		widget.simpleTableWrap
-			.append(widget.tableElQ);
+		const tableElQ = widget.tableElQ = $(`
+			<div class="simple-table-wrap">
+				<div class="grid-viewport"></div>
+			</div>
+		`);
+		const gridViewPort = widget.gridViewPort = tableElQ.find('.grid-viewport');
 
 		widget.element.find('.awf-dock.center')
-			.append(widget.simpleTableWrap);
+			.append(widget.tableElQ)
+		;
 
 		// @TODO generate ID
 		widget.element.attr('id', 'my-dummy-id');
@@ -131,8 +133,8 @@ var SimpleTableWidget = AWF.Widget.create({
 		log.debug("rowHeader.getNumRows(): ", rowHeader.getNumRows());
 		log.debug("rowHeader.getNumCols(): ", rowHeader.getNumCols());
 
-		log.debug("rowHeader.getNumRows(): ", colHeader.getNumRows());
-		log.debug("rowHeader.getNumCols(): ", colHeader.getNumCols());
+		log.debug("colHeader.getNumRows(): ", colHeader.getNumRows());
+		log.debug("colHeader.getNumCols(): ", colHeader.getNumCols());
 
 		log.debug("grid.getNumRows(): ", grid.getNumRows());
 		log.debug("grid.getNumCols(): ", grid.getNumCols());
@@ -142,17 +144,13 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.verticalScrollBarElQ.scrollbar('maximum', grid.getNumRows());
 		widget.verticalScrollBarElQ.scrollbar('visibleAmount', 24);
 
+		// reset state
 		widget.element.stylesheet('dispose');
-		widget.simpleTableWrap.empty();
+		widget.gridViewPort.empty();
 		widget.observablePosition.off();
 
-		const viewPortSizeInPx = {
-			width: widget.simpleTableWrap.width(),
-			height: widget.simpleTableWrap.height(),
-		}
-
 		const tileContainer = $('<div class="tile-container"></div>');
-		widget.simpleTableWrap.append(tileContainer);
+		widget.gridViewPort.append(tileContainer);
 
 		const defaultTileHeightInPx = (function determineTileHeight() {
 			// @TODO create proper tile based on block size
@@ -197,6 +195,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		// sizes in px
 		// @TODO: for when we construct the sizingTileElQ based on blockSize: replace '3' with 'blockSize.numRows'
 		const defaultRowHeightInPx = defaultTileHeightInPx / 3;
+		const defaultColWidthInPx = defaultColWidth * emToPx;
 		const getColWidthInPx = (col) => orElse(nonDefaultColWidths[col], defaultColWidth) * emToPx;
 		const isColInTile = (startCol, col) => (col >= startCol) && (col < (startCol + blockSize.numCols));
 		const calculateTileWidthInPx = (startCol) => {
@@ -217,6 +216,17 @@ var SimpleTableWidget = AWF.Widget.create({
 			return cellLeftOffsetInEm * emToPx;
 		};
 		const calculateCellTopOffsetInPx = (row) => row * defaultRowHeightInPx;
+
+		widget.gridViewPort.css({
+			top: colHeader.getNumCols() * defaultRowHeightInPx,
+			left: rowHeader.getNumCols() * defaultColWidthInPx, // @TODO getColWidthInPx_for_rowHeader
+		})
+
+		const viewPortSizeInPx = {
+			width: widget.gridViewPort.width(),
+			height: widget.gridViewPort.height(),
+		}
+		log.debug("viewPortSizeInPx", viewPortSizeInPx.width, viewPortSizeInPx.height);
 
 		const tileDataCache = new TileDataCache({
 			blockSize,
@@ -311,7 +321,7 @@ var SimpleTableWidget = AWF.Widget.create({
 			console.log("position", position.row, position.col);
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol(position);
 			console.log("tileStartRow,tileStartCol",tileStartRow,tileStartCol);
-			console.log("tables: ", widget.simpleTableWrap.find('> table.tile'));
+			console.log("tables: ", widget.gridViewPort.find('> table.tile'));
 			console.log("tiles: ", tiles);
 			console.log("tileDataCache size: ", Object.keys(tileDataCache.cache).length);
 		}, 100);

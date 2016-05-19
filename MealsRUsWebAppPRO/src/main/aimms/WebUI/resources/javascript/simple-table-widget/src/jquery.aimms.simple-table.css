@@ -4,14 +4,17 @@
 	overflow: hidden;
 }
 
-.tag-simple-table .simpleTableWrap {
-	width:100%;
-	height:100%;
-	position:relative;
+.tag-simple-table .grid-viewport {
+	top: 90px;
+	bottom: 0px;
+	left: 0;
+	right: 0;
+	margin: auto;
+	position:absolute;
 	overflow:hidden;
 }
 
-.tag-simple-table .simpleTableWrap .tile-container {
+.tag-simple-table .tile-container {
 	position: absolute;
 	transition:
 		top 0.3s ease,
@@ -19,30 +22,30 @@
 	;
 }
 
-.tag-simple-table .simpleTableWrap .fast-scrolling.tile-container {
+.tag-simple-table .fast-scrolling.tile-container {
 	transition:
 		top 0.3s ease,
 		left 0.3s ease
 	;
 }
 
-.tag-simple-table .simpleTableWrap table.tile {
+.tag-simple-table table.tile {
 	position: absolute;
 	transition: all 0.3s ease;
 	table-layout: fixed;
 }
 
-.tag-simple-table .simpleTableWrap col {
+.tag-simple-table table.tile col {
 	width: 50px;
 }
 
-.tag-simple-table .simpleTableWrap table.tile td > div {
+.tag-simple-table table.tile td > div {
 	height: 1em;
 }
 
-.tag-simple-table .simpleTableWrap table.tile tr td:last-of-type {
+.tag-simple-table table.tile tr td:last-of-type {
 	border-right: none;
 }
-.tag-simple-table .simpleTableWrap table.tile tr:last-of-type td {
+.tag-simple-table table.tile tr:last-of-type td {
 	border-bottom: none;
 }
