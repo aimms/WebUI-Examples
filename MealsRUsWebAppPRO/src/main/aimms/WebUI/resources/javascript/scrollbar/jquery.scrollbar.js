@@ -56,7 +56,7 @@
 		_init: function _init() {
 			this.options.orientation = this.element.width() > this.element.height() ? 'horizontal' : 'vertical';
 			this.options.visibleAmount = this.options.visibleAmount.clamp(1, this.options.maximum - this.options.minimum);
-			
+
 			// 1. Initialize the contents of the DOM element.
 			this.element.addClass('ui-scrollbar ui-widget');
 			this.element.html(
@@ -137,7 +137,7 @@
 			this.element.empty();
 			this.element.removeClass('ui-scrollbar ui-widget');
 		},
-		
+
 		/**
 		 *	Refreshes the current view of this scrollbar by recalculating and reapplying sizes and positions to the scrollbar's four main components:
 		 *	The decrement button; the thumb container; the thumb; and the increment button.
@@ -254,7 +254,7 @@
 		minimum: function minimum(minimum) {
 			if(minimum != undefined) {
 				this.options.minimum = Math.min(this.options.maximum, minimum);
-				this._refreshThumb();	
+				this._refreshThumb();
 			} else {
 				return this.options.minimum;
 			}
@@ -321,7 +321,11 @@
 			var newValue = value.clamp(this.options.minimum, this.options.maximum - this.options.visibleAmount);
 			if(newValue != this.options.value) {
 				this.options.value = newValue;
-				this._trigger('change', 0, {value: this.options.value});
+				if((this.options.visibleAmount + this.options.value) === this.options.maximum){
+					this._trigger('end', 0, {value: this.options.value});
+				} else{
+					this._trigger('change', 0, {value: this.options.value});
+				}
 				return true;
 			} else {
 				return false
@@ -354,7 +358,7 @@
 					this._setValue(this.options.value + this.options.unitIncrement);
 				}
 				this._refreshThumb();
-				
+
 				if(!isAutoRepeating) {
 					$.autoRepeat(event, ui, this);
 				}

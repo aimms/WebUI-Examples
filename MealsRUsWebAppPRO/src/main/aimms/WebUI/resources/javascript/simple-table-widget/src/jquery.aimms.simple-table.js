@@ -51,6 +51,10 @@ var SimpleTableWidget = AWF.Widget.create({
 			.on('scrollbarchange', _.throttle((event, ui) => {
 				widget.observablePosition.set(widget.observablePosition.row, ui.value);
 			}, 33))
+			.on('scrollbarend', (event, ui) => {
+				console.log("end event ***");
+				widget.observablePosition.trigger("end", {orientation: "horizontal"});
+			})
 		;
 
 		let verticalScrollBarElQ = widget.verticalScrollBarElQ =
@@ -70,6 +74,9 @@ var SimpleTableWidget = AWF.Widget.create({
 			.on('scrollbarchange', _.throttle((event, ui) => {
 				widget.observablePosition.set(ui.value, widget.observablePosition.col);
 			}, 33))
+			.on('scrollbarend', (event, ui) => {
+				widget.observablePosition.trigger("end", {orientation: "vertical"});
+			})
 		;
 	},
 
@@ -213,6 +220,7 @@ var SimpleTableWidget = AWF.Widget.create({
 			tileStartCol: Math.floor(position.col/blockSize.numCols) * blockSize.numCols,
 		});
 		const createTile = (tileStartRow, tileStartCol) => {
+			console.log("Create", tileStartCol);
 			const tile = new Tile({
 				startRow: tileStartRow,
 				startCol: tileStartCol,
@@ -300,12 +308,42 @@ var SimpleTableWidget = AWF.Widget.create({
 			console.log("tileDataCache size: ", Object.keys(tileDataCache.cache).length);
 		}, 100);
 
+		const handleScrollEnd = (options) => {
+			let numOfItems = null;
+			let getEndPosition = null;
+			const createOverflowCheck = (getDimension, viewPortDimension) => {
+				let total = 0;
+				return (position) => {
+					total += getDimension(position);
+					return total > viewPortDimension;
+				}
+			};
+
+			if(options.orientation === "horizontal")){
+				numOfItems = grid.getNumCols();
+				getEndPosition = (col) => [0, col + 2];
+				doItemsOverflow = createOverflowCheck(getColWidthInPx, viewPortSizeInPx.width);
+			} else if(options.orientation === "vertical")){
+				numOfItems = grid.getNumRows();
+				getEndPosition = (row) => [row + 2, 0];
+				doItemsOverflow = createOverflowCheck(() => defaultRowHeightInPx, viewPortSizeInPx.height);
+			}
+
+			for(let i=numOfItems; i--;){
+				if(doItemsOverflow(i)){
+					widget.observablePosition.set(...getEndPosition(i));
+					break;
+				}
+			}
+		};
+
 		widget.observablePosition.on('change', assertThatTheViewPortIsFilledWithTiles);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
 		widget.observablePosition.on('change', scrollTileContainerToPosition);
 		// widget.observablePosition.on('change', printStats);
 
 		assertThatTheViewPortIsFilledWithTiles(widget.observablePosition);
+		widget.observablePosition.on('end', handleScrollEnd);
 	},
 
 	/**

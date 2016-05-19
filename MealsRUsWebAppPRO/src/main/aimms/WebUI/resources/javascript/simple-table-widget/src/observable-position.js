@@ -1,6 +1,6 @@
 class ObservablePosition {
 	constructor() {
-		Observable(this, ["change"]);
+		Observable(this, ["change", "end"]);
 		this.on = this.bind;
 		this.off = this.unbind;
 
