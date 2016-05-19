@@ -329,8 +329,8 @@ var SimpleTableWidget = AWF.Widget.create({
 				}
 			}
 		};
-		widget.horizontalScrollBarElQ.on('scrollbarend', handleScrollEnd.curry("horizontal"));
-		widget.verticalScrollBarElQ.on('scrollbarend', handleScrollEnd.curry("vertical"));
+		widget.horizontalScrollBarElQ.off('scrollbarend').on('scrollbarend', handleScrollEnd.curry("horizontal"));
+		widget.verticalScrollBarElQ.off('scrollbarend').on('scrollbarend', handleScrollEnd.curry("vertical"));
 
 		widget.observablePosition.on('change', assertThatTheViewPortIsFilledWithTiles);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
