@@ -51,10 +51,6 @@ var SimpleTableWidget = AWF.Widget.create({
 			.on('scrollbarchange', _.throttle((event, ui) => {
 				widget.observablePosition.set(widget.observablePosition.row, ui.value);
 			}, 33))
-			.on('scrollbarend', (event, ui) => {
-				console.log("end event ***");
-				widget.observablePosition.trigger('end', {orientation: 'horizontal'});
-			})
 		;
 
 		let verticalScrollBarElQ = widget.verticalScrollBarElQ =
@@ -74,9 +70,6 @@ var SimpleTableWidget = AWF.Widget.create({
 			.on('scrollbarchange', _.throttle((event, ui) => {
 				widget.observablePosition.set(ui.value, widget.observablePosition.col);
 			}, 33))
-			.on('scrollbarend', (event, ui) => {
-				widget.observablePosition.trigger('end', {orientation: 'vertical'});
-			})
 		;
 	},
 
@@ -308,7 +301,7 @@ var SimpleTableWidget = AWF.Widget.create({
 			console.log("tileDataCache size: ", Object.keys(tileDataCache.cache).length);
 		}, 100);
 
-		const handleScrollEnd = (options) => {
+		const handleScrollEnd = (orientation) => {
 			let numOfItems = null;
 			let getEndPosition = null;
 			const createOverflowCheck = (getDimension, viewPortDimension) => {
@@ -319,23 +312,25 @@ var SimpleTableWidget = AWF.Widget.create({
 				}
 			};
 
-			if(options.orientation === 'horizontal'){
+			if(orientation === 'horizontal') {
 				numOfItems = grid.getNumCols();
 				getEndPosition = (col) => [widget.observablePosition.row, col + 2];
 				doItemsOverflow = createOverflowCheck(getColWidthInPx, viewPortSizeInPx.width);
-			} else if(options.orientation === 'vertical'){
+			} else if(orientation === 'vertical') {
 				numOfItems = grid.getNumRows();
 				getEndPosition = (row) => [row + 2, widget.observablePosition.col];
 				doItemsOverflow = createOverflowCheck(() => defaultRowHeightInPx, viewPortSizeInPx.height);
 			}
 
-			for(let i=numOfItems; i--;){
-				if(doItemsOverflow(i)){
+			for(let i=numOfItems; i--;) {
+				if(doItemsOverflow(i)) {
 					widget.observablePosition.set(...getEndPosition(i));
 					break;
 				}
 			}
 		};
+		widget.horizontalScrollBarElQ.on('scrollbarend', handleScrollEnd.curry("horizontal"));
+		widget.verticalScrollBarElQ.on('scrollbarend', handleScrollEnd.curry("vertical"));
 
 		widget.observablePosition.on('change', assertThatTheViewPortIsFilledWithTiles);
 		widget.observablePosition.on('change', assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed);
@@ -343,7 +338,6 @@ var SimpleTableWidget = AWF.Widget.create({
 		// widget.observablePosition.on('change', printStats);
 
 		assertThatTheViewPortIsFilledWithTiles(widget.observablePosition);
-		widget.observablePosition.on('end', handleScrollEnd);
 	},
 
 	/**
