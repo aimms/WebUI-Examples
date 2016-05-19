@@ -53,7 +53,7 @@ var SimpleTableWidget = AWF.Widget.create({
 			}, 33))
 			.on('scrollbarend', (event, ui) => {
 				console.log("end event ***");
-				widget.observablePosition.trigger("end", {orientation: "horizontal"});
+				widget.observablePosition.trigger('end', {orientation: 'horizontal'});
 			})
 		;
 
@@ -75,7 +75,7 @@ var SimpleTableWidget = AWF.Widget.create({
 				widget.observablePosition.set(ui.value, widget.observablePosition.col);
 			}, 33))
 			.on('scrollbarend', (event, ui) => {
-				widget.observablePosition.trigger("end", {orientation: "vertical"});
+				widget.observablePosition.trigger('end', {orientation: 'vertical'});
 			})
 		;
 	},
@@ -319,11 +319,11 @@ var SimpleTableWidget = AWF.Widget.create({
 				}
 			};
 
-			if(options.orientation === "horizontal"){
+			if(options.orientation === 'horizontal'){
 				numOfItems = grid.getNumCols();
 				getEndPosition = (col) => [widget.observablePosition.row, col + 2];
 				doItemsOverflow = createOverflowCheck(getColWidthInPx, viewPortSizeInPx.width);
-			} else if(options.orientation === "vertical"){
+			} else if(options.orientation === 'vertical'){
 				numOfItems = grid.getNumRows();
 				getEndPosition = (row) => [row + 2, widget.observablePosition.col];
 				doItemsOverflow = createOverflowCheck(() => defaultRowHeightInPx, viewPortSizeInPx.height);
