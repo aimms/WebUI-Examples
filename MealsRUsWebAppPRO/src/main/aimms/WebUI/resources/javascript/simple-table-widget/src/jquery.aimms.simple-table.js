@@ -4,7 +4,7 @@
 $.fn.packery = null;
 
 var log = log4javascript.getLogger("widgets.simple-table");
-//setupLogger("widgets.simple-table2", "TRACE");
+// setupLogger("widgets.simple-table", "DEBUG");
 
 /**
  *	An AWF Widget or Widget Addon is a 'subclass' (i.e. derived from a protype)
@@ -33,6 +33,9 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		widget.element.find('.awf-dock.center')
 			.append(widget.simpleTableWrap);
+
+		// @TODO generate ID
+		widget.element.attr('id', 'my-dummy-id');
 
 		let horizontalScrollBarElQ = widget.horizontalScrollBarElQ =
 							$(`<div style="
@@ -139,6 +142,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.verticalScrollBarElQ.scrollbar('maximum', grid.getNumRows());
 		widget.verticalScrollBarElQ.scrollbar('visibleAmount', 24);
 
+		widget.element.stylesheet('dispose');
 		widget.simpleTableWrap.empty();
 		widget.observablePosition.off();
 
@@ -180,19 +184,23 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		// sizes in em
 		const defaultColWidth = 10; // @TODO from user-option
-		const nonDefaultColWidths = {}; // @TODO from non-user visible option
+		const nonDefaultColWidths = {1: 20, 2: 20, 3: 30, 5: 50, 7: 30, 11: 20}; // @TODO from non-user visible option
+		const allColsWithNonDefaultWidth = Object.keys(nonDefaultColWidths).map((colName) => parseInt(colName));
 
 		// width of 1 em in px
 		const emToPx = 5; // @TODO calculate
+
+		allColsWithNonDefaultWidth.forEach((col) => {
+			widget.element.stylesheet('getRule', `col.col${col}`).style.width = `${nonDefaultColWidths[col] * emToPx}px`;
+		});
 
 		// sizes in px
 		// @TODO: for when we construct the sizingTileElQ based on blockSize: replace '3' with 'blockSize.numRows'
 		const defaultRowHeightInPx = defaultTileHeightInPx / 3;
 		const getColWidthInPx = (col) => orElse(nonDefaultColWidths[col], defaultColWidth) * emToPx;
-		const isColInTile = (col) => (col >= startCol) && (col < (startCol + blockSize.numCols));
+		const isColInTile = (startCol, col) => (col >= startCol) && (col < (startCol + blockSize.numCols));
 		const calculateTileWidthInPx = (startCol) => {
-			const allColsWithNonDefaultWidth = Object.keys(nonDefaultColWidths);
-			const colsInTileWithNonDefaultWidth = allColsWithNonDefaultWidth.filter(isColInTile);
+			const colsInTileWithNonDefaultWidth = allColsWithNonDefaultWidth.filter(isColInTile.curry(startCol));
 			const tileWidthInEm = (blockSize.numCols - colsInTileWithNonDefaultWidth.length) * defaultColWidth
 				+ _.sum(colsInTileWithNonDefaultWidth.map((col) => nonDefaultColWidths[col]));
 
@@ -200,7 +208,14 @@ var SimpleTableWidget = AWF.Widget.create({
 		};
 
 		// @TODO take non default column widths into account
-		const calculateCellLeftOffsetInPx = (col) => col * defaultColWidth * emToPx;
+		const calculateCellLeftOffsetInPx = (col) => {
+			const allColsWithNonDefaultWidthLeftOfCol = allColsWithNonDefaultWidth.filter((col_) => col_ < col);
+
+			const cellLeftOffsetInEm = (col - allColsWithNonDefaultWidthLeftOfCol.length) * defaultColWidth
+				+ _.sum(allColsWithNonDefaultWidthLeftOfCol.map((col) => nonDefaultColWidths[col]));
+
+			return cellLeftOffsetInEm * emToPx;
+		};
 		const calculateCellTopOffsetInPx = (row) => row * defaultRowHeightInPx;
 
 		const tileDataCache = new TileDataCache({
@@ -229,7 +244,7 @@ var SimpleTableWidget = AWF.Widget.create({
 			const {tileStartRow, tileStartCol} = getTileStartRowAndCol({row, col});
 			const tileKey = _key_(tileStartRow, tileStartCol);
 			if(!tiles[tileKey]) {
-				log.debug("Creating tile", tileStartRow, tileStartCol);
+				log.debug("Creating tile", tileStartRow, tileStartCol, calculateCellLeftOffsetInPx(tileStartCol));
 				const tile = tiles[tileKey] = createTile(tileStartRow, tileStartCol);
 
 				tile.getOrConstructTileElQ().then((elQ) => {
