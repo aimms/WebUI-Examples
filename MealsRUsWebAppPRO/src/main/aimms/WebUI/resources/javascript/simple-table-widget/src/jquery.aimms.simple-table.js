@@ -152,188 +152,57 @@ var SimpleTableWidget = AWF.Widget.create({
 		widget.gridViewPort.empty();
 		widget.observablePosition.off();
 
-		const tileContainer = $('<div class="tile-container"></div>');
-		widget.gridViewPort.append(tileContainer);
-
-		const defaultTileHeightInPx = (function determineTileHeight() {
-			// @TODO create proper tile based on block size
-			const tileSizingElQ =
-				$(`<table class="tile">
-					<tbody>
-						<tr><td class="grid"><div>mmmmmmmmmm</div></td></tr>
-						<tr><td class="grid"><div>mmmmmmmmmm</div></td></tr>
-						<tr><td class="grid"><div>mmmmmmmmmm</div></td></tr>
-					</tbody>
-				   </table>
-			    `)
-				.css({top: '-999px', left:'-999px'})
-				.appendTo(tileContainer)
-			;
-			// sizes in px
-			const defaultTileHeightInPx = tileSizingElQ.outerHeight();
-			tileContainer.empty();
-			console.log('defaultTileHeightInPx', defaultTileHeightInPx);
-
-			return defaultTileHeightInPx;
-		})();
-
 		// @TODO can we calculate these based on the viewport size to obtain an optimized performance?
 		const blockSize = {
 			numRows: 15,
 			numCols: 15,
 		};
 
-		// sizes in em
-		const defaultColWidth = 10; // @TODO from user-option
-		const nonDefaultColWidths = {1: 20, 2: 20, 3: 30, 5: 50, 7: 30, 11: 20}; // @TODO from non-user visible option
-		const allColsWithNonDefaultWidth = Object.keys(nonDefaultColWidths).map((colName) => parseInt(colName));
+		class ColSizeConfiguration {
+			constructor() {
+				// sizes in em
+				const defaultColWidth = this.defaultColWidth = 10; // @TODO from user-option
+				const nonDefaultColWidths = this.nonDefaultColWidths = {1: 20, 2: 20, 3: 30, 5: 50, 7: 30, 11: 20}; // @TODO from non-user visible option
+				this.allColsWithNonDefaultWidth = Object.keys(nonDefaultColWidths).map((colName) => parseInt(colName));
+			}
+		}
 
-		// width of 1 em in px
-		const emToPx = 5; // @TODO calculate
+		const colSizeConfiguration = new ColSizeConfiguration({
 
-		allColsWithNonDefaultWidth.forEach((col) => {
-			widget.element.stylesheet('getRule', `col.col${col}`).style.width = `${nonDefaultColWidths[col] * emToPx}px`;
 		});
 
-		// sizes in px
-		// @TODO: for when we construct the sizingTileElQ based on blockSize: replace '3' with 'blockSize.numRows'
-		const defaultRowHeightInPx = defaultTileHeightInPx / 3;
-		const defaultColWidthInPx = defaultColWidth * emToPx;
-		const getColWidthInPx = (col) => orElse(nonDefaultColWidths[col], defaultColWidth) * emToPx;
-		const isColInTile = (startCol, col) => (col >= startCol) && (col < (startCol + blockSize.numCols));
-		const calculateTileWidthInPx = (startCol) => {
-			const colsInTileWithNonDefaultWidth = allColsWithNonDefaultWidth.filter(isColInTile.curry(startCol));
-			const tileWidthInEm = (blockSize.numCols - colsInTileWithNonDefaultWidth.length) * defaultColWidth
-				+ _.sum(colsInTileWithNonDefaultWidth.map((col) => nonDefaultColWidths[col]));
+		const tileGeometryUtil = new TileGeometryUtil({
+			colSizeConfiguration: colSizeConfiguration,
+			viewPortElQ: 		  widget.gridViewPort,
+			blockSize,
+		});
 
-			return emToPx * tileWidthInEm;
-		};
+		colSizeConfiguration.allColsWithNonDefaultWidth.forEach((col) => {
+			widget.element.stylesheet('getRule', `col.col${col}`).style.width = `${tileGeometryUtil.getColWidthInPx(col)}px`;
+		});
 
-		// @TODO take non default column widths into account
-		const calculateCellLeftOffsetInPx = (col) => {
-			const allColsWithNonDefaultWidthLeftOfCol = allColsWithNonDefaultWidth.filter((col_) => col_ < col);
-
-			const cellLeftOffsetInEm = (col - allColsWithNonDefaultWidthLeftOfCol.length) * defaultColWidth
-				+ _.sum(allColsWithNonDefaultWidthLeftOfCol.map((col) => nonDefaultColWidths[col]));
-
-			return cellLeftOffsetInEm * emToPx;
-		};
-		const calculateCellTopOffsetInPx = (row) => row * defaultRowHeightInPx;
-
+		// Position the viewPort
 		widget.gridViewPort.css({
-			top: colHeader.getNumCols() * defaultRowHeightInPx,
-			left: rowHeader.getNumCols() * defaultColWidthInPx, // @TODO getColWidthInPx_for_rowHeader
+			top: colHeader.getNumCols() * tileGeometryUtil.defaultRowHeightInPx,
+			left: rowHeader.getNumCols() * tileGeometryUtil.defaultColWidthInPx, // @TODO getColWidthInPx_for_rowHeader
 		})
 
-		const viewPortSizeInPx = {
-			width: widget.gridViewPort.width(),
-			height: widget.gridViewPort.height(),
-		}
-		log.debug("viewPortSizeInPx", viewPortSizeInPx.width, viewPortSizeInPx.height);
-
-		class TiledGridView {
-			constructor() {
-				this.tileDataCache = new TileDataCache({
-					blockSize,
-					requestDataBlock: (...args) => grid.requestDataBlock(...args)
-				});
-				this.tiles = {};
-			}
-			getTileStartRowAndCol(position) {
-				return {
-					tileStartRow: Math.floor(position.row/blockSize.numRows) * blockSize.numRows,
-					tileStartCol: Math.floor(position.col/blockSize.numCols) * blockSize.numCols,
-				}
-			}
-			createTile(tileStartRow, tileStartCol) {
-				console.log("Create", tileStartCol);
-				const tile = new Tile({
-					startRow: tileStartRow,
-					startCol: tileStartCol,
-					blockSize,
-					tileDataCache: this.tileDataCache,
-					calculateTileWidthInPx,
-				});
-				return tile;
-			}
-			// Note: row, col can be any row or col, the function will figure out which tile it needs
-			//       and make sure that it is placed
-			assertThatTileExistsAndIsPlaced(row, col) {
-				const {tileStartRow, tileStartCol} = this.getTileStartRowAndCol({row, col});
-				const tileKey = _key_(tileStartRow, tileStartCol);
-				if(!this.tiles[tileKey]) {
-					log.debug("Creating tile", tileStartRow, tileStartCol, calculateCellLeftOffsetInPx(tileStartCol));
-					const tile = this.tiles[tileKey] = this.createTile(tileStartRow, tileStartCol);
-
-					tile.getOrConstructTileElQ().then((elQ) => {
-						elQ.css({
-							top: `${calculateCellTopOffsetInPx(tileStartRow)}px`,
-							left: `${calculateCellLeftOffsetInPx(tileStartCol)}px`,
-						});
-						tileContainer.append(elQ);
-					});
-				}
-			}
-			assertThatTheViewPortIsFilledWithTiles(position) {
-				let numColsInViewPort = 0;
-				let colWidthsInPx = 0;
-				for(let col = position.col; col < grid.getNumCols() && colWidthsInPx < viewPortSizeInPx.width; col++) {
-					const colWidthInPx = Math.max(getColWidthInPx(col), 1); // guard against non-positive results
-					colWidthsInPx += colWidthInPx;
-					// console.log("col widths:", col, colWidthInPx, colWidthsInPx);
-					numColsInViewPort++;
-				}
-
-				let numRowsInViewPort = Math.ceil(viewPortSizeInPx.height / defaultRowHeightInPx);
-
-				// console.log("Num rows / cols in vp:", numRowsInViewPort, numColsInViewPort);
-
-				// @TODO do some smartness because we know the block size:
-				for(let i = 0; i <= numColsInViewPort; i++) {
-					for(let j = 0; j < numRowsInViewPort; j++) {
-						// console.log("assertThatTileExistsAndIsPlaced", position.row+j, position.col+i);
-						this.assertThatTileExistsAndIsPlaced(position.row+j, position.col+i);
-					}
-				}
-			}
-			assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed(position) {
-				const {tileStartRow: masterTileStartRow, tileStartCol: masterTileStartCol} = this.getTileStartRowAndCol(position);
-				Object.forEach(this.tiles, (tileKey, tile) => {
-					// console.log(tile.startCol , masterTileStartCol);
-					// @TODO find better definition of when to remove tiles
-					const maxRowDistance = 30 / blockSize.numRows;
-					const maxColDistance = 30 / blockSize.numCols;
-					if(Math.abs(tile.startRow/blockSize.numRows - masterTileStartRow/blockSize.numRows) >= maxRowDistance ||
-					Math.abs(tile.startCol/blockSize.numCols - masterTileStartCol/blockSize.numCols) >= maxColDistance) {
-
-						delete this.tiles[tileKey];
-						tile.destroy();
-					}
-				});
-			}
-			scrollTileContainerToPosition(position) {
-				// "private local variable" to the scrollTileContainerToPosition;
-				this.previousPosition = this.previousPosition || {row: position.row, col: position.col};
-				const delta = Math.abs(this.previousPosition.col - position.col);
-				this.previousPosition = position;
-
-				tileContainer.toggleClass("fast-scrolling", delta > (2 * blockSize.numCols));
-
-				log.debug(`Scrolling to col ${position.col} (delta: ${delta})`);
-				tileContainer.css({
-					top: `-${calculateCellTopOffsetInPx(position.row)}px`,
-					left: `-${calculateCellLeftOffsetInPx(position.col)}px`,
-				});
-			}
-		};
-
-		const gridView = new TiledGridView();
-
-		widget.observablePosition.on('change', gridView.assertThatTheViewPortIsFilledWithTiles.bind(gridView));
-		widget.observablePosition.on('change', gridView.assertThatTilesThatAreTooDistantFromTheMasterTileAreDestroyed.bind(gridView));
-		widget.observablePosition.on('change', gridView.scrollTileContainerToPosition.bind(gridView));
-
+		// Add the gridView to the viewPort
+		const gridView = new TiledGridView({
+			observablePosition: widget.observablePosition,
+			blockSize,
+			viewPortElQ: widget.gridViewPort,
+			tileGeometryUtil: tileGeometryUtil,
+			tileDataCache: new TileDataCache({
+				blockSize,
+				// @TODO debatable modularisation:
+				getNumCols: () => grid.getNumCols(),
+				getNumRows: () => grid.getNumRows(),
+				requestDataBlock: (...args) => grid.requestDataBlock(...args),
+			})
+		});
 		gridView.assertThatTheViewPortIsFilledWithTiles(widget.observablePosition);
+		widget.gridViewPort.append(gridView.tileContainer);
 
 		const printStats = _.debounce((position) => {
 			console.log("position", position.row, position.col);
@@ -360,11 +229,11 @@ var SimpleTableWidget = AWF.Widget.create({
 			if(orientation === 'horizontal') {
 				numOfItems = grid.getNumCols();
 				getEndPosition = (col) => [widget.observablePosition.row, col + 2];
-				doItemsOverflow = createOverflowCheck(getColWidthInPx, viewPortSizeInPx.width);
+				doItemsOverflow = createOverflowCheck(tileGeometryUtil.getColWidthInPx, gridView.viewPortSizeInPx.width);
 			} else if(orientation === 'vertical') {
 				numOfItems = grid.getNumRows();
 				getEndPosition = (row) => [row + 2, widget.observablePosition.col];
-				doItemsOverflow = createOverflowCheck(() => defaultRowHeightInPx, viewPortSizeInPx.height);
+				doItemsOverflow = createOverflowCheck(() => tileGeometryUtil.defaultRowHeightInPx, gridView.viewPortSizeInPx.height);
 			}
 
 			for(let i=numOfItems; i--;) {
