@@ -27,10 +27,12 @@ var SimpleTableWidget = AWF.Widget.create({
 
 		const tableElQ = widget.tableElQ = $(`
 			<div class="simple-table-wrap">
+				<div class="colheader-viewport"></div>
 				<div class="grid-viewport"></div>
 			</div>
 		`);
 		const gridViewPort = widget.gridViewPort = tableElQ.find('.grid-viewport');
+		const colHeaderViewPort = widget.colHeaderViewPort = tableElQ.find('.colheader-viewport');
 
 		widget.element.find('.awf-dock.center')
 			.append(widget.tableElQ)
@@ -150,6 +152,7 @@ var SimpleTableWidget = AWF.Widget.create({
 		// 	widget.element.stylesheet('dispose');
 		// } catch(e) {} 
 		widget.gridViewPort.empty();
+		widget.colHeaderViewPort.empty();
 		widget.observablePosition.off();
 
 		// @TODO can we calculate these based on the viewport size to obtain an optimized performance?
@@ -181,6 +184,7 @@ var SimpleTableWidget = AWF.Widget.create({
 			widget.element.stylesheet('getRule', `col.col${col}`).style.width = `${tileGeometryUtil.getColWidthInPx(col)}px`;
 		});
 
+		// Grid
 		// Position the viewPort
 		widget.gridViewPort.css({
 			top: colHeader.getNumCols() * tileGeometryUtil.defaultRowHeightInPx,
@@ -203,6 +207,52 @@ var SimpleTableWidget = AWF.Widget.create({
 		});
 		gridView.assertThatTheViewPortIsFilledWithTiles(widget.observablePosition);
 		widget.gridViewPort.append(gridView.tileContainer);
+
+		// Col Header
+		// Position the viewPort
+		widget.colHeaderViewPort.css({
+			top: 0,
+			left: rowHeader.getNumCols() * tileGeometryUtil.defaultColWidthInPx, // @TODO getColWidthInPx_for_rowHeader
+			height: colHeader.getNumCols() * tileGeometryUtil.defaultRowHeightInPx, // @TODO NOTE transposed so actually numRows!
+		})
+
+		const cHTDC = new TileDataCache({
+			blockSize,
+			// @TODO debatable modularisation:
+			// getNumCols: () => colHeader.getNumCols(),
+			// getNumRows: () => colHeader.getNumRows(),
+			// requestDataBlock: (...args) => colHeader.requestDataBlock(...args),
+			getNumCols: () => colHeader.getNumRows(),
+			getNumRows: () => colHeader.getNumCols(),
+			requestDataBlock: (...args) => colHeader.requestDataBlock([args[0][1], args[0][0]], args[1], args[2]),
+		});
+		const origGetData = cHTDC.getData.bind(cHTDC);
+		cHTDC.getData = (...args) => origGetData(...args)
+			.then((layeredDataBlock) => {
+				const origGetLayer = layeredDataBlock.getLayer.bind(layeredDataBlock);
+
+				layeredDataBlock.getLayer = (...args) => {
+					const origLayer = origGetLayer(...args);
+					const origGet = origLayer.get.bind(origLayer);
+					origLayer.get = (row, col) => origGet(col, row);
+					return origLayer;
+				};
+
+				return layeredDataBlock;
+			})
+		;
+
+		// Add the colHeaderView to the viewPort
+		const colHeaderView = new TiledGridView({
+			observablePosition: widget.observablePosition,
+			blockSize,
+			viewPortElQ: widget.colHeaderViewPort,
+			tileGeometryUtil: tileGeometryUtil,
+			tileDataCache: cHTDC,
+		});
+		colHeaderView.assertThatTheViewPortIsFilledWithTiles(widget.observablePosition);
+		widget.colHeaderViewPort.append(colHeaderView.tileContainer);
+
 
 		const printStats = _.debounce((position) => {
 			console.log("position", position.row, position.col);

@@ -4,14 +4,19 @@
 	overflow: hidden;
 }
 
-.tag-simple-table .grid-viewport {
-	top: 90px;
+.tag-simple-table .grid-viewport,
+.tag-simple-table .colheader-viewport {
+	/*top: 90px;*/
 	bottom: 0px;
 	left: 0;
 	right: 0;
 	margin: auto;
 	position:absolute;
 	overflow:hidden;
+}
+
+.tag-simple-table .colheader-viewport {
+	margin: 0 auto;
 }
 
 .tag-simple-table .tile-container {
