@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>02 - Adding dynamic contents, part I: Options</title>
+		<meta data-wp-post-id="9979" />
+		<link href='//fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
+		<style>
+		html {
+			background-color: #ECEDEF;
+		}
+		body {
+			font-family: 'Roboto', sans-serif;
+			max-width: 42em;
+			margin: 0 auto;
+			padding: 6em 4em;
+			text-align: justify;
+			color: #333;
+			background-color: #FAFAFA;
+		}
+		@media screen and (max-width:560px) {
+			html, body{ padding:0;background:#fff;font-family: Verdana, sans-serif;text-align: left;font-size:12px;}
+			h1, h2, h3, h4, h5, h6, h7, #carousel ul, #carousel h3 {
+				font-family: 'Cabin Condensed';
+			}
+			h1, h2, h3, h4, h5, h6, h7 {
+				font-size: 2em;
+				font-weight: 500;
+			}
+			body {padding-right:10px;}
+			.wp-title{display:none;}
+			img {max-width:100%}
+		}
+		</style>
+		<!-- highightjs - syntax highlighting -->
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
+		<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
+	</head>
+	<body>
+		<h1 class="wp-title">AIMMS WebUI Dev Tutorial</h1>
+		<h2 id="02-adding-dynamic-contents-part-i-options">02 - Adding dynamic contents, part I: Options</h2>
+		<p> In this tutorial you will learn how to extend the widget that we created in
+			<a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a> with dynamic contents. Like in the
+			previous tutorial, we will leave out much of the technical details and underlying design and only explain the
+			essential things in order to get you up-and-running as soon as possible.
+		<h3>Before we begin - Prerequisites</h3>
+		<p>To make the most out of this tutorial, it is important that you meet a couple of prerequisites.
+		<p>First of all, we are going to assume that you already familiarized yourself a bit with the AIMMS WebUI.
+			Both with the end-usage and the app-development. That you have a recent AIMMS and that you have it
+			running in your set-up.
+		<p>Since this is a (software) development tutorial, we are also assuming that you have experience in writing
+			software in a generic programming language, and, that you have a basic knowledge on HTML5 technologies
+			(HTML5 DOM, CSS, Javascript, and the likes). It is also beneficial, however not required, if you are
+			familiar with <a href="http://jquery.org">jQuery</a> and, to lesser extent,
+			<a href="http://jquery-ui.org">jQuery UI</a>, as AIMMS WebUI is built on top of these technologies.
+		<p> Finally, since this tutorial builds on the previous tutorial, we expect that you have done that tutorial
+			first. If you have not done so yet, here is a link to <a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a>.
+		<h3>Dynamic contents in AWF</h3>
+		<p> There are two ways of having dynamic contents in an AWF widget. The easiest way is through options; the second way
+			is through data from AIMMS. In this tutorial we will be explaining the former method. The latter method will be
+			the topic of a later tutorial.
+		<h3>Options</h3>
+		<p> As already mentioned in <a href="../01-writing-your-first-custom-widget/index.html">tutorial-01</a>,
+			a widget can be manipulated during its lifecycle through the AWF Option Mechanism.
+			As an option value changes, the widget responds to such a change by updating its associated DOM element.
+			Likewise, a widget can change the value of an option and thereby make changes in a model.
+		<h3>The basic components of an option</h3>
+		<p> An option in AWF consists of:
+		<ol>
+			<li>a <em>name</em>,
+			<li>a <em>type</em>, and
+			<li>a <em>value</em>.
+		</ol>
+		<p> An option <em>name</em> is just that, a string to identify the option. It should be all lower
+			case consisting of short nouns separated by periods, not unlike
+			<a href="http://www.oracle.com/technetwork/java/codeconventions-135099.html">Java package names</a>. For example:
+			<ul>
+				<li><tt>car.interior.steeringwheel</tt>
+				<li><tt>car.door.handle</tt>
+				<li><tt>car.door.window</tt>
+			</ul>
+		<p> An option <em>type</em> determines the types of values it can hold (or can be resolved to).
+			The basic option types in AWF are:
+			<em>number</em>, <em>string</em>, <em>boolean</em>, <em>array</em>, <em>object</em> and <em>datasource</em>.
+			These names should speak for themselves, except for, perhaps, the <em>datasource</em> option type, which we
+			will explain in a later tutorial. The framework allows plugins to introduce their own option types, more
+			on this will also be in a later tutorial.
+		<p> The option <em>value</em> depends, as was stated, on the option <em>type</em>. A value of <tt>null</tt>
+			denotes that a default value, intrinsic to the widget, should be used.
+		<p> An option is declared and specified in the widget <em>factory</em>
+		<h3>Option editors</h3>
+		<p> Where an option be seen as a widget programmer's means of informing AWF what it wants as input, there also
+			needs to be a means for an end-user to interact with the widget using that option. In AWF the value of an
+			option can be manipulated through the UI by means of an option editor. For known option types, AWF will take
+			care of instantiating the corresponding option editor for each option that is declared in the widget's factory.
+			All option editors are accessible through the option dialog, which opens by clicking on the gear icon of a widget
+			(figure 1 - point 1).
+
+		<p><picture>
+			<img src="../assets/img/optiondialog.png">
+			<div><strong>figure 1</strong></div>
+		</picture>
+
+		<h3>Adding an option to our widget</h3>
+		<p>	Now that we know a little more about the AWF Option Mechanism and how it works with options and option editors,
+			we can extend our static "Hello AIMMS!" widget with an AWF option. Then, we will be able to change the option's
+			value through the option editor and finally, we can respond to the option value changes and update the contents
+			of our widget dynamically.
+		<p> Inside the factory.js we specify the <em>contents</em> option which is of type <tt>string</tt>. We do this inside the
+			<tt>onInitializeOptionTypes</tt>.
+
+<pre><code class="js">
+// factory.js
+AWF.Bus.subscribe({
+	onCollectTypes: function(collectedTypes, contextElQ) {
+		if(!contextElQ || contextElQ.awf.tags("placeable-widget-container")) {
+			collectedTypes.push("my-widget");
+		}
+	},
+	onInitializeTags: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.awf.tags(["placeable"], 'add');
+		}
+	},
+	onDecorateElement: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.aimms_my_widget();
+		}
+	},
+	onInitializeOptionTypes: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.awf.optionTypes("contents", "string");
+		}
+	},
+});
+</code></pre>
+
+		<h3>Reacting to option changes</h3>
+		<p>In the widget we need to use the <tt>onResolvedOptionChanged</tt> function which is automatically invoked by AWF
+			whenever an option value of the widget changes.
+			Because we specified the <em>contents</em> option in the factory we are now able to listen for changes and
+			react accordingly. In our case we update the text in the widget.
+
+<pre><code class="js">// jquery.aimms.my-widget.js
+jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
+	_create: function() {
+		var widget = this;
+		widget.contentElQ = $('&lt;div&gt;Hello AIMMS!&lt;/div&gt;');
+
+		widget.element
+				.find('.awf-dock.center')
+				.append(widget.contentElQ);
+	},
+	onResolvedOptionChanged: function(optionName, optionValue) {
+		var widget = this;
+
+		if (optionName === "contents") {
+			if (optionValue) {
+				widget.contentElQ.text(optionValue);
+			} else {
+				widget.contentElQ.text("Empty contents!");
+			}
+		}
+	},
+}));
+</code></pre>
+
+		<h3>Changing the value</h3>
+		<p> After reloading the browser-tab, if we now open the widget's option dialog and navigate to the miscellaneous
+			option editor (for historical reasons the icon is still denoted by a <tt>T</tt>), we will see that a new
+			option editor has become available for the <em>contents</em> option. By typing inside the contents
+			option's textfield, we can see that our widgets content is updated! (See figure 2)
+
+		<p><picture>
+			<img src="../assets/img/simple-option-editor-of-new-literal-option.png">
+			<div><strong>figure 2</strong></div>
+		</picture>
+
+		<p>And there you have it, your first steps into the world of dynamic widgets in AWF using options. Next tutorial
+			we will show you how to have dynamic widgets in AWF using data that comes from an AIMMS model.
+
+	</body>
+</html>

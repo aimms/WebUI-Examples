@@ -3,19 +3,32 @@
 	<head>
 	<title>AIMMS WebUI Dev Tutorial Series</title>
 	<meta data-wp-post-id="9609" />
-	<link href='http://fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
+	<link href='//fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
 	<style>
 		html {
 			background-color: #ECEDEF;
 		}
 		body {
 			font-family: 'Roboto', sans-serif;
-			width: 42em;
+			max-width: 42em;
 			margin: 0 auto;
 			padding: 6em 4em;
 			text-align: justify;
 			color: #333;
 			background-color: #FAFAFA;
+		}
+		@media screen and (max-width:560px) {
+			html, body{ padding:0;background:#fff;font-family: Verdana, sans-serif;text-align: left;font-size:12px;}
+			h1, h2, h3, h4, h5, h6, h7, #carousel ul, #carousel h3 {
+				font-family: 'Cabin Condensed';
+			}
+			h1, h2, h3, h4, h5, h6, h7 {
+				font-size: 2em;
+				font-weight: 500;
+			}
+			body {padding-right:10px;}
+			.wp-title{display:none;}
+			img {max-width:100%}
 		}
 	</style>
 	</head>
@@ -30,20 +43,25 @@
 			that you have otherwise familiarized yourself with the AIMMS WebUI. You are also required to have some experience in
 			HTML5 (i.e. Javascript, CSS, HTML, ...).
 		<ul>
-			<li><strong><a href="01-writing-your-first-custom-widget/index.html">01 - Writing your first custom widget</a></strong><br/>
+			<li><strong><a href="01-writing-your-first-custom-widget/index.html">01 - Writing your first custom widget</a></strong>
 				<p>In this tutorial we will show you how easy it is to create and add your own widget to AIMMS WebUI. It will give
 					you a very rudimentary overview of what is involved in order to get a static widget on your page.
-			<li><strong>02 - Adding dynamic contents, part I: Options</strong>
+			<li><strong><a href="02-adding-dynamic-contents-part-i-options/index.html">02 - Adding dynamic contents, part I: Options</a></strong>
 				<p>This tutorial continues where the previous tutorial stopped. We will extend our static custom widget with some
 					simple dynamic contents. We will be using the AIMMS WebUI Option Mechanism to interact with the widget during
 					its lifecycle.
-			<li><strong>03 - Adding dynamic contents, part II: Simple data from AIMMS</strong>
+			<li><strong><a href="03-adding-dynamic-contents-part-ii-aimms-scalar-options/index.html">03 - Adding dynamic contents, part II: Simple data from AIMMS</a></strong>
 				<p>Now that we have been introduced to the AIMMS WebUI Option Mechanism, we are ready to learn how to connect our
 					widget to data from AIMMS.
-			<li><strong>04 - A custom multi-dimensional widget</strong>
-				<p>TODO.
-			<li><strong>05 - Changing data</strong>
-				<p>TODO.
+			<li><strong><a href="04-creating-a-custom-widget-with-multi-dimensional-data-from-aimms/index.html">04 - A custom multi-dimensional widget with
+						multi-dimensional data from AIMMS</a></strong>
+				<p>In this tutorial we will create a widget that is able to display multi-dimensional data from AIMMS. Important topics
+					that are involved with multi-dimensional data display, like <em>pivoting</em> and <em> asynchronous data retrieval</em>
+					will be explained in this tutorial.
+			<li><strong><a href="05-changing-data/index.html">05 - Changing data in AIMMS</a></strong>
+				<p>This tutorial builds upon the previous one and extends the multi-dimensional table widget that has been created in the
+					previous tutorial with edit support: the user will be able to change values that are communicated back to the AIMMS
+					mode. In addition, some basic error handling related to data changes will be discussed.
 <!--
 			<li><strong>TODO</strong><br/>
 				<p>TODO.

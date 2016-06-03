@@ -6,8 +6,8 @@
 
 	var PALETTES = [
 		{name: "Default Palette", className: "default"},
-		{name: "Colorbrewer 11 color Qualitative", className: "colorbrewer-qualitative-11"},
-		{name: "Colorbrewer 7 color Qualitative",  className: "colorbrewer-qualitative-7"},
+		{name: "ColorBrewer 11", className: "colorbrewer-qualitative-11"},
+		{name: "ColorBrewer 7",  className: "colorbrewer-qualitative-7"},
 	];
 
 	$.widget('aimms.aimms_palette_switch_addon', AWF.Widget.create({

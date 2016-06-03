@@ -3,29 +3,42 @@
 	<head>
 	<title>01 - Writing your first custom widget</title>
 	<meta data-wp-post-id="9628" />
-	<link href='http://fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
+	<link href='//fonts.googleapis.com/css?family=Roboto:300,300italic' rel='stylesheet' type='text/css'>
 	<style>
 		html {
 			background-color: #ECEDEF;
 		}
 		body {
 			font-family: 'Roboto', sans-serif;
-			width: 42em;
+			max-width: 42em;
 			margin: 0 auto;
 			padding: 6em 4em;
 			text-align: justify;
 			color: #333;
 			background-color: #FAFAFA;
 		}
+		@media screen and (max-width:560px) {
+			html, body{ padding:0;background:#fff;font-family: Verdana, sans-serif;text-align: left;font-size:12px;}
+			h1, h2, h3, h4, h5, h6, h7, #carousel ul, #carousel h3 {
+				font-family: 'Cabin Condensed';
+			}
+			h1, h2, h3, h4, h5, h6, h7 {
+				font-size: 2em;
+				font-weight: 500;
+			}
+			body {padding-right:10px;}
+			.wp-title{display:none;}
+			img {max-width:100%}
+		}
 	</style>
 	<!-- highightjs - syntax highlighting -->
-	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
-	<script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
 	<script>hljs.initHighlightingOnLoad();hljs.configure({tabReplace: '    '});</script>
 	</head>
 	<body>
 		<h1 class="wp-title">AIMMS WebUI Dev Tutorial</h1>
-		<h2 class="wp-title">01 - Writing your first custom widget</h2>
+		<h2>01 - Writing your first custom widget</h2>
 		<p>In this tutorial you will learn how to create your very first custom widget for AIMMS Web UI.
 			The goal is to leave out much of the technical details and underlying design and only explain the
 			essential things in order to get you up-and-running as soon as possible.
@@ -140,8 +153,14 @@ jQuery.widget('ui.aimms_my_widget', AWF.Widget.create({
 		<pre><code class="js">// factory.js
 AWF.Bus.subscribe({
 	onCollectTypes: function(collectedTypes, contextElQ) {
-		if(!contextElQ || contextElQ.awf.tags("placeable")) {
+		if(!contextElQ || contextElQ.awf.tags("placeable-widget-container")) {
 			collectedTypes.push("my-widget");
+		}
+	},
+
+	onInitializeTags: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.awf.tags(["placeable"], 'add');
 		}
 	},
 
@@ -204,10 +223,19 @@ AWF.Bus.subscribe({
 	// and what basic characteristics they have. Since the AIMMS WebUI
 	// itself is also built using AWF and not all of those widgets are
 	// meant to be put inside a WebUI page, we respond only if either
-	// there is no contextElQ or it has a tag called "placeable"
+	// there is no contextElQ or it has a tag called "placeable-widget-container"
 	onCollectTypes: function(collectedTypes, contextElQ) {
-		if(!contextElQ || contextElQ.awf.tags("placeable")) {
+		if(!contextElQ || contextElQ.awf.tags("placeable-widget-container")) {
 			collectedTypes.push("my-widget");
+		}
+	},
+
+	// This is called by AWF to initialize some generic characteristics
+	// of a widget. In this case, we indicate that the widget placeable,
+	// so that the framework can treat/recognize it as such.
+	onInitializeTags: function(elQ, type) {
+		if (type === "my-widget") {
+			elQ.awf.tags(["placeable"], 'add');
 		}
 	},
 
