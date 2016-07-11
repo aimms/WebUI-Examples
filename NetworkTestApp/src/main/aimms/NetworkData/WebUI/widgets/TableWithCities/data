@@ -1,1 +1,27 @@
-<div data-contents="aimms:{&quot;contents&quot;:[&quot;WebUICoordinates&quot;]}" tabindex="0" data-username="literal:&quot;&quot;" data-fullname="literal:&quot;&quot;" data-email="literal:&quot;&quot;" data-aimms.widget.type="literal:&quot;table&quot;" data-contents.partition="literal:{&quot;rowHeader&quot;:[&quot;c&quot;],&quot;colHeader&quot;:[&quot;iLonLat&quot;],&quot;aggregated&quot;:[&quot;<IDENTIFIER-SET>&quot;]}" data-title="literal:&quot;Coordinates as Table&quot;"></div>
+{
+	"slot0": "",
+	"slot1": "",
+	"------------------------------------------------------------------<<<<-contents-": "",
+	"contents": "aimms:{\"contents\":[\"WebUICoordinates\"]}",
+	"------------------------------------------------------------------>>>>-contents-": "",
+	"slot2": "",
+	"slot3": "",
+	"slot4": "",
+	"slot5": "",
+	"slot6": "",
+	"------------------------------------------------------------------<<<<-widget.uri-": "",
+	"widget.uri": "X",
+	"------------------------------------------------------------------>>>>-widget.uri-": "",
+	"slot7": "",
+	"------------------------------------------------------------------<<<<-awf.persistence.version-": "",
+	"awf.persistence.version": "1.1",
+	"------------------------------------------------------------------>>>>-awf.persistence.version-": "",
+	"------------------------------------------------------------------<<<<-aimms.widget.type-": "",
+	"aimms.widget.type": "literal:\"table\"",
+	"------------------------------------------------------------------>>>>-aimms.widget.type-": "",
+	"------------------------------------------------------------------<<<<-contents.partition-": "",
+	"contents.partition": "literal:{\"rowHeader\":[\"c\"],\"colHeader\":[\"iLonLat\"],\"aggregated\":[\"<IDENTIFIER-SET>\"]}",
+	"------------------------------------------------------------------>>>>-contents.partition-": "",
+	"slot8": "",
+	"slot9": ""
+}
