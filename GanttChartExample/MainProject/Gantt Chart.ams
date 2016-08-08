@@ -1,0 +1,369 @@
+## ams_version=1.0
+
+Model Main_Gantt_Chart {
+    Section Gantt_Chart_Section {
+        DeclarationSection Gantt_Chart_Declarations {
+            Quantity SI_Time_Duration {
+                BaseUnit: hour;
+                Conversions: minute->hour : #-># / 60;
+                Comment: "Expresses the value for the duration of periods.";
+            }
+            Set Tasks {
+                Index: t;
+                Parameter: SelectedTask;
+            }
+            Set Persons {
+                Index: p;
+            }
+            Set TaskTypes {
+                Index: tt;
+            }
+            Parameter TaskStart {
+                IndexDomain: (t,tt,p);
+                Unit: hour;
+            }
+            Parameter TaskDuration {
+                IndexDomain: (t,tt,p);
+                Unit: hour;
+            }
+            StringParameter TaskDescription {
+                IndexDomain: t;
+            }
+            StringParameter DescriptionOfSelectedTask {
+                Definition: TaskDescription(SelectedTask);
+            }
+            StringParameter ViewportStart;
+            StringParameter ViewportEnd;
+        }
+        Procedure InitializeGanttChartData {
+            Body: {
+                ViewPortStart := "08-01-2016 00:00";
+                ViewportEnd := "08-03-2016 00:00";
+                
+                Tasks := ElementRange(1,28,prefix:"task-");
+                Persons := data { George, John, Paul, Ringo };
+                TaskTypes := data { 'daily scrum', meeting, refinement, lunch, programming, testing };
+                
+                empty TaskStart, TaskDuration;
+                
+                COMPOSITE TABLE
+                  t       tt                p        TaskStart TaskDuration
+                ! ------- ----------------- -------- --------- ------------
+                  task-01 testing           George   9         1
+                  task-02 'daily scrum'     George   11        0.25
+                  task-03 lunch             George   12        1
+                  task-04 testing           George   14        1     
+                  task-05 testing           George   35        1
+                  task-06 'daily scrum'     George   36        0.25
+                  task-07 programming       John     10        1
+                  task-08 'daily scrum'     John     11        0.25
+                  task-09 lunch             John     14        0.5
+                  task-10 meeting           John     15        1
+                  task-11 testing           John     34        1
+                  task-12 'daily scrum'     John     36        0.25
+                  task-13 lunch             John     38        0.5
+                  task-14 refinement        John     39        1.5
+                  task-15 'daily scrum'     Paul     11        0.25
+                  task-16 lunch             Paul     13        0.5
+                  task-17 programming       Paul     14        3
+                  task-18 'daily scrum'     Paul     36        0.25
+                  task-19 lunch             Paul     37        0.5
+                  task-20 refinement        Paul     39        1.5
+                  task-21 programming       Ringo    8         2
+                  task-22 'daily scrum'     Ringo    11        0.25
+                  task-23 lunch             Ringo    13        0.5
+                  task-24 meeting           Ringo    15        1
+                  task-25 programming       Ringo    32        2
+                  task-26 'daily scrum'     Ringo    36        0.25
+                  task-27 lunch             Ringo    37        0.5
+                  task-28 refinement        Ringo    39        1.5
+                 ;
+                
+                 for ((t,tt,p) | TaskStart(t, tt, p)) do
+                 	startTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(t,tt,p));
+                 	endTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(t,tt,p)+TaskDuration(t, tt, p));
+                 	TaskDescription(t) := FormatString("%e performs task %e from %s till %s",p,tt,startTime,endTime);
+                 endfor;
+            }
+            StringParameter startTime;
+            StringParameter endTime;
+        }
+        Section Viewport_Control_Procedures {
+            Procedure MoveDate {
+                Arguments: (dateString,numHours);
+                Body: {
+                    moment := StringToMoment("%m-%d-%c%y %H:%M", [hour], "2016-01-01 00:00", dateString);
+                    moment += numHours;
+                    dateString := MomentToString("%m-%d-%c%y %H:%M", [hour], "2016-01-01 00:00", moment);
+                }
+                StringParameter dateString {
+                    Property: InOut;
+                }
+                Parameter numHours {
+                    Unit: hour;
+                    Property: Input;
+                }
+                Parameter moment {
+                    Unit: hour;
+                }
+            }
+            Procedure ZoomViewport {
+                Arguments: (factor);
+                Body: {
+                    ! zoom and keep center
+                    
+                    startMoment := StringToMoment("%m-%d-%c%y %H:%M", [hour], "2016-01-01 00:00", ViewportStart);
+                    endMoment := StringToMoment("%m-%d-%c%y %H:%M", [hour], "2016-01-01 00:00", ViewportEnd);
+                    duration := endMoment - startMoment;
+                    ViewportStart := MomentToString("%m-%d-%c%y %H:%M", [hour], "2016-01-01 00:00", startMoment + 0.5 * duration * (1-factor));
+                    ViewportEnd := MomentToString("%m-%d-%c%y %H:%M", [hour], "2016-01-01 00:00", startMoment + 0.5 * duration * (1+factor));
+                }
+                Parameter factor {
+                    Property: Input;
+                }
+                Parameter startMoment {
+                    Unit: hour;
+                }
+                Parameter endMoment {
+                    Unit: hour;
+                }
+                Parameter duration {
+                    Unit: hour;
+                }
+            }
+            Procedure ScrollViewport {
+                Arguments: (numHours);
+                Body: {
+                    MoveDate(ViewportStart,numHours);
+                    MoveDate(ViewportEnd,numHours);
+                }
+                Parameter numHours {
+                    Unit: hour;
+                    Property: Input;
+                }
+            }
+            Procedure ViewportScrollToTheRight {
+                Body: {
+                    ScrollViewport(1[hour]);
+                }
+            }
+            Procedure ViewportScrollToTheLeft {
+                Body: {
+                    ScrollViewport(-1[hour]);
+                }
+            }
+            Procedure ViewportZoomIn {
+                Body: {
+                    ZoomViewport(0.8);
+                }
+            }
+            Procedure ViewportZoomOut {
+                Body: {
+                    ZoomViewport(1.25);
+                }
+            }
+        }
+    }
+    Section Job_Form_Section {
+        StringParameter DetailTaskId {
+            IndexDomain: t;
+        }
+        ElementParameter DetailTaskPerformer {
+            IndexDomain: t;
+            Range: Persons;
+        }
+        ElementParameter DetailTaskType {
+            IndexDomain: t;
+            Range: TaskTypes;
+        }
+        Parameter DetailTaskStart {
+            IndexDomain: t;
+            Unit: hour;
+        }
+        Parameter DetailTaskDuration {
+            IndexDomain: t;
+            Unit: hour;
+        }
+        Parameter SelectedTasks {
+            IndexDomain: t;
+            Default: 0;
+        }
+        ElementParameter SelectedTaskMonitor {
+            Range: webui::RegisteredDataChangeMonitors;
+        }
+        Set SelectedTaskIdentifierSet {
+            SubsetOf: AllIdentifiers;
+            Definition: data { 'SelectedTask' };
+        }
+        Procedure InitializeFormData {
+            Body: {
+                for ((t,tt,p) | TaskStart(t, tt, p)) do
+                	DetailTaskId(t) := FormatString("%e",t);
+                	DetailTaskPerformer(t) := p;
+                	DetailTaskType(t) := tt;
+                	DetailTaskStart(t) := TaskStart(t, tt, p);
+                	DetailTaskDuration(t) := TaskDuration(t, tt, p);
+                endfor;
+            }
+        }
+        Procedure ValidateTask {
+            Arguments: (formData,validationErrors);
+            Body: {
+                empty validationErrors;
+                
+                newStart := (Val(formData('DetailTaskStart'))) [hour];
+                newDuration := (Val(formData('DetailTaskDuration'))) [hour];
+                
+                ! office is closed between 20:00 and 06:00
+                ! find latest 20:00 before the proposed start time
+                if ( Mod(newStart,24) < 6 [hour]) then
+                	officeClosed := (Div(newStart,24)-1 [hour])*24+20 [hour];
+                else
+                	officeClosed := Div(newStart,24)*24+20 [hour];
+                endif;
+                officeOpen := officeClosed + 10 [hour];
+                
+                if ( webui::FormIsNewEntry('TaskForm') and StringToElement(Tasks,formData('DetailTaskId')) ) then
+                	validationErrors('DetailTaskId') := webui::CreateValidationError("validation-error-task-id-should-be-unique");
+                endif;
+                
+                if ( newDuration <= 0 [hour] ) then
+                	validationErrors('DetailTaskDuration') := webui::CreateValidationError("validation-error-duration-should-be-strictly-positive");
+                elseif ( Max(newStart,officeClosed) < Min(newStart+newDuration,officeOpen) ) then
+                	validationErrors('DetailTaskStart') := webui::CreateValidationError("validation-error-office-closed");
+                	validationErrors('DetailTaskDuration') := webui::CreateValidationError("validation-error-office-closed");
+                endif;
+            }
+            StringParameter formData {
+                IndexDomain: (webui::ffn);
+                Property: Input;
+            }
+            StringParameter validationErrors {
+                IndexDomain: (webui::ffn);
+                Property: InOut;
+            }
+            Parameter newStart {
+                Unit: hour;
+            }
+            Parameter newDuration {
+                Unit: hour;
+            }
+            Parameter officeClosed {
+                Unit: hour;
+            }
+            Parameter officeOpen {
+                Range: free;
+                Unit: hour;
+            }
+        }
+        Procedure UpdateTaskCallback {
+            Arguments: (formData,taskName);
+            Body: {
+                taskName := formData('DetailTaskId');
+                currentTask := StringToElement(Tasks, taskName);
+                
+                ! Create new task if not yet present
+                if ( not currentTask ) then
+                	SetElementAdd(Tasks,currentTask,taskName);
+                endif;
+                
+                ! Retrieve current job type and current job resource from form data
+                currentTaskType := StringToElement(TaskTypes,formData('DetailTaskType'));
+                currentPerson := StringToElement(Persons,formData('DetailTaskPerformer'));
+                
+                ! Clear data for old version of the task (relevant when either task-type or person has been changed)
+                TaskStart(currentTask,tt,p) := 0 [hour];
+                TaskDuration(currentTask,tt,p) := 0 [hour];
+                
+                ! Update start and duration in model based on form data
+                TaskStart(currentTask,currentTaskType,currentPerson) := (Val(formData('DetailTaskStart'))) [hour]; 
+                TaskDuration(currentTask,currentTaskType,currentPerson) := (Val(formData('DetailTaskDuration'))) [hour];
+                
+                ! Update task description based on updated values
+                startTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(currentTask,currentTaskType,currentPerson));
+                endTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(currentTask,currentTaskType,currentPerson)+TaskDuration(currentTask,currentTaskType,currentPerson));
+                TaskDescription(currentTask) := FormatString("%e performs task %e from %s till %s",currentPerson,currentTaskType,startTime,endTime);
+            }
+            StringParameter formData {
+                IndexDomain: (webui::ffn);
+                Property: Input;
+            }
+            StringParameter taskName {
+                Property: Output;
+            }
+            ElementParameter currentTask {
+                Range: Tasks;
+            }
+            ElementParameter currentPerson {
+                Range: Persons;
+            }
+            ElementParameter currentTaskType {
+                Range: TaskTypes;
+            }
+            StringParameter startTime;
+            StringParameter endTime;
+        }
+        Procedure UpdateSelectionInForm {
+            Body: {
+                SelectedTasks(t) := 1 onlyif ( t = SelectedTask );
+            }
+        }
+        Procedure SetupTaskForm {
+            Body: {
+                SelectedTasks(t) := 0;
+                
+                FormFields := data { 'DetailTaskId', 'DetailTaskType', 'DetailTaskPerformer', 'DetailTaskStart', 'DetailTaskDuration' };
+                
+                webui::SetupForm("TaskForm", 'SelectedTasks', FormFields, 'ValidateTask', 'UpdateTaskCallback' );
+                
+                ! Use DataChangeMonitor to update the selection in the form as the selection in the Gantt chart changes
+                webui::DataChangeMonitorRegisterCallback(
+                	identifierSet :  SelectedTaskIdentifierSet,
+                	callback      :  'UpdateSelectionInForm',
+                	aMonitor      :  SelectedTaskMonitor
+                );
+            }
+            Set FormFields {
+                SubsetOf: AllIdentifiers;
+            }
+        }
+    }
+    Procedure MainInitialization {
+        Body: {
+            InitializeGanttChartData;
+            InitializeFormData;
+        }
+        Comment: "Add initialization statements here that do NOT require any library being initialized already.";
+    }
+    Procedure PostMainInitialization {
+        Body: {
+            SetupTaskForm; ! Should be called after 'AimmsWebUI' library has been initialized ... that is why we are using the 'PostMainInitialization'
+        }
+        Comment: {
+            "Add initialization statements here that require that the libraries are already initialized properly,
+            or add statements that require the Data Management module to be initialized."
+        }
+    }
+    Procedure MainExecution;
+    Procedure PreMainTermination {
+        Body: {
+            return DataManagementExit();
+        }
+        Comment: {
+            "Add termination statements here that require all libraries to be still alive.
+            Return 1 if you allow the termination sequence to continue.
+            Return 0 if you want to cancel the termination sequence."
+        }
+    }
+    Procedure MainTermination {
+        Body: {
+            return 1;
+        }
+        Comment: {
+            "Add termination statements here that do not require all libraries to be still alive.
+            Return 1 to allow the termination sequence to continue.
+            Return 0 if you want to cancel the termination sequence.
+            It is recommended to only use the procedure PreMainTermination to cancel the termination sequence and let this procedure always return 1."
+        }
+    }
+}
