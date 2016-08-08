@@ -1,0 +1,14 @@
+{
+  "level": {
+    ".*": "null"
+  },
+  "destFile": {
+    ".*": "webui-service.log"
+  },
+  "remote": {
+    ".*": null
+  },
+  "stdout": false,
+  "locked": true,
+  "dateFormat": "MMM DD, YYYY / hh:mm:ss A"
+}
