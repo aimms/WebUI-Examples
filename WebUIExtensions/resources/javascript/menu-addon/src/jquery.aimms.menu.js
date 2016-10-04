@@ -22,7 +22,7 @@ var menuAddon = AWF.Widget.create({
 	},
 	afterResolvedOptionChanged: function(name, pageUri) {
 		var addon = this;
-		
+
 		if (name === "pages.current" && pageUri) {
 			var searchString = 'a[data-uri="' + pageUri + '"]';
 
@@ -83,7 +83,7 @@ var menuAddon = AWF.Widget.create({
 
 				addon.navMenuElQ.append(item);
 			});
-			
+
 			addon.navMenuElQ.find("a").on("click", function (e) {
 				e.preventDefault();
 				AWF.Bus.requestPageChange($(this).attr("data-link"));
@@ -92,6 +92,6 @@ var menuAddon = AWF.Widget.create({
 	},
 });
 
-$.widget("aimms.menu_addon", menuAddon);
+$.widget("aimms.aimms_menu_addon", menuAddon);
 
 })(jQuery);
