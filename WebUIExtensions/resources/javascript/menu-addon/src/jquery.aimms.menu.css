@@ -18,7 +18,7 @@ header h2.page-section {flex:1 0 1;}
 		background:rgba(17, 119, 187, 0.5);
 		color:#fff;
 	}
-	
+
 	.menubar li.ancestor>a {
 		background:rgba(17, 119, 187, 0.25)
 	}
@@ -98,6 +98,7 @@ header h2.page-section {flex:1 0 1;}
 		line-height:30px;
 		height:30px;
 		padding:0 15px;
+		white-space: nowrap;
 	}
 		.menubar li ul li a span {
 			padding:0;
@@ -105,4 +106,3 @@ header h2.page-section {flex:1 0 1;}
 			border:0;
 			height:30px;
 		}
-
