@@ -59,6 +59,9 @@ var menuAddon = AWF.Widget.create({
 				pageslist.filter(function(subpage) {
 					return subpage.uri.startsWith(page.uri + "/");
 				}).forEach(function (subpage) {
+					if(!page.children) {
+						page.children = [];
+					}
 					page.children.push(subpage);
 				});
 
