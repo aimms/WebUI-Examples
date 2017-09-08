@@ -12,7 +12,7 @@
 	"------------------------------------------------------------------>>>>-sessions.default.id.private-": "",
 	"slot5": "",
 	"------------------------------------------------------------------<<<<-pages-": "",
-	"pages": "literal:[]",
+	"pages": "literal:{\"name\":\"root\",\"children\":[{\"name\":\"Main Project\",\"slug\":\"main_project\",\"children\":[{\"name\":\"home\",\"slug\":\"home_1\",\"children\":[]}]}]}",
 	"------------------------------------------------------------------>>>>-pages-": "",
 	"------------------------------------------------------------------<<<<-sessions.default.case.status.modified-": "",
 	"sessions.default.case.status.modified": "aimms:{\"contents\":[\"webui::CurrentCaseIsDirty\"]}",
