@@ -33,7 +33,7 @@ I wrote a script file to help you achieve this task
 
 ## Steps
 - In your desktop right click choose 'Git Bash Here'
-- Execute `curl -sSL https://git.io/vdu93 -o build-aimms-pack.sh`
+- Execute `curl -sSL https://git.io/vdgXq -o build-aimms-pack.sh`
 - Execute `./build-aimms-pack.sh your-model-path your-theme-path aimms-version`
 - Example `./build-aimms-pack.sh "$HOME/Documents/Ready-To-Eat Meal Production" "$HOME/Documents/Ready-To-Eat Meal Production/WebUI/resources/css/themes/dark" 4.42.2.1106`
 - This script will create a 'tmp' folder & aimmspack. Before uploading the aimmspack test your model by opening the tmp folder.
