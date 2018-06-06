@@ -272,7 +272,7 @@ Model Main_Ready_To_Eat_Meal_Production {
                 Meals := data { meal-01 .. meal-20 };
                 
                 for (w) do
-                	SetElementAdd( WeekNumbers, WeekNumber, FormatString("%e",w) )
+                	SetElementAdd( WeekNumbers, WeekNumber, FormatString("%e",w) );
                 endfor;
             }
         }
@@ -500,13 +500,19 @@ Model Main_Ready_To_Eat_Meal_Production {
             }
         }
         Procedure PivotTableOnlyShowStock {
-            Body: PivotTableIdentifiers := data { Stock };
+            Body: {
+                PivotTableIdentifiers := data { Stock };
+            }
         }
         Procedure PivotTableOnlyShowProduction {
-            Body: PivotTableIdentifiers := data { MealsProduced };
+            Body: {
+                PivotTableIdentifiers := data { MealsProduced };
+            }
         }
         Procedure PivotTableShowStockAndProduction {
-            Body: PivotTableIdentifiers := data { MealsProduced, Stock };
+            Body: {
+                PivotTableIdentifiers := data { MealsProduced, Stock };
+            }
         }
     }
     Section WebUI_Teaser_Declarations {
@@ -661,7 +667,7 @@ Model Main_Ready_To_Eat_Meal_Production {
                 
                                 endif;
                         !endif;
-                endfor
+                endfor;
             }
         }
         Procedure AddOtherScenarios {
