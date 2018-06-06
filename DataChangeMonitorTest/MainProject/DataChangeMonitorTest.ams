@@ -74,7 +74,7 @@ Model Main_DataChangeMonitorTest {
             onDataChangeProcedureWasCalled := 0;
             IdentifierToMonitor += 1;
             
-            webui::DataChangeMonitorReset2(dataChangeMonitor);
+            webui::DataChangeMonitorReset(dataChangeMonitor);
             
             webui::DataChangeMonitorsUpdate();
             
@@ -93,7 +93,7 @@ Model Main_DataChangeMonitorTest {
             onDataChangeProcedureWasCalled := 0;
             IdentifierToMonitor += 1;
             
-            webui::DataChangeMonitorReset2(dataChangeMonitor);
+            webui::DataChangeMonitorReset(dataChangeMonitor);
             
             webui::DataChangeMonitorsUpdate();
             

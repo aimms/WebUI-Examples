@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Project AimmsVersion="4.8.20000.553 unicode x86" ProjectUUID="1858ED58-3E8C-4258-A2A8-B33B7C9D2558">
+<Project AimmsVersion="4.53.5.8 unicode x64" ProjectUUID="1858ED58-3E8C-4258-A2A8-B33B7C9D2558">
 	<ModelFileName>DataChangeMonitorTest.ams</ModelFileName>
 	<AutoSaveAndBackup>
 		<DataBackup AtRegularInterval="true" EveryNMinutes="15" NumBackupsDatedToday="3" NumDaysBeforeToday="3" />
