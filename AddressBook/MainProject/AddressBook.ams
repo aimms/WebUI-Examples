@@ -3,6 +3,7 @@
 Model Main_AddressBook {
     Set Persons {
         Index: p;
+        webui::ElementTextIdentifier: PersonName;
     }
     Parameter SelectedPersons {
         IndexDomain: p;

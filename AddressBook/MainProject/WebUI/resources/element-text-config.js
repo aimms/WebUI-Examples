@@ -1,3 +1,0 @@
-ElementTextMap = {
-	"p": "PersonName",
-};
