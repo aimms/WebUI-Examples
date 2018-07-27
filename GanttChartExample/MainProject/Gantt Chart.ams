@@ -13,17 +13,19 @@ Model Main_Gantt_Chart {
                 Parameter: SelectedTask;
             }
             Set Persons {
-                Index: p;
+                Index: p, p1;
+                Parameter: epp, epp1;
             }
             Set TaskTypes {
                 Index: tt;
+                Parameter: eptt;
             }
             Parameter TaskStart {
-                IndexDomain: (t,tt,p);
+                IndexDomain: (t,tt,p,p1);
                 Unit: hour;
             }
             Parameter TaskDuration {
-                IndexDomain: (t,tt,p);
+                IndexDomain: (t,tt,p,p1);
                 Unit: hour;
             }
             StringParameter TaskDescription {
@@ -47,41 +49,41 @@ Model Main_Gantt_Chart {
                 empty TaskStart, TaskDuration;
                 
                 COMPOSITE TABLE
-                  t       tt                p        TaskStart TaskDuration
-                ! ------- ----------------- -------- --------- ------------
-                  task-01 testing           George   9         1
-                  task-02 'daily scrum'     George   11        0.25
-                  task-03 lunch             George   12        1
-                  task-04 testing           George   14        1     
-                  task-05 testing           George   35        1
-                  task-06 'daily scrum'     George   36        0.25
-                  task-07 programming       John     10        1
-                  task-08 'daily scrum'     John     11        0.25
-                  task-09 lunch             John     14        0.5
-                  task-10 meeting           John     15        1
-                  task-11 testing           John     34        1
-                  task-12 'daily scrum'     John     36        0.25
-                  task-13 lunch             John     38        0.5
-                  task-14 refinement        John     39        1.5
-                  task-15 'daily scrum'     Paul     11        0.25
-                  task-16 lunch             Paul     13        0.5
-                  task-17 programming       Paul     14        3
-                  task-18 'daily scrum'     Paul     36        0.25
-                  task-19 lunch             Paul     37        0.5
-                  task-20 refinement        Paul     39        1.5
-                  task-21 programming       Ringo    8         2
-                  task-22 'daily scrum'     Ringo    11        0.25
-                  task-23 lunch             Ringo    13        0.5
-                  task-24 meeting           Ringo    15        1
-                  task-25 programming       Ringo    32        2
-                  task-26 'daily scrum'     Ringo    36        0.25
-                  task-27 lunch             Ringo    37        0.5
-                  task-28 refinement        Ringo    39        1.5
+                  t       tt                p        p1       TaskStart TaskDuration
+                ! ------- ----------------- -------- -------- --------- ------------
+                  task-01 testing           George   George   9         1
+                  task-02 'daily scrum'     George   George   11        0.25
+                  task-03 lunch             George   George   12        1
+                  task-04 testing           George   George   14        1     
+                  task-05 testing           George   George   35        1
+                  task-06 'daily scrum'     George   George   36        0.25
+                  task-07 programming       John     John     10        1
+                  task-08 'daily scrum'     John     John     11        0.25
+                  task-09 lunch             John     John     14        0.5
+                  task-10 meeting           John     John     15        1
+                  task-11 testing           John     John     34        1
+                  task-12 'daily scrum'     John     John     36        0.25
+                  task-13 lunch             John     John     38        0.5
+                  task-14 refinement        John     John     39        1.5
+                  task-15 'daily scrum'     Paul     Paul     11        0.25
+                  task-16 lunch             Paul     Paul     13        0.5
+                  task-17 programming       Paul     Paul     14        3
+                  task-18 'daily scrum'     Paul     Paul     36        0.25
+                  task-19 lunch             Paul     Paul     37        0.5
+                  task-20 refinement        Paul     Paul     39        1.5
+                  task-21 programming       Ringo    Ringo    8         2
+                  task-22 'daily scrum'     Ringo    Ringo    11        0.25
+                  task-23 lunch             Ringo    Ringo    13        0.5
+                  task-24 meeting           Ringo    Ringo    15        1
+                  task-25 programming       Ringo    Ringo    32        2
+                  task-26 'daily scrum'     Ringo    Ringo    36        0.25
+                  task-27 lunch             Ringo    Ringo    37        0.5
+                  task-28 refinement        Ringo    Ringo    39        1.5
                  ;
                 
-                 for ((t,tt,p) | TaskStart(t, tt, p)) do
-                 	startTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(t,tt,p));
-                 	endTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(t,tt,p)+TaskDuration(t, tt, p));
+                 for ((t,tt,p,p1) | TaskStart(t, tt, p,p1)) do
+                 	startTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(t,tt,p,p1));
+                 	endTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(t,tt,p,p1)+TaskDuration(t, tt, p,p1));
                  	TaskDescription(t) := FormatString("%e performs task %e from %s till %s",p,tt,startTime,endTime);
                  endfor;
             }
@@ -197,12 +199,12 @@ Model Main_Gantt_Chart {
         }
         Procedure InitializeFormData {
             Body: {
-                for ((t,tt,p) | TaskStart(t, tt, p)) do
+                for ((t,tt,p,p1) | TaskStart(t, tt, p,p1)) do
                 	DetailTaskId(t) := FormatString("%e",t);
                 	DetailTaskPerformer(t) := p;
                 	DetailTaskType(t) := tt;
-                	DetailTaskStart(t) := TaskStart(t, tt, p);
-                	DetailTaskDuration(t) := TaskDuration(t, tt, p);
+                	DetailTaskStart(t) := TaskStart(t, tt, p,p1);
+                	DetailTaskDuration(t) := TaskDuration(t, tt, p,p1);
                 endfor;
             }
         }
@@ -272,16 +274,16 @@ Model Main_Gantt_Chart {
                 currentPerson := StringToElement(Persons,formData('DetailTaskPerformer'));
                 
                 ! Clear data for old version of the task (relevant when either task-type or person has been changed)
-                TaskStart(currentTask,tt,p) := 0 [hour];
-                TaskDuration(currentTask,tt,p) := 0 [hour];
+                TaskStart(currentTask,tt,p,p1) := 0 [hour];
+                TaskDuration(currentTask,tt,p,p1) := 0 [hour];
                 
                 ! Update start and duration in model based on form data
-                TaskStart(currentTask,currentTaskType,currentPerson) := (Val(formData('DetailTaskStart'))) [hour]; 
-                TaskDuration(currentTask,currentTaskType,currentPerson) := (Val(formData('DetailTaskDuration'))) [hour];
+                TaskStart(currentTask,currentTaskType,currentPerson,currentPerson) := (Val(formData('DetailTaskStart'))) [hour]; 
+                TaskDuration(currentTask,currentTaskType,currentPerson,currentPerson) := (Val(formData('DetailTaskDuration'))) [hour];
                 
                 ! Update task description based on updated values
-                startTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(currentTask,currentTaskType,currentPerson));
-                endTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(currentTask,currentTaskType,currentPerson)+TaskDuration(currentTask,currentTaskType,currentPerson));
+                startTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(currentTask,currentTaskType,currentPerson,currentPerson));
+                endTime := MomentToString("%m-%d-%c%y %H:%M",[hour],"2016-08-01 00",TaskStart(currentTask,currentTaskType,currentPerson,currentPerson)+TaskDuration(currentTask,currentTaskType,currentPerson,currentPerson));
                 TaskDescription(currentTask) := FormatString("%e performs task %e from %s till %s",currentPerson,currentTaskType,startTime,endTime);
             }
             StringParameter formData {

@@ -6,7 +6,7 @@
 	"slot1": "",
 	"slot2": "",
 	"------------------------------------------------------------------<<<<-widgets-": "",
-	"widgets": "literal:[{\"uri\":\"GanttChartWithControlButtons\",\"layoutInfo\":{\"width\":\"6\",\"height\":\"2\",\"customPosition\":\"\"}},{\"uri\":\"TaskDescription\",\"layoutInfo\":{\"width\":\"12\",\"height\":\"1\",\"customPosition\":\"\"}},{\"uri\":\"TaskForm\",\"layoutInfo\":{\"width\":\"6\",\"height\":\"2\",\"customPosition\":\"\"}}]",
+	"widgets": "literal:[{\"uri\":\"GanttChartWithControlButtons\",\"layoutInfo\":{\"width\":\"6\",\"height\":\"2\",\"customPosition\":\"\"}},{\"uri\":\"TaskDescription\",\"layoutInfo\":{\"width\":\"12\",\"height\":\"1\",\"customPosition\":\"\"}},{\"uri\":\"TaskForm\",\"layoutInfo\":{\"width\":\"6\",\"height\":\"2\",\"customPosition\":\"\"}},{\"uri\":\"Element Parameters\",\"layoutInfo\":{\"width\":\"2\",\"height\":\"2\",\"customPosition\":\"\"}}]",
 	"------------------------------------------------------------------>>>>-widgets-": "",
 	"slot3": "",
 	"slot4": "",
