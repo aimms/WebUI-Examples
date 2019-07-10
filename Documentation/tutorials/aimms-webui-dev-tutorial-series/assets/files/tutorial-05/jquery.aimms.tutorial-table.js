@@ -32,9 +32,9 @@ var MyTableWidget = AWF.Widget.create({
 
 		// 1a. Create the column header
 		var theadElQ = $('<thead>');
-		numRowsInColHeader.times(function(col) {
+		_.times(numRowsInColHeader, function(col) {
 			var trElQ = $('<tr>');
-			numColsInColHeader.times(function(row) {
+			_.times(numColsInColHeader, function(row) {
 				trElQ.append(createCellElQ('th', 'colHeader', row, col));
 			});
 			theadElQ.append(trElQ);
@@ -46,12 +46,12 @@ var MyTableWidget = AWF.Widget.create({
 		// 1c. Create the row header and grid
 		var numColsInGrid = numColsInColHeader;
 		var tbodyElQ = $('<tbody>');
-		numRowsInRowHeader.times(function(row) {
+		_.times(numRowsInRowHeader, function(row) {
 			var trElQ = $('<tr>');
-			numColsInRowHeader.times(function(col) {
+			_.times(numColsInRowHeader, function(col) {
 				trElQ.append(createCellElQ('th', 'rowHeader', row, col));
 			});
-			numColsInGrid.times(function(col) {
+			_.times(numColsInGrid, function(col) {
 			var gridElQ = 
 				trElQ.append(createInputElQ('values', row, col));
 			});
@@ -110,8 +110,8 @@ var MyTableWidget = AWF.Widget.create({
 				function onReady(layeredDataBlocks) {
 					['rowHeader', 'colHeader', 'values'].forEach(function(type) {
 						var partDataSource = dataSource[type];
-						partDataSource.getNumRows().times(function(row) {
-							partDataSource.getNumCols().times(function(col) {
+						_.times(partDataSource.getNumRows(), function(row) {
+							_.times(partDataSource.getNumCols(), function(col) {
 								updateTableCell(type, row, col, layeredDataBlocks[type].getLayer("values").get(row, col));
 							});
 						});

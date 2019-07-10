@@ -120,12 +120,12 @@
 			In addition, we change the code that build the row header and grid area to
 <pre><code>var numColsInGrid = numColsInColHeader;
 var tbodyElQ = $('&lt;tbody&gt;');
-numRowsInRowHeader.times(function(row) {
+_.times(numRowsInRowHeader, function(row) {
 	var trElQ = $('&lt;tr&gt;');
-	numColsInRowHeader.times(function(col) {
+	_.times(numColsInRowHeader, function(col) {
 		trElQ.append(createCellElQ('th', 'rowHeader', row, col));
 	});
-	numColsInGrid.times(function(col) {
+	_.times(numColsInGrid, function(col) {
 	var gridElQ = 
 		trElQ.append(createInputElQ('values', row, col));
 	});
